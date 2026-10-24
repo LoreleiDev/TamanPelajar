@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
+import { HeaderWithAccount } from "@/components/layout/header-with-account";
 import { SproutMark } from "@/components/shared/ornaments";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Halaman tidak ditemukan" };
 export default function NotFound() {
   return (
     <>
-      <SiteHeader />
+      <HeaderWithAccount />
       <main className="page-container flex flex-1 flex-col justify-center gap-6 py-20">
         <SproutMark className="size-12" />
         <p className="text-display text-primary tabular-nums">404</p>

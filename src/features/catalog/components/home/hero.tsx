@@ -24,7 +24,7 @@ export function Hero({ stats }: { stats: PlatformStats }) {
   return (
     <section
       aria-labelledby="hero-judul"
-      className="relative overflow-hidden bg-gradient-to-br from-primary to-olive text-white" // taste-skill-ignore: gradient hero wajib (D.1.1)
+      className="relative overflow-hidden bg-linear-to-br from-primary to-olive text-white" // taste-skill-ignore: gradient hero wajib (D.1.1)
     >
       <OrganicCorners tone="on-green" />
       <div className="page-container relative grid items-center gap-12 py-14 md:py-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-24">
