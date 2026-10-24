@@ -1,31 +1,70 @@
-import { CircleCheck } from "lucide-react";
+import type { Metadata } from "next";
+import type { WebSite } from "schema-dts";
 
-import { Logo } from "@/components/layout/logo";
+import { JsonLd } from "@/components/shared/json-ld";
+import { Advantages } from "@/features/catalog/components/home/advantages";
+import { ClosingCta } from "@/features/catalog/components/home/closing-cta";
+import { Hero } from "@/features/catalog/components/home/hero";
+import { HomeFaq } from "@/features/catalog/components/home/home-faq";
+import { LiveSearch } from "@/features/catalog/components/home/live-search";
+import { ProgramLineup } from "@/features/catalog/components/home/program-lineup";
+import { QuickMenu } from "@/features/catalog/components/home/quick-menu";
+import { Recommended } from "@/features/catalog/components/home/recommended";
+import { StatsLedger } from "@/features/catalog/components/home/stats-ledger";
+import { TestimonialLetters } from "@/features/catalog/components/home/testimonial-letters";
+import {
+  getPlatformStats,
+  listAllProductsForSearch,
+  listCategories,
+  listFeaturedProducts,
+  listHomeFaq,
+  listTestimonials,
+} from "@/features/catalog/queries";
 
-// Halaman sementara Tahap 0. Beranda lengkap (D.1) dibangun di Tahap 1.
-const tagline = ["Pelatihan berkualitas", "Penilaian cermat", "Sertifikat akurat"];
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
-export default function Home() {
+// Beranda (D.1).
+export default async function HomePage() {
+  const [stats, categories, featured, allProducts, testimonials, faq] = await Promise.all([
+    getPlatformStats(),
+    listCategories(),
+    listFeaturedProducts(3),
+    listAllProductsForSearch(),
+    listTestimonials(),
+    listHomeFaq(),
+  ]);
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-8 px-4 py-16 sm:px-8">
-      <Logo size="lg" />
-      <div className="flex flex-col gap-3">
-        <h1 className="text-3xl font-extrabold tracking-tight text-primary uppercase sm:text-4xl">
-          Taman Pelajar sedang disiapkan
-        </h1>
-        <p className="max-w-prose text-base text-muted-foreground">
-          Kelas online, video pembelajaran, dan tryout CBT dengan pembahasan untuk
-          UTBK/SNBT, SKD CPNS, sekolah kedinasan, dan tes potensi akademik.
-        </p>
-      </div>
-      <ul className="flex flex-col gap-2">
-        {tagline.map((item) => (
-          <li key={item} className="flex items-center gap-2 font-semibold text-foreground">
-            <CircleCheck className="size-5 text-primary" strokeWidth={2} aria-hidden="true" />
-            {item}
-          </li>
-        ))}
-      </ul>
+    <main>
+      <JsonLd<WebSite>
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Taman Pelajar",
+          url: appUrl,
+          inLanguage: "id-ID",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: `${appUrl}/program?q={search_term_string}`,
+            // schema-dts belum mengetik properti "query-input" milik Google
+            ...({ "query-input": "required name=search_term_string" } as object),
+          },
+        }}
+      />
+      <Hero stats={stats} />
+      <QuickMenu />
+      <ProgramLineup categories={categories} />
+      <LiveSearch products={allProducts} />
+      <Recommended products={featured} />
+      <Advantages />
+      <StatsLedger stats={stats} />
+      <TestimonialLetters items={testimonials} />
+      <HomeFaq items={faq} />
+      <ClosingCta />
     </main>
   );
 }

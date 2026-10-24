@@ -30,7 +30,7 @@ export function BottomNav() {
       aria-label="Navigasi bawah"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden" // taste-skill-ignore: border tipis brand (CLAUDE.md)
     >
-      <ul className="flex">
+      <ul className="flex px-2">
         {items.map(({ href, label, icon: Icon, needsLogin }) => {
           const active = isActivePath(pathname, href);
           const inner = (
