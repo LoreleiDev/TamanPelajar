@@ -112,9 +112,61 @@ Lima branch, masing-masing di-squash ke `main` setelah lint, typecheck, test, da
 - Akun media sosial dan email `halo@tamanpelajar.com` di footer dan halaman kontak
 - Teks kebijakan privasi serta syarat dan ketentuan perlu ditinjau pihak yang berwenang
 
-## Tahap 2 — Autentikasi, database, dashboard, kelas, video
+## Tahap 2 — Autentikasi, database, dashboard, kelas, video (24 Oktober 2026)
 
-Belum dimulai.
+Lima branch fitur dan dua branch perbaikan, masing-masing di-squash ke `main` setelah lint, typecheck, test, build, dan e2e lulus.
+
+### `feat/N-skema-database`
+- [x] **N.1–N.7** Skema Prisma 56 model sesuai `ARSITEKTUR.md` §2; migration `20261024081425_init`
+- [x] **N.8.1–N.8.7** id cuid, `createdAt`/`updatedAt`, foreign key, `@@index`, unique, soft delete (User, Course, Product, Exam, Question, Order), enum status
+- [x] **O.1–O.6** Seed yang bisa diulang (TRUNCATE lalu isi): 1 admin + 5 siswa, 4 program, 6 kelas (bab 1–2 gratis), 30 soal orisinal untuk 6 jenis, 3 tryout masing-masing 2 subtes, 12 paket, pesanan, enrollment, hasil demo, progres, sertifikat, ulasan, notifikasi, testimoni, artikel, voucher
+- [x] **J.1.1–J.1.6** `features/scoring/score.ts`: fungsi murni penilaian (benar, salah nol/negatif, kosong 0, bobot soal dan subtes, passing grade) dengan tes unit
+- [x] **A.6** Katalog, beranda, dan detail paket membaca Prisma; `mock-data.ts` dihapus
+
+### `feat/E-autentikasi`
+- [x] **E.1.1–E.1.6** Daftar, masuk, lupa password, reset password, verifikasi email, lengkapi profil
+- [x] **E.2.1–E.2.7** Semua field pendaftaran, **E.3.1–E.3.4** validasi Zod, pesan per field, indikator kekuatan, tampilkan password
+- [x] **E.3.5** Google OAuth (aktif bila `AUTH_GOOGLE_ID` diisi), **E.3.6–E.3.7** kunci akun setelah 5 gagal dalam 15 menit dan rate limit di tabel `RateLimit`, **E.3.8** sesi JWT di cookie HTTP-only
+- [x] **C.4, P.1.8** `src/proxy.ts` + `requireRole()`/`requireOwnership()` di `lib/rbac.ts`
+- [x] **B.2.4–B.2.5** Navbar dengan notifikasi dan menu akun
+- Email memakai `MAIL_MODE=log`: tautan verifikasi dan reset ditampilkan sebagai tautan demo, belum dikirim
+
+### `feat/G-kelas`
+- [x] **G.1** Sidebar kurikulum dengan bab, materi, jenis, status selesai, gembok
+- [x] **G.2.1–G.2.7** Player, deskripsi, lampiran PDF, sebelumnya/berikutnya, tandai selesai, catatan, diskusi
+- [x] **G.3** Panel progres, **G.4.1–G.4.9** progres otomatis, resume video, urutan, unduh PDF (signed URL 5 menit), kuis, sertifikat, pencarian, bookmark, riwayat aktivitas
+- [x] **G.4.10–G.4.12, C.5.5, K.5** `canAccessLesson()` di `lib/access.ts`: tamu ditolak, bab gratis untuk user login, bab lain butuh enrollment aktif; URL video/PDF bab terkunci tidak dikirim ke client; dialog ajakan berlangganan
+- [x] **C.1.9** Halaman sertifikat yang bisa dicetak di `/sertifikat/[nomor]`
+
+### `feat/H-video`
+- [x] **H.1** Pustaka video dengan filter kategori, mata pelajaran, durasi, tingkat, status tonton
+- [x] **H.2.1–H.2.8** Player, deskripsi, transkrip, materi terkait, catatan, simpan, sebelumnya/berikutnya, progres tontonan
+- Video contoh dibuat sendiri (`pnpm seed:video`, animasi kanvas 24 detik) dan diunggah ke Cloudinary. TODO: ganti dengan video pembelajaran asli
+
+### `feat/F-dashboard`
+- [x] **F.1** Sidebar 11 menu (tab geser di mobile) dengan jumlah notifikasi belum dibaca
+- [x] **F.2.1–F.2.10** Sapaan, program aktif, progres, jadwal tryout, kelas terakhir, nilai terbaru, rata-rata, waktu belajar, aktivitas, rekomendasi
+- [x] **F.3.1–F.3.4** Grafik Recharts dengan tabel data alternatif; palet hijau brand divalidasi dengan skrip skill `dataviz`
+- [x] **J.2.1–J.2.8** Halaman Analisis Kemampuan: nilai per topik, penguasaan, kecepatan, akurasi, mudah/sedang/sulit, antarpercobaan, rata-rata peserta, rekomendasi
+- [x] Kelas Saya, Video Saya, Tryout Saya, Riwayat Hasil, Transaksi, Sertifikat, Notifikasi, Profil (ubah data dan ganti password)
+
+### Perbaikan
+- `fix/konflik-merge-autentikasi`: lima berkas berisi penanda konflik dari commit "p" di `main` dipulihkan dari versi yang sudah diuji
+- `fix/D1-hero-tanpa-soal`: kartu soal CBT di hero beranda diganti ilustrasi tunas SVG (revisi RMED); form autentikasi memakai `method="post"` dan tombol nonaktif sebelum hydration agar kredensial tidak masuk URL
+
+**Pengujian (akhir tahap):**
+- `pnpm lint`, `pnpm typecheck`, `pnpm build` lulus; `pnpm test` 25/25
+- `pnpm test:e2e` 71/71 lulus dua kali berturut-turut (desktop + mobile): autentikasi, kelas, video, dashboard, dan alur Tahap 1
+- Kriteria yang sudah tercakup: **T.1**, **T.4**, **T.5**, **T.17**, **T.18** (bagian bab gratis dan bab berlangganan; pembayaran Midtrans menyusul di Tahap 4)
+
+**Review visual:** screenshot 1440, 1024, 768, 375 px untuk halaman autentikasi, kelas, ruang belajar, video, sertifikat, dan 10 halaman dashboard. Tidak ada error console dan tidak ada scroll horizontal. Perbaikan dari review: grid dashboard meluber karena teks `sr-only` di tab geser, label sumbu "100%" terpotong, teks "naik 0 poin" menjadi "tetap".
+
+**Catatan:**
+- Database lokal MariaDB 10.4 (XAMPP); skema tetap ditulis untuk MySQL 8. Prisma 7.10.1 dengan `@prisma/adapter-mariadb`
+- `/transaksi` sementara dialihkan ke `/dashboard/transaksi` (lewat `next.config.ts`) sampai halaman transaksi dibangun di Tahap 4
+- Verifikasi sertifikat memakai `/sertifikat/[nomor]`, bukan `/sertifikat/verifikasi/[nomor]`
+- Halaman daftar dan pengerjaan tryout dibangun di Tahap 3; balasan diskusi oleh admin (**L.2.8**) di Tahap 5
+- Di server dev kadang muncul peringatan hydration saat beban tinggi; tidak muncul di build produksi
 
 ## Tahap 3 — Tryout CBT
 

@@ -315,7 +315,7 @@ Keterangan: **P** = publik (tamu boleh), **U** = harus login (USER/ADMIN), **A**
 | `/informasi/[slug]` artikel | P | D.4.2 |
 | `/cari` hasil pencarian global | P | B.2.3 |
 | `/tentang`, `/bantuan`, `/kebijakan-privasi`, `/syarat-ketentuan`, `/kontak` | P | D.1.9 |
-| `/sertifikat/verifikasi/[nomor]` | P | C.1.9 |
+| `/sertifikat/[nomor]` (cetak dan verifikasi) | P | C.1.9 |
 
 ### 3.2 Autentikasi `(auth)`
 
@@ -345,7 +345,7 @@ Keterangan: **P** = publik (tamu boleh), **U** = harus login (USER/ADMIN), **A**
 | `/dashboard/tryout` | F.1, F.2.4 |
 | `/dashboard/riwayat` | F.1 |
 | `/dashboard/analisis` | F.3, J.2 |
-| `/dashboard/transaksi` (pintasan ke `/transaksi`) | F.1 |
+| `/dashboard/transaksi` (riwayat pesanan; `/transaksi` sementara dialihkan ke sini sampai Tahap 4) | F.1 |
 | `/dashboard/sertifikat` | C.1.9 |
 | `/dashboard/notifikasi` | F.1 |
 | `/dashboard/profil` (ubah profil dan password) | F.1 |
