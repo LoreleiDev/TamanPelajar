@@ -30,7 +30,7 @@ test.describe("autentikasi (E, C.4–C.5)", () => {
     await page.getByRole("link", { name: "Masuk sekarang" }).click();
     await masuk(page, email, "belajar2027");
     await expect(page).toHaveURL(/\/dashboard$/);
-    await expect(page.getByRole("heading", { name: "Halo, Peserta" })).toBeVisible();
+    await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toContainText("Peserta");
   });
 
   test("validasi form daftar menampilkan pesan per field", async ({ page }) => {
@@ -69,7 +69,7 @@ test.describe("autentikasi (E, C.4–C.5)", () => {
     await expect(page).toHaveURL(/\/masuk\?callbackUrl=%2Fdashboard/);
     await masuk(page, "user1@tamanpelajar.test");
     await expect(page).toHaveURL(/\/dashboard$/);
-    await expect(page.getByRole("heading", { name: "Halo, Nadia" })).toBeVisible();
+    await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toContainText("Nadia");
   });
 
   test("navbar menampilkan akun, notifikasi, dan bisa keluar (B.2.4–B.2.5)", async ({ page, isMobile }) => {

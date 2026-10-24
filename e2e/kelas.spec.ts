@@ -50,7 +50,7 @@ test.describe("kelas online (G, T.4, T.5, T.17, T.18)", () => {
 
     const note = `Catatan uji ${Date.now()}`;
     await page.getByRole("main").getByLabel("Catatan pribadi untuk materi ini").fill(note);
-    await expect(page.getByRole("main").getByText("Tersimpan", { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("main").getByText("Tersimpan", { exact: true })).toBeVisible();
 
     await page.reload();
     await expect(page.getByRole("button", { name: "Sudah selesai" })).toBeVisible();
@@ -60,7 +60,7 @@ test.describe("kelas online (G, T.4, T.5, T.17, T.18)", () => {
     await page.getByRole("button", { name: "Sudah selesai" }).click();
     await expect(page.getByRole("button", { name: "Tandai selesai" })).toBeVisible();
     await page.getByRole("main").getByLabel("Catatan pribadi untuk materi ini").fill("");
-    await expect(page.getByRole("main").getByText("Tersimpan", { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("main").getByText("Tersimpan", { exact: true })).toBeVisible();
   });
 
   test("kuis dinilai di server dan menampilkan status dengan teks", async ({ page }) => {
