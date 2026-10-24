@@ -1,0 +1,3 @@
+# Migration Prisma dan skrip shell selalu LF agar checksum dan eksekusi sama di semua OS.
+prisma/migrations/** text eol=lf
+*.sh text eol=lf

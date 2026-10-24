@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SessionProvider, useSession } from "next-auth/react";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
 import { SproutMark } from "@/components/shared/ornaments";
@@ -22,13 +23,17 @@ type RequireLogin = (reason: string, onAuthenticated?: () => void) => void;
 
 const LoginContext = createContext<{ isAuthenticated: boolean; requireLogin: RequireLogin } | null>(null);
 
-export function LoginRequiredProvider({
-  isAuthenticated,
-  children,
-}: {
-  isAuthenticated: boolean;
-  children: ReactNode;
-}) {
+export function LoginRequiredProvider({ children }: { children: ReactNode }) {
+  return (
+    <SessionProvider>
+      <LoginRequiredInner>{children}</LoginRequiredInner>
+    </SessionProvider>
+  );
+}
+
+function LoginRequiredInner({ children }: { children: ReactNode }) {
+  // Status sesi dibaca di client (/api/auth/session) agar halaman publik tetap statis.
+  const isAuthenticated = useSession().status === "authenticated";
   const [reason, setReason] = useState<string | null>(null);
   const [callbackUrl, setCallbackUrl] = useState("/");
 

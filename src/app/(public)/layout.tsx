@@ -1,6 +1,6 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
+import { HeaderWithAccount } from "@/components/layout/header-with-account";
 
 export default function PublicLayout({ children }: LayoutProps<"/">) {
   return (
@@ -11,7 +11,7 @@ export default function PublicLayout({ children }: LayoutProps<"/">) {
       >
         Lewati ke konten
       </a>
-      <SiteHeader />
+      <HeaderWithAccount />
       <div id="konten" className="flex flex-1 flex-col">
         {children}
       </div>

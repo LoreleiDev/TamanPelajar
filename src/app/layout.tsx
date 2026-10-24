@@ -34,8 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className={`${jakarta.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        {/* TODO Tahap 2: isAuthenticated dari sesi Auth.js */}
-        <LoginRequiredProvider isAuthenticated={false}>{children}</LoginRequiredProvider>
+        <LoginRequiredProvider>{children}</LoginRequiredProvider>
         <Toaster position="top-center" />
       </body>
     </html>
