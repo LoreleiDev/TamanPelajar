@@ -6,10 +6,7 @@ import { Suspense } from "react";
 import { HeaderWithAccount } from "@/components/layout/header-with-account";
 import { SproutMark } from "@/components/shared/ornaments";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
 import { Skeleton } from "@/components/ui/skeleton";
-=======
->>>>>>> aff4f2773b8df2b079ffefbc949056eb2b7437cd
 import { prisma } from "@/lib/prisma";
 import { requireUserPage } from "@/lib/rbac";
 
@@ -44,11 +41,7 @@ export default function DashboardPage() {
     <>
       <HeaderWithAccount />
       <main className="page-container flex flex-1 flex-col justify-center gap-6 py-16">
-<<<<<<< HEAD
         <Suspense fallback={<Skeleton className="h-48 rounded-xl" aria-label="Memuat" />}>
-=======
-        <Suspense fallback={<div className="h-48 animate-pulse rounded-xl bg-muted" aria-label="Memuat" />}>
->>>>>>> aff4f2773b8df2b079ffefbc949056eb2b7437cd
           <DashboardContent />
         </Suspense>
       </main>

@@ -72,11 +72,7 @@ export function SiteHeader({ account }: { account: AccountSummary | null | "load
             </Link>
           </Button>
           {account === "loading" ? (
-<<<<<<< HEAD
             <Skeleton aria-hidden="true" className="hidden size-10 rounded-full sm:block" />
-=======
-            <span aria-hidden="true" className="hidden size-10 animate-pulse rounded-full bg-muted sm:block" />
->>>>>>> aff4f2773b8df2b079ffefbc949056eb2b7437cd
           ) : account ? (
             <div className="hidden items-center gap-1 sm:flex">
               <NotificationBell unread={account.unread} />

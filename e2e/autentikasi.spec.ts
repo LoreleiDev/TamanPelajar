@@ -96,11 +96,7 @@ test.describe("autentikasi (E, C.4–C.5)", () => {
     await expect(page.getByRole("heading", { name: "Buat password baru" })).toBeVisible();
     // Password tidak diganti agar akun demo tetap memakai Demo12345!.
     await page.goto("/reset-password/token-tidak-valid-sama-sekali");
-<<<<<<< HEAD
     // Dibatasi ke <main>: saat streaming, salinan konten sempat berada di wadah tersembunyi.
     await expect(page.getByRole("main").getByText(/sudah kedaluwarsa atau sudah dipakai/)).toBeVisible();
-=======
-    await expect(page.getByText(/sudah kedaluwarsa atau sudah dipakai/)).toBeVisible();
->>>>>>> aff4f2773b8df2b079ffefbc949056eb2b7437cd
   });
 });
