@@ -6,7 +6,7 @@ import Google from "next-auth/providers/google";
 import { authConfig } from "@/auth.config";
 import { masukSchema } from "@/features/auth/schemas";
 import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { isRateLimited, rateLimit } from "@/lib/rate-limit";
 
 // Kode error dipetakan ke pesan Bahasa Indonesia di features/auth/actions.ts.
 class LoginError extends CredentialsSignin {
@@ -18,6 +18,11 @@ class LoginError extends CredentialsSignin {
 
 const MAX_FAILED = 5;
 const LOCK_MINUTES = 15;
+// Batas percobaan GAGAL per 15 menit. Login yang berhasil tidak dihitung, agar banyak siswa
+// di balik satu IP (jaringan sekolah) tidak saling memblokir.
+const WINDOW_SEC = 15 * 60;
+const IP_FAILURES = 30;
+const EMAIL_FAILURES = 10;
 
 /** Pemeriksaan login: rate limit, kunci brute force, akun aktif, email terverifikasi (E.3.6–E.3.7). */
 async function authorize(raw: unknown, request: Request) {
@@ -26,20 +31,26 @@ async function authorize(raw: unknown, request: Request) {
   const { email, password } = parsed.data;
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "lokal";
-  const byIp = await rateLimit(`masuk:ip:${ip}`, 20, 15 * 60);
-  const byEmail = await rateLimit(`masuk:email:${email}`, 10, 15 * 60);
-  if (!byIp.allowed || !byEmail.allowed) throw new LoginError("rate-limited");
+  const ipKey = `masuk-gagal:ip:${ip}`;
+  const emailKey = `masuk-gagal:email:${email}`;
+  if ((await isRateLimited(ipKey, IP_FAILURES)) || (await isRateLimited(emailKey, EMAIL_FAILURES))) {
+    throw new LoginError("rate-limited");
+  }
+  const recordFailure = () =>
+    Promise.all([rateLimit(ipKey, IP_FAILURES, WINDOW_SEC), rateLimit(emailKey, EMAIL_FAILURES, WINDOW_SEC)]);
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || user.deletedAt || !user.passwordHash) {
     // Tetap jalankan bcrypt agar waktu respons tidak membocorkan email yang terdaftar.
     await bcrypt.compare(password, "$2b$10$Sc9Vtplbh7cDfGqPEz.o8eDDpmQKJM7qb.CydW9KxFUw.H9HHgEP6");
+    await recordFailure();
     throw new LoginError("invalid");
   }
   if (user.lockedUntil && user.lockedUntil > new Date()) throw new LoginError("locked");
 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
+    await recordFailure();
     const failed = user.failedLogins + 1;
     await prisma.user.update({
       where: { id: user.id },

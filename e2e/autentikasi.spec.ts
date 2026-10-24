@@ -50,6 +50,20 @@ test.describe("autentikasi (E, C.4–C.5)", () => {
     await expect(page.getByRole("alert").filter({ hasText: "Email atau password salah." })).toBeVisible();
   });
 
+  test("5 kali password salah mengunci akun sementara (E.3.6)", async ({ page, isMobile }) => {
+    test.skip(isMobile, "cukup sekali; memakai akun user3");
+    await page.goto("/masuk");
+    for (let i = 0; i < 5; i++) {
+      await masuk(page, "user3@tamanpelajar.test", `salah-${i}-sekali`);
+      await expect(page.getByRole("alert").filter({ hasText: /salah|dikunci/ })).toBeVisible();
+    }
+    await expect(page.getByRole("alert").filter({ hasText: "Akun dikunci sementara" })).toBeVisible();
+    // Password benar pun ditolak selama terkunci.
+    await masuk(page, "user3@tamanpelajar.test");
+    await expect(page.getByRole("alert").filter({ hasText: "Akun dikunci sementara" })).toBeVisible();
+    await expect(page).toHaveURL(/\/masuk/);
+  });
+
   test("halaman terlindungi mengarah ke masuk lalu kembali ke tujuan (C.5.4)", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/masuk\?callbackUrl=%2Fdashboard/);

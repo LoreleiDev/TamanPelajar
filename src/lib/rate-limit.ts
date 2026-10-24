@@ -35,6 +35,12 @@ export async function rateLimit(key: string, limit: number, windowSec: number): 
   };
 }
 
+/** Cek tanpa menambah hitungan: apakah kunci sudah mencapai batas di jendela berjalan. */
+export async function isRateLimited(key: string, limit: number): Promise<boolean> {
+  const row = await prisma.rateLimit.findUnique({ where: { key }, select: { count: true, resetAt: true } });
+  return Boolean(row && row.resetAt > new Date() && row.count >= limit);
+}
+
 export function formatRetry(sec: number) {
   return sec >= 60 ? `${Math.ceil(sec / 60)} menit` : `${sec} detik`;
 }

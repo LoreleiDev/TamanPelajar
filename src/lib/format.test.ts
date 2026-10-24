@@ -20,3 +20,14 @@ describe("formatTanggal", () => {
     expect(normalize(formatTanggalJam(date))).toContain("01.30");
   });
 });
+
+describe("formatClock dan formatStudyTime", () => {
+  it("memformat durasi video dan waktu belajar", async () => {
+    const { formatClock, formatStudyTime } = await import("./format");
+    expect(formatClock(725)).toBe("12:05");
+    expect(formatClock(3725)).toBe("1:02:05");
+    expect(formatStudyTime(45 * 60)).toBe("45 menit");
+    expect(formatStudyTime(200 * 60)).toBe("3 jam 20 menit");
+    expect(formatStudyTime(120 * 60)).toBe("2 jam");
+  });
+});

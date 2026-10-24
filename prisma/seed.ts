@@ -5,6 +5,7 @@ import "dotenv/config";
 
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcryptjs";
+import { v2 as cloudinary } from "cloudinary";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 import { scoreExam, type ScoringAnswer, type ScoringQuestion } from "../src/features/scoring/score";
@@ -18,6 +19,7 @@ import {
   testimonials,
   vouchers,
 } from "./seed/catalog";
+import { simplePdf } from "./seed/pdf";
 import { exams, questions } from "./seed/questions";
 
 const url = process.env.DATABASE_URL;
@@ -25,8 +27,58 @@ if (!url) throw new Error("DATABASE_URL belum diisi di .env");
 const prisma = new PrismaClient({ adapter: new PrismaMariaDb(url) });
 
 const DEMO_PASSWORD = "Demo12345!";
-// TODO: ganti video contoh. Klip demo publik Cloudinary dipakai sampai video pembelajaran asli diunggah.
-const SAMPLE_VIDEO_URL = "https://res.cloudinary.com/demo/video/upload/dog.mp4";
+// Video contoh orisinal per kelas dibuat oleh `pnpm seed:video` (prisma/seed/generate-videos.mts)
+// dan disajikan sebagai MP4 oleh Cloudinary. TODO: ganti dengan video pembelajaran asli.
+const SAMPLE_VIDEO_SECONDS = 24;
+const sampleVideoUrl = (courseSlug: string) =>
+  process.env.CLOUDINARY_CLOUD_NAME
+    ? `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/video/upload/q_auto/${process.env.CLOUDINARY_UPLOAD_FOLDER ?? "tamanpelajar"}/kelas/video-${courseSlug}.mp4`
+    : "https://res.cloudinary.com/demo/video/upload/dog.mp4";
+
+const cloudinaryReady = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET,
+);
+if (cloudinaryReady) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+}
+const uploadFolder = `${process.env.CLOUDINARY_UPLOAD_FOLDER ?? "tamanpelajar"}/kelas`;
+
+/**
+ * Unggah PDF ringkasan sebagai file berbayar (raw, delivery authenticated) lalu catat di
+ * Media. Mengembalikan null bila Cloudinary belum dikonfigurasi atau gagal, agar seed tetap jalan.
+ */
+async function uploadSummaryPdf(uploaderId: string, name: string, title: string, paragraphs: string[]) {
+  if (!cloudinaryReady) return null;
+  try {
+    const pdf = simplePdf(title, paragraphs);
+    const r = await cloudinary.uploader.upload(`data:application/pdf;base64,${pdf.toString("base64")}`, {
+      resource_type: "raw",
+      type: "authenticated",
+      public_id: `${uploadFolder}/${name}.pdf`,
+      overwrite: true,
+    });
+    return prisma.media.create({
+      data: {
+        publicId: r.public_id,
+        resourceType: "RAW",
+        format: "pdf",
+        version: r.version,
+        bytes: r.bytes,
+        deliveryType: "AUTHENTICATED",
+        folder: uploadFolder,
+        uploadedById: uploaderId,
+      },
+    });
+  } catch (e) {
+    console.warn(`  Lewati PDF ${name}: ${e instanceof Error ? e.message : JSON.stringify(e)}`);
+    return null;
+  }
+}
 
 const DAY = 86_400_000;
 const now = new Date();
@@ -193,15 +245,15 @@ async function main() {
     });
     courseId.set(c.slug, course.id);
     const lessons: { id: string; sectionOrder: number; videoId: string | null }[] = [];
-    let minutes = 0;
+    let seconds = 0;
 
     for (const [order, chapter] of c.chapters.entries()) {
       const section = await prisma.courseSection.create({
         data: { courseId: course.id, title: chapter.title, order, isFree: order < 2 },
       });
       for (const [i, title] of chapter.lessons.entries()) {
-        const durationSec = 300 + randInt(0, 8) * 60;
-        minutes += Math.round(durationSec / 60);
+        const durationSec = SAMPLE_VIDEO_SECONDS;
+        seconds += durationSec;
         const video = await prisma.video.create({
           data: {
             slug: `${c.slug}-${slugify(title)}`,
@@ -214,7 +266,7 @@ async function main() {
               "Terakhir, coba kerjakan latihan di bawah video sebelum lanjut ke materi berikutnya.",
             ].join("\n\n"),
             provider: "EKSTERNAL",
-            url: SAMPLE_VIDEO_URL,
+            url: sampleVideoUrl(c.slug),
             durationSec,
             subject: c.subject,
             difficulty: c.level,
@@ -261,7 +313,27 @@ async function main() {
         lessons.push({ id: lesson.id, sectionOrder: order, videoId: null });
       }
     }
-    await prisma.course.update({ where: { id: course.id }, data: { estimatedMinutes: minutes } });
+    await prisma.course.update({ where: { id: course.id }, data: { estimatedMinutes: Math.ceil(seconds / 60) } });
+
+    // Lampiran PDF (G.4.4): bab 1 (gratis) dan bab 3 (berbayar) untuk mendemokan aturan akses.
+    for (const chapterIndex of [0, 2]) {
+      const chapter = c.chapters[chapterIndex];
+      const target = lessons.find((l) => l.sectionOrder === chapterIndex);
+      if (!chapter || !target) continue;
+      const media = await uploadSummaryPdf(
+        admin.id,
+        `${c.slug}-ringkasan-bab-${chapterIndex + 1}`,
+        `Ringkasan ${c.title}: Bab ${chapterIndex + 1} ${chapter.title}`,
+        [
+          `Ringkasan ini merangkum materi bab ${chapterIndex + 1} kelas ${c.title} di Taman Pelajar.`,
+          ...chapter.lessons.map((t, i) => `${i + 1}. ${t}: pahami konsepnya, lalu kerjakan contoh soal di video sebelum lanjut.`),
+          "Tips: tulis ulang poin penting dengan kata-katamu sendiri di kolom catatan setiap materi.",
+        ],
+      );
+      if (media) {
+        await prisma.material.create({ data: { lessonId: target.id, title: `Ringkasan bab ${chapterIndex + 1} (PDF)`, mediaId: media.id } });
+      }
+    }
     await prisma.certificate.create({ data: { title: `Sertifikat ${c.title}`, courseId: course.id } });
     lessonsByCourse.set(c.slug, lessons);
   }

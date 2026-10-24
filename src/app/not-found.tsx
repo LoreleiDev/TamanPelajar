@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Suspense } from "react";
+
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { HeaderWithAccount } from "@/components/layout/header-with-account";
@@ -31,7 +33,10 @@ export default function NotFound() {
         </div>
       </main>
       <SiteFooter />
-      <BottomNav />
+      {/* usePathname() di BottomNav butuh Suspense di rute dinamis (cacheComponents) */}
+      <Suspense fallback={null}>
+        <BottomNav />
+      </Suspense>
     </>
   );
 }

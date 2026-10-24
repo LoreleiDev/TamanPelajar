@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 import type { AccountSummary } from "./account-menu";
-import { SiteHeader } from "./site-header";
+import { SiteHeader, SiteHeaderView } from "./site-header";
 
 async function loadAccount(): Promise<AccountSummary | null> {
   // auth() memakai crypto sebelum membaca cookie; tandai dinamis lebih dulu (cacheComponents).
@@ -39,7 +39,7 @@ async function HeaderAccount() {
  */
 export function HeaderWithAccount() {
   return (
-    <Suspense fallback={<SiteHeader account="loading" />}>
+    <Suspense fallback={<SiteHeaderView account="loading" pathname="" />}>
       <HeaderAccount />
     </Suspense>
   );

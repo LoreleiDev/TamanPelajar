@@ -37,7 +37,7 @@ Spesifikasi lengkap ada di [CLAUDE.md](CLAUDE.md). Arsitektur, rancangan databas
    pnpm dev
    ```
 
-Seed bisa dijalankan ulang kapan saja. Semua tabel dikosongkan lalu diisi kembali.
+Seed bisa dijalankan ulang kapan saja. Semua tabel dikosongkan lalu diisi kembali. Setelah seed ulang, restart `pnpm dev` agar data katalog yang di-cache ikut diperbarui.
 
 ## Akun demo
 
@@ -67,7 +67,8 @@ Isi data demo:
 | `pnpm test` | Tes unit Vitest (penilaian, filter katalog) |
 | `pnpm test:e2e` | Tes Playwright. Unduh browser sekali dengan `pnpm exec playwright install chromium` |
 | `pnpm prisma migrate dev` | Membuat dan menerapkan migration |
-| `pnpm prisma db seed` | Mengisi data demo |
+| `pnpm prisma db seed` | Mengisi data demo (termasuk PDF ringkasan materi ke Cloudinary bila dikonfigurasi) |
+| `pnpm seed:video` | Membuat dan mengunggah video contoh orisinal per kelas ke Cloudinary (sekali saja, butuh Chromium Playwright) |
 | `pnpm prisma studio` | Melihat isi database |
 
 ## Cloudinary

@@ -27,12 +27,21 @@ function SearchForm({ id, className }: { id: string; className?: string }) {
   );
 }
 
+type Account = AccountSummary | null | "loading";
+
 /**
  * Navbar sticky (B.2): logo, enam menu, pencarian, notifikasi, foto dan nama pengguna,
  * atau Masuk/Daftar untuk tamu. `account` diisi HeaderWithAccount dari sesi.
  */
-export function SiteHeader({ account }: { account: AccountSummary | null | "loading" }) {
-  const pathname = usePathname();
+export function SiteHeader({ account }: { account: Account }) {
+  return <SiteHeaderView account={account} pathname={usePathname()} />;
+}
+
+/**
+ * Navbar tanpa membaca URL, untuk kerangka statis (fallback Suspense). Di rute dinamis,
+ * usePathname() di luar Suspense menghambat prerender (cacheComponents).
+ */
+export function SiteHeaderView({ account, pathname }: { account: Account; pathname: string }) {
   const [open, setOpen] = useState(false);
 
   return (
