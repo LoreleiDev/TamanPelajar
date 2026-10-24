@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Prisma client hasil generate dan berkas skill
+    "src/generated/**",
+    ".agents/**",
+    ".claude/**",
   ]),
 ]);
 

@@ -1,0 +1,11 @@
+// Skema Taman Pelajar (MySQL 8). Rancangan lengkap model ada di docs/ARSITEKTUR.md §2
+// dan diterapkan sebagai migration pada Tahap 2.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
