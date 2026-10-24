@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { LoginRequiredProvider } from "@/components/shared/require-login";
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -30,7 +33,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className={`${jakarta.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {/* TODO Tahap 2: isAuthenticated dari sesi Auth.js */}
+        <LoginRequiredProvider isAuthenticated={false}>{children}</LoginRequiredProvider>
+        <Toaster position="top-center" />
+      </body>
     </html>
   );
 }
