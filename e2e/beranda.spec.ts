@@ -15,16 +15,6 @@ test.describe("beranda (D.1)", () => {
     }
   });
 
-  test("soal contoh di hero menampilkan benar/salah dengan teks dan pembahasan", async ({ page }) => {
-    await page.goto("/");
-    const soal = page.getByRole("radiogroup", { name: /Lanjutkan deret/ });
-    await soal.getByText("36", { exact: true }).click();
-    await expect(page.getByText("Belum tepat, jawabannya B")).toBeVisible();
-    await expect(page.getByText(/27 \+ 11 = 38/)).toBeVisible();
-    await page.getByRole("button", { name: "Coba soal lain" }).click();
-    await expect(page.getByRole("radiogroup", { name: /Rani tidak mengikuti wawancara/ })).toBeVisible();
-  });
-
   test("pencarian langsung memfilter paket dan contoh mengganti kata kunci", async ({ page }) => {
     await page.goto("/");
     const input = page.getByRole("searchbox", { name: "Cari paket belajar" });

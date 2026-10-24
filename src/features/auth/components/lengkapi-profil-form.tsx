@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { lengkapiProfil } from "@/features/auth/actions";
 import { EDUCATION_OPTIONS, EXAM_TARGETS, lengkapiProfilSchema, type LengkapiProfilInput } from "@/features/auth/schemas";
 
-import { describedBy, Field, FormAlert } from "./form-parts";
+import { describedBy, Field, FormAlert, useHydrated } from "./form-parts";
 import { NativeSelect } from "./native-select";
 
 /** Lengkapi profil (E.1.6). */
@@ -24,6 +24,7 @@ export function LengkapiProfilForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const hydrated = useHydrated();
   const [error, setError] = useState<string>();
   const form = useForm<LengkapiProfilInput>({
     resolver: zodResolver(lengkapiProfilSchema),
@@ -60,7 +61,7 @@ export function LengkapiProfilForm({
   );
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
       <FormAlert message={error} />
       <Field label="Nomor WhatsApp" htmlFor="phone" error={errors.phone?.message}>
         <Input type="tel" autoComplete="tel" inputMode="tel" placeholder="08xxxxxxxxxx" {...field("phone")} {...form.register("phone")} />
@@ -99,7 +100,7 @@ export function LengkapiProfilForm({
           <Input autoComplete="address-level2" {...field("city")} {...form.register("city")} />
         </Field>
       </div>
-      <Button type="submit" size="lg" disabled={pending}>
+      <Button type="submit" size="lg" disabled={pending || !hydrated}>
         {pending ? "Menyimpan…" : "Simpan dan lanjutkan"}
       </Button>
     </form>

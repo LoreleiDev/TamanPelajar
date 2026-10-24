@@ -2,17 +2,15 @@ import Link from "next/link";
 
 import { OrganicCorners } from "@/components/shared/ornaments";
 import { Button } from "@/components/ui/button";
-import { sampleQuestions } from "@/features/catalog/home-sample";
 import type { PlatformStats } from "@/features/catalog/types";
 
-import { HeroQuestion } from "./hero-question";
+import { HeroIllustration } from "./hero-illustration";
 
 const number = new Intl.NumberFormat("id-ID");
 
 /**
  * Hero (D.1.1): gradient hijau tua ke zaitun, judul kapital tebal, dua aksi, angka
- * platform dari data. Di kanan, soal CBT yang bisa dijawab langsung.
- * TODO: ilustrasi pelajar di sisi kanan bila aset ilustrasi sudah ada.
+ * platform dari data, dan ilustrasi tunas di kanan (sementara, sampai ada ilustrasi pelajar).
  */
 export function Hero({ stats }: { stats: PlatformStats }) {
   const figures = [
@@ -56,9 +54,8 @@ export function Hero({ stats }: { stats: PlatformStats }) {
             ))}
           </dl>
         </div>
-        <div className="mx-auto w-full max-w-md lg:max-w-none">
-          <h2 className="sr-only">Coba satu soal tryout</h2>
-          <HeroQuestion questions={sampleQuestions} />
+        <div className="hidden justify-end lg:flex">
+          <HeroIllustration />
         </div>
       </div>
     </section>

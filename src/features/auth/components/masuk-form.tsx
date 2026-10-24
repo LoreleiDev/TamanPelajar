@@ -11,12 +11,13 @@ import { Input } from "@/components/ui/input";
 import { masuk } from "@/features/auth/actions";
 import { masukSchema, type MasukInput } from "@/features/auth/schemas";
 
-import { describedBy, Field, FormAlert, PasswordInput } from "./form-parts";
+import { describedBy, Field, FormAlert, PasswordInput, useHydrated } from "./form-parts";
 
 /** Form masuk (E.1.2, E.3.1–E.3.2, E.3.4). */
 export function MasukForm({ callbackUrl, initialError }: { callbackUrl: string; initialError?: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const hydrated = useHydrated();
   const [error, setError] = useState<{ message: string; code?: string } | undefined>(
     initialError ? { message: initialError } : undefined,
   );
@@ -40,7 +41,7 @@ export function MasukForm({ callbackUrl, initialError }: { callbackUrl: string; 
   );
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
       <FormAlert message={error?.message}>
         {error?.code === "unverified" && (
           <Link href="/verifikasi-email" className="mt-1 block font-semibold underline underline-offset-4">
@@ -71,7 +72,7 @@ export function MasukForm({ callbackUrl, initialError }: { callbackUrl: string; 
       <Link href="/lupa-password" className="-mt-2 self-end text-sm font-semibold text-primary underline-offset-4 hover:underline">
         Lupa password?
       </Link>
-      <Button type="submit" size="lg" disabled={pending}>
+      <Button type="submit" size="lg" disabled={pending || !hydrated}>
         {pending ? "Memeriksa…" : "Masuk"}
       </Button>
     </form>

@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { resetPassword } from "@/features/auth/actions";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/features/auth/schemas";
 
-import { describedBy, Field, FormAlert, PasswordInput, PasswordStrengthMeter } from "./form-parts";
+import { describedBy, Field, FormAlert, PasswordInput, PasswordStrengthMeter, useHydrated } from "./form-parts";
 
 /** Form password baru dari tautan email (E.1.4). */
 export function ResetPasswordForm({ token }: { token: string }) {
   const [pending, startTransition] = useTransition();
+  const hydrated = useHydrated();
   const [error, setError] = useState<string>();
   const [done, setDone] = useState(false);
   const form = useForm<ResetPasswordInput>({
@@ -53,7 +54,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
       <FormAlert message={error} />
       <Field label="Password baru" htmlFor="password" error={errors.password?.message} hint="Minimal 8 karakter, memuat huruf dan angka.">
         <PasswordInput
@@ -74,7 +75,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           {...form.register("confirmPassword")}
         />
       </Field>
-      <Button type="submit" size="lg" disabled={pending}>
+      <Button type="submit" size="lg" disabled={pending || !hydrated}>
         {pending ? "Menyimpan…" : "Simpan password baru"}
       </Button>
     </form>

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { kirimUlangVerifikasi, lupaPassword } from "@/features/auth/actions";
 import { lupaPasswordSchema, type LupaPasswordInput } from "@/features/auth/schemas";
 
-import { describedBy, Field, FormAlert, MailSentNotice } from "./form-parts";
+import { describedBy, Field, FormAlert, MailSentNotice, useHydrated } from "./form-parts";
 
 const modes = {
   reset: {
@@ -33,6 +33,7 @@ const modes = {
 export function EmailRequestForm({ mode }: { mode: keyof typeof modes }) {
   const m = modes[mode];
   const [pending, startTransition] = useTransition();
+  const hydrated = useHydrated();
   const [error, setError] = useState<string>();
   const [sent, setSent] = useState<{ demoLink?: string }>();
   const form = useForm<LupaPasswordInput>({ resolver: zodResolver(lupaPasswordSchema), defaultValues: { email: "" } });
@@ -58,7 +59,7 @@ export function EmailRequestForm({ mode }: { mode: keyof typeof modes }) {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
       <FormAlert message={error} />
       <Field label="Email akun" htmlFor="email" error={emailError}>
         <Input
@@ -71,7 +72,7 @@ export function EmailRequestForm({ mode }: { mode: keyof typeof modes }) {
           {...form.register("email")}
         />
       </Field>
-      <Button type="submit" size="lg" disabled={pending}>
+      <Button type="submit" size="lg" disabled={pending || !hydrated}>
         {pending ? "Mengirim…" : m.submit}
       </Button>
     </form>

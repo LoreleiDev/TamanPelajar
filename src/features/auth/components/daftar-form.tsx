@@ -10,12 +10,13 @@ import { Input } from "@/components/ui/input";
 import { daftar } from "@/features/auth/actions";
 import { daftarSchema, EDUCATION_OPTIONS, EXAM_TARGETS, type DaftarInput } from "@/features/auth/schemas";
 
-import { describedBy, Field, FormAlert, MailSentNotice, PasswordInput, PasswordStrengthMeter } from "./form-parts";
+import { describedBy, Field, FormAlert, MailSentNotice, PasswordInput, PasswordStrengthMeter, useHydrated } from "./form-parts";
 import { NativeSelect } from "./native-select";
 
 /** Form pendaftaran (E.1.1, E.2.1–E.2.7, E.3.1–E.3.4). */
 export function DaftarForm({ callbackUrl }: { callbackUrl: string }) {
   const [pending, startTransition] = useTransition();
+  const hydrated = useHydrated();
   const [error, setError] = useState<string>();
   const [sent, setSent] = useState<{ email: string; demoLink?: string }>();
   const form = useForm<DaftarInput>({
@@ -76,7 +77,7 @@ export function DaftarForm({ callbackUrl }: { callbackUrl: string }) {
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
       <FormAlert message={error} />
       <Field label="Nama lengkap" htmlFor="name" error={errors.name?.message}>
         <Input autoComplete="name" {...field("name")} {...form.register("name")} />
@@ -143,7 +144,7 @@ export function DaftarForm({ callbackUrl }: { callbackUrl: string }) {
           </p>
         )}
       </div>
-      <Button type="submit" size="lg" disabled={pending}>
+      <Button type="submit" size="lg" disabled={pending || !hydrated}>
         {pending ? "Membuat akun…" : "Buat akun"}
       </Button>
     </form>

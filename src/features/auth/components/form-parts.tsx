@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, MailCheck } from "lucide-react";
-import { useState, type ComponentProps, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ComponentProps, type ReactNode } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,16 @@ export function Field({
       )}
     </div>
   );
+}
+
+const noopSubscribe = () => () => {};
+
+/**
+ * true setelah hydration. Tombol submit form autentikasi dinonaktifkan sebelum itu agar
+ * form tidak terkirim secara native sebelum handler React terpasang.
+ */
+export function useHydrated() {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
 }
 
 export const describedBy = (id: string, error?: string) => (error ? `${id}-error` : undefined);
