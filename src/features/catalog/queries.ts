@@ -2,41 +2,9 @@
 // diganti query Prisma dengan tanda tangan yang sama.
 
 import { categories, homeFaq, platformStats, products, testimonials } from "./mock-data";
-import type {
-  CatalogFilter,
-  CatalogPage,
-  Category,
-  EducationLevel,
-  ProductDetail,
-  ProductSummary,
-  ProgramType,
-  SortOption,
-} from "./types";
+import type { CatalogFilter, CatalogPage, Category, ProductDetail, ProductSummary, SortOption } from "./types";
 
 export const CATALOG_PAGE_SIZE = 9;
-
-export const programTypeLabels: Record<ProgramType, string> = {
-  BUNDEL: "Paket lengkap",
-  KELAS: "Kelas",
-  TRYOUT: "Tryout",
-};
-
-export const educationLevelLabels: Record<EducationLevel, string> = {
-  SMP: "SMP",
-  SMA: "SMA/MA",
-  SMK: "SMK",
-  D3: "D3",
-  S1: "S1",
-  S2: "S2",
-  UMUM: "Umum",
-};
-
-export const sortLabels: Record<SortOption, string> = {
-  terbaru: "Terbaru",
-  terpopuler: "Terpopuler",
-  termurah: "Harga termurah",
-  termahal: "Harga tertinggi",
-};
 
 // Hanya field kartu yang dikirim, agar payload ke client tetap kecil.
 function toSummary(p: ProductDetail): ProductSummary {

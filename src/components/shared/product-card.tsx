@@ -6,7 +6,7 @@ import { ProductCover } from "@/components/shared/product-cover";
 import { Rating } from "@/components/shared/rating";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { programTypeLabels } from "@/features/catalog/queries";
+import { programTypeLabels } from "@/features/catalog/labels";
 import type { ProductSummary } from "@/features/catalog/types";
 import { cn } from "@/lib/utils";
 
