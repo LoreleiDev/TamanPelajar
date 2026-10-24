@@ -300,7 +300,7 @@ Keterangan: **P** = publik (tamu boleh), **U** = harus login (USER/ADMIN), **A**
 |---|---|---|
 | `/` beranda | P | D.1 |
 | `/program` katalog (search, filter, sort, pagination) | P | D.2 |
-| `/program/[kategori]` katalog per kategori | P | D.1.3 |
+| `/program?kategori=<slug>` katalog per kategori (parameter, bukan segmen) | P | D.1.3 |
 | `/paket/[slug]` detail paket | P | D.3 |
 | `/kelas` daftar kelas online | P | C.5.1 |
 | `/kelas/[slug]` ruang belajar (bab gratis/terkunci) | P (lihat), U (buka materi) | G |
