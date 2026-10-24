@@ -27,7 +27,7 @@ test.describe("navigasi mobile", () => {
   });
 
   test("tamu yang membuka Transaksi melihat dialog masuk dengan callbackUrl (C.5.3)", async ({ page }) => {
-    await page.goto("/tentang");
+    await page.goto("/tentang", { waitUntil: "networkidle" });
     await page.getByRole("navigation", { name: "Navigasi bawah" }).getByRole("button", { name: "Transaksi" }).click();
     const dialog = page.getByRole("dialog", { name: "Masuk dulu untuk melanjutkan" });
     await expect(dialog).toBeVisible();

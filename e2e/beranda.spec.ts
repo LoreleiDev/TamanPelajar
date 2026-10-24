@@ -37,7 +37,8 @@ test.describe("beranda (D.1)", () => {
   });
 
   test("tamu yang menekan Beli sekarang melihat dialog masuk (C.5.3)", async ({ page }) => {
-    await page.goto("/");
+    // Tunggu hydration selesai: klik lebih awal memicu peringatan hydration mismatch di dev.
+    await page.goto("/", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "Beli sekarang" }).first().click();
     await expect(page.getByRole("dialog", { name: "Masuk dulu untuk melanjutkan" })).toBeVisible();
   });

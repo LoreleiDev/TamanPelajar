@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Taman Pelajar
 
-## Getting Started
+Aplikasi bimbingan belajar online: kelas online, video pembelajaran, penjualan paket belajar, tryout CBT dengan hasil dan pembahasan, dashboard siswa, dan panel administrator.
 
-First, run the development server:
+Spesifikasi lengkap ada di [CLAUDE.md](CLAUDE.md). Arsitektur, rancangan database, dan sitemap ada di [docs/ARSITEKTUR.md](docs/ARSITEKTUR.md). Progres per tahap ada di [docs/PROGRESS.md](docs/PROGRESS.md).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Teknologi
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Next.js 16 (App Router, Cache Components), TypeScript strict
+- Tailwind CSS v4, shadcn/ui, Lucide
+- Prisma 7 + MySQL 8 (produksi); lokal memakai MariaDB 10.4 bawaan XAMPP
+- Auth.js v5, Cloudinary, Midtrans (dengan mode simulasi)
+- Vitest dan Playwright
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Prasyarat
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Node.js 22 atau lebih baru
+- pnpm 11 (`corepack enable`)
+- XAMPP dengan MySQL berjalan di port 3306. Proyek ini tidak memakai Docker.
 
-## Learn More
+## Instalasi lokal
 
-To learn more about Next.js, take a look at the following resources:
+1. Buat database `tamanpelajar` di phpMyAdmin dengan collation `utf8mb4_unicode_ci`.
+2. Salin `.env.example` menjadi `.env`, lalu isi minimal `DATABASE_URL`, `AUTH_SECRET`, dan `NEXT_PUBLIC_APP_URL`.
+   - `AUTH_SECRET` bisa dibuat dengan `npx auth secret`.
+3. Pasang dependensi. Langkah ini sekaligus membuat Prisma Client.
+   ```bash
+   pnpm install
+   ```
+4. Terapkan migration dan isi data demo.
+   ```bash
+   pnpm prisma migrate dev
+   pnpm prisma db seed
+   ```
+5. Jalankan aplikasi di http://localhost:3000.
+   ```bash
+   pnpm dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Seed bisa dijalankan ulang kapan saja. Semua tabel dikosongkan lalu diisi kembali.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Akun demo
 
-## Deploy on Vercel
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@tamanpelajar.test | Demo12345! |
+| User | user1@tamanpelajar.test … user5@tamanpelajar.test | Demo12345! |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Isi data demo:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| User | Isi |
+|---|---|
+| user1 | Paket SKD aktif, dua percobaan tryout, progres kelas TWK |
+| user2 | Paket UTBK aktif dan satu sertifikat |
+| user3 | Tryout SKD |
+| user4 | Belum membeli; ada pesanan yang menunggu pembayaran |
+| user5 | Paket TPA yang masa aktifnya sudah berakhir |
+
+## Perintah
+
+| Perintah | Fungsi |
+|---|---|
+| `pnpm dev` | Server development |
+| `pnpm build` | Build produksi. Membutuhkan database karena halaman publik di-prerender dari data |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
+| `pnpm test` | Tes unit Vitest (penilaian, filter katalog) |
+| `pnpm test:e2e` | Tes Playwright. Unduh browser sekali dengan `pnpm exec playwright install chromium` |
+| `pnpm prisma migrate dev` | Membuat dan menerapkan migration |
+| `pnpm prisma db seed` | Mengisi data demo |
+| `pnpm prisma studio` | Melihat isi database |
+
+## Cloudinary
+
+Semua file (gambar, PDF materi, sertifikat) disimpan di Cloudinary.
+
+- Isi variabel `CLOUDINARY_*` dan `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` di `.env`.
+- Akun gratis Cloudinary memblokir pengiriman PDF dan ZIP secara bawaan. Aktifkan **Settings → Security → Allow delivery of PDF and ZIP files** agar PDF materi bisa diunduh.
+
+## Deploy ke Vercel
+
+1. Siapkan database MySQL 8 terkelola, misalnya PlanetScale, Aiven for MySQL, atau TiDB Cloud.
+   - Jika host tidak mendukung foreign key, tambahkan `relationMode = "prisma"` di `datasource`. Semua relasi sudah memiliki `@@index`.
+2. Isi semua variabel `.env.example` di Project Settings → Environment Variables. Untuk produksi:
+   - `AUTH_URL` dan `NEXT_PUBLIC_APP_URL` diisi domain produksi.
+   - `PAYMENT_MODE` diisi `midtrans` jika pembayaran sungguhan sudah siap.
+3. Terapkan migration ke database produksi sebelum build pertama:
+   ```bash
+   pnpm prisma migrate deploy
+   ```
+   Build Vercel membaca database saat prerender, jadi `DATABASE_URL` harus bisa diakses dari Vercel.

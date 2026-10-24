@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { categories } from "./mock-data";
 import { activeFilterCount, catalogHref, parseCatalogFilter as parse } from "./schemas";
 
-const slugs = categories.map((c) => c.slug);
+const slugs = ["utbk-snbt", "cpns", "tes-bumn", "sekolah-kedinasan"];
 const parseCatalogFilter = (p: Parameters<typeof parse>[0]) => parse(p, slugs);
 
 describe("parseCatalogFilter", () => {

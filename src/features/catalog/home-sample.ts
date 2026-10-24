@@ -19,9 +19,9 @@ export const sampleQuestions: SampleQuestion[] = [
     id: "contoh-tiu",
     exam: "Tryout SKD Paket 1",
     section: "TIU",
-    number: 12,
-    total: 110,
-    remaining: "84:37",
+    number: 6,
+    total: 10,
+    remaining: "17:42",
     prompt: "Lanjutkan deret berikut: 3, 6, 11, 18, 27, …",
     options: [
       { label: "A", text: "36" },
@@ -37,9 +37,9 @@ export const sampleQuestions: SampleQuestion[] = [
     id: "contoh-pu",
     exam: "Tryout UTBK Paket 1",
     section: "Penalaran Umum",
-    number: 5,
-    total: 20,
-    remaining: "41:10",
+    number: 1,
+    total: 10,
+    remaining: "14:05",
     prompt:
       "Semua peserta yang lulus tes tertulis mengikuti wawancara. Rani tidak mengikuti wawancara. Simpulan yang pasti benar adalah …",
     options: [
@@ -57,9 +57,9 @@ export const sampleQuestions: SampleQuestion[] = [
     id: "contoh-twk",
     exam: "Tryout SKD Paket 1",
     section: "TWK",
-    number: 7,
-    total: 110,
-    remaining: "92:05",
+    number: 1,
+    total: 10,
+    remaining: "19:20",
     prompt: "Tindakan yang paling mencerminkan sila keempat Pancasila adalah …",
     options: [
       { label: "A", text: "Menggalang donasi untuk korban banjir" },

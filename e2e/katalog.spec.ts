@@ -21,7 +21,7 @@ test.describe("katalog program (D.2)", () => {
     await page.goto("/program");
     await page.getByLabel("Urutkan").selectOption("termurah");
     await expect(page).toHaveURL(/urut=termurah/);
-    await expect(page.getByRole("article").first().getByRole("heading")).toHaveText("Tryout SKD 110 Soal");
+    await expect(page.getByRole("article").first().getByRole("heading")).toHaveText("Tryout SKD CPNS");
   });
 
   test("pencarian, pagination, dan keadaan kosong", async ({ page }) => {

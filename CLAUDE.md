@@ -38,7 +38,7 @@ Taman Pelajar adalah aplikasi bimbingan belajar online full-stack: kelas online,
 | Grafik | Recharts |
 | Tabel admin | TanStack Table |
 | ORM | Prisma |
-| Database | **MySQL 8**, `datasource provider = "mysql"`. Produksi: MySQL terkelola (PlanetScale, Aiven for MySQL, atau TiDB Cloud). Lokal: MySQL 8 terpasang langsung di laptop (Laragon atau MySQL Installer), **tanpa Docker** |
+| Database | **MySQL 8**, `datasource provider = "mysql"`. Produksi: MySQL terkelola (PlanetScale, Aiven for MySQL, atau TiDB Cloud). Lokal: MariaDB 10.4 bawaan XAMPP (dikelola lewat phpMyAdmin), **tanpa Docker**; skema dan migration tetap ditulis untuk MySQL 8 dan diuji ke MySQL 8 sebelum deploy |
 | Auth | Auth.js (NextAuth v5): Credentials + Google OAuth, session JWT di HTTP-only secure cookie, bcrypt untuk hash password |
 | Penyimpanan file | **Cloudinary** untuk semua file: thumbnail, gambar, gambar soal, PDF materi, sertifikat. Tidak memakai Supabase |
 | Video | URL YouTube unlisted / Vimeo / URL eksternal (tidak di-upload ke server) |
@@ -50,7 +50,7 @@ Taman Pelajar adalah aplikasi bimbingan belajar online full-stack: kelas online,
 
 ```bash
 pnpm install
-# MySQL 8 lokal harus sudah berjalan (Laragon/MySQL Installer); proyek ini tidak memakai Docker
+# MySQL XAMPP (MariaDB 10.4) harus sudah berjalan di port 3306; proyek ini tidak memakai Docker
 pnpm prisma migrate dev       # buat/terapkan migration
 pnpm prisma db seed           # isi data demo
 pnpm dev                      # http://localhost:3000

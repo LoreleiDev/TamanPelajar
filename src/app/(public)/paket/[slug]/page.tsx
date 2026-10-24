@@ -16,6 +16,10 @@ import { Syllabus } from "@/features/catalog/components/detail/syllabus";
 import { educationLevelLabels, programTypeLabels } from "@/features/catalog/labels";
 import { effectivePrice, getProductBySlug, listProductSlugs, listRelatedProducts } from "@/features/catalog/queries";
 
+// Semua paket di-prerender lewat generateStaticParams. Slug lain dirender blocking agar
+// paket yang tidak ada tetap mengembalikan status 404 (bukan kerangka 200 lalu 404).
+export const instant = false;
+
 export async function generateStaticParams() {
   return (await listProductSlugs()).map((slug) => ({ slug }));
 }

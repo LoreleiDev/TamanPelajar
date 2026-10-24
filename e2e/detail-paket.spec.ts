@@ -10,22 +10,22 @@ test.describe("detail paket (D.3)", () => {
     await expect(panel.getByText("Rp 299.000", { exact: false })).toBeVisible();
     await expect(panel.getByText("Masa aktif 180 hari sejak pembayaran")).toBeVisible();
 
-    await expect(page.getByRole("table", { name: "Tryout CBT" }).getByRole("row")).toHaveCount(6);
+    await expect(page.getByRole("table", { name: "Tryout CBT" }).getByRole("row")).toHaveCount(2);
     await expect(page.getByText("Gratis setelah masuk").first()).toBeVisible();
     await expect(page.getByText("Terbuka setelah berlangganan").first()).toBeVisible();
-    await expect(page.getByText("dari 31 ulasan")).toBeVisible();
+    await expect(page.getByText("dari 1 ulasan")).toBeVisible();
 
     const jsonLd = await page.locator('script[type="application/ld+json"]').textContent();
     expect(JSON.parse(jsonLd ?? "{}")).toMatchObject({ "@type": "Course", offers: { price: 299000, priceCurrency: "IDR" } });
   });
 
   test("tombol beli memunculkan dialog masuk untuk tamu", async ({ page }) => {
-    await page.goto("/paket/tryout-skd-110-soal");
+    await page.goto("/paket/tryout-skd-cpns", { waitUntil: "networkidle" });
     await page.getByRole("complementary", { name: "Pembelian" }).getByRole("button", { name: "Beli sekarang" }).click();
     const dialog = page.getByRole("dialog", { name: "Masuk dulu untuk melanjutkan" });
     await expect(dialog.getByRole("link", { name: "Masuk" })).toHaveAttribute(
       "href",
-      "/masuk?callbackUrl=%2Fpaket%2Ftryout-skd-110-soal",
+      "/masuk?callbackUrl=%2Fpaket%2Ftryout-skd-cpns",
     );
   });
 
@@ -38,8 +38,8 @@ test.describe("detail paket (D.3)", () => {
 
   test("kartu katalog membuka detail paket", async ({ page }) => {
     await page.goto("/program");
-    await page.getByRole("link", { name: "Tryout UTBK Intensif", exact: true }).click();
-    await expect(page).toHaveURL(/\/paket\/tryout-utbk-intensif$/);
+    await page.getByRole("link", { name: "Tryout UTBK/SNBT", exact: true }).click();
+    await expect(page).toHaveURL(/\/paket\/tryout-utbk-snbt$/);
     await expect(page.getByRole("heading", { name: "Paket serupa" })).toBeVisible();
   });
 });

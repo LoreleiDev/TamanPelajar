@@ -1,5 +1,7 @@
-// Skema Taman Pelajar (MySQL 8). Rancangan lengkap model ada di docs/ARSITEKTUR.md §2
-// dan diterapkan sebagai migration pada Tahap 2.
+// Skema Taman Pelajar (butir N). Ditulis untuk MySQL 8; lokal berjalan di MariaDB 10.4 (XAMPP).
+// Aturan: setiap model punya id cuid, createdAt, updatedAt; soft delete (deletedAt) untuk User,
+// Course, Product, Exam, Question, Order; teks panjang memakai @db.Text / @db.LongText;
+// setiap foreign key dan kolom filter diberi @@index. Rancangan: docs/ARSITEKTUR.md §2.
 
 generator client {
   provider = "prisma-client"
@@ -8,4 +10,1269 @@ generator client {
 
 datasource db {
   provider = "mysql"
+}
+
+// ─── Enum ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum EducationLevel {
+  SMP
+  SMA
+  SMK
+  D3
+  S1
+  S2
+  UMUM
+}
+
+enum PublishStatus {
+  DRAF
+  TERBIT
+  ARSIP
+}
+
+enum Difficulty {
+  MUDAH
+  SEDANG
+  SULIT
+}
+
+enum LessonType {
+  VIDEO
+  PDF
+  TEKS
+  KUIS
+  TUGAS
+}
+
+enum VideoProvider {
+  YOUTUBE
+  VIMEO
+  EKSTERNAL
+}
+
+enum EnrollmentStatus {
+  AKTIF
+  KEDALUWARSA
+  DIBATALKAN
+}
+
+enum QuestionType {
+  PG_TUNGGAL
+  PG_JAMAK
+  BENAR_SALAH
+  ISIAN_SINGKAT
+  NUMERIK
+  ESSAY
+}
+
+enum AttemptStatus {
+  BERLANGSUNG
+  SELESAI
+  KEDALUWARSA
+}
+
+enum ActivityType {
+  MULAI
+  PINDAH_TAB
+  KELUAR_FULLSCREEN
+  MASUK_FULLSCREEN
+  SUBMIT
+  AUTO_SUBMIT
+}
+
+enum OrderStatus {
+  MENUNGGU
+  BERHASIL
+  GAGAL
+  KEDALUWARSA
+  DIKEMBALIKAN
+}
+
+enum PaymentStatus {
+  MENUNGGU
+  BERHASIL
+  GAGAL
+  KEDALUWARSA
+  DIKEMBALIKAN
+}
+
+enum PaymentMethod {
+  VIRTUAL_ACCOUNT
+  QRIS
+  E_WALLET
+  TRANSFER_BANK
+  SIMULASI
+}
+
+enum DiscountType {
+  PERSEN
+  NOMINAL
+}
+
+enum ArticleCategory {
+  ARTIKEL
+  JADWAL_UJIAN
+  PENGUMUMAN
+  TIPS_BELAJAR
+  PENDAFTARAN
+}
+
+enum NotificationType {
+  TRANSAKSI
+  TRYOUT
+  KELAS
+  SISTEM
+}
+
+enum MediaResourceType {
+  IMAGE
+  RAW
+  VIDEO
+}
+
+enum MediaDelivery {
+  UPLOAD
+  AUTHENTICATED
+}
+
+enum ProgramType {
+  KELAS
+  TRYOUT
+  BUNDEL
+}
+
+// ─── N.1 Pengguna ────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  name          String
+  image         String?   @db.VarChar(500)
+  role          Role      @default(USER)
+  isActive      Boolean   @default(true)
+  failedLogins  Int       @default(0)
+  lockedUntil   DateTime?
+  lastLoginAt   DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile             Profile?
+  accounts            Account[]
+  passwordResetTokens PasswordResetToken[]
+  enrollments         Enrollment[]
+  lessonProgress      LessonProgress[]
+  videoProgress       VideoProgress[]
+  notes               LessonNote[]
+  bookmarks           Bookmark[]
+  learningSessions    LearningSession[]
+  quizAttempts        QuizAttempt[]
+  examAttempts        ExamAttempt[]
+  gradedAnswers       ExamAnswer[]         @relation("GradedBy")
+  questionsCreated    Question[]           @relation("QuestionCreatedBy")
+  cart                Cart?
+  orders              Order[]
+  voucherUsages       VoucherUsage[]
+  reviews             Review[]
+  discussions         Discussion[]
+  discussionReplies   DiscussionReply[]
+  notifications       Notification[]
+  articles            Article[]
+  certificates        UserCertificate[]
+  auditLogs           AuditLog[]
+  mediaUploaded       Media[]
+
+  @@index([role])
+  @@index([deletedAt])
+}
+
+model Profile {
+  id             String          @id @default(cuid())
+  userId         String          @unique
+  phone          String?
+  educationLevel EducationLevel?
+  examTarget     String?
+  school         String?
+  city           String?
+  birthDate      DateTime?       @db.Date
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Akun OAuth (Google) yang ditautkan ke User; sesi memakai JWT, bukan tabel Session.
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// Token verifikasi email (E.1.5). Disimpan sebagai hash.
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── N.2 Kelas ───────────────────────────────────────────────────────────────
+
+model CourseCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  shortName   String
+  description String   @db.Text
+  audience    String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courses   Course[]
+  videos    Video[]
+  exams     Exam[]
+  products  Product[]
+  questions Question[]
+
+  @@index([order])
+}
+
+model Course {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  title            String
+  summary          String        @db.VarChar(500)
+  description      String        @db.Text
+  categoryId       String
+  thumbnailId      String?
+  subject          String
+  level            Difficulty    @default(SEDANG)
+  status           PublishStatus @default(DRAF)
+  sequentialLock   Boolean       @default(false)
+  estimatedMinutes Int           @default(0)
+  deletedAt        DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  category         CourseCategory    @relation(fields: [categoryId], references: [id])
+  thumbnail        Media?            @relation("CourseThumbnail", fields: [thumbnailId], references: [id], onDelete: SetNull)
+  sections         CourseSection[]
+  products         ProductCourse[]
+  certificate      Certificate?
+  learningSessions LearningSession[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([thumbnailId])
+  @@index([deletedAt])
+}
+
+model CourseSection {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  order     Int
+  isFree    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+model Lesson {
+  id          String     @id @default(cuid())
+  sectionId   String
+  slug        String
+  title       String
+  summary     String?    @db.VarChar(500)
+  type        LessonType
+  content     String?    @db.LongText
+  order       Int
+  durationSec Int?
+  videoId     String?
+  quizId      String?    @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  section     CourseSection    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  video       Video?           @relation(fields: [videoId], references: [id], onDelete: SetNull)
+  quiz        Quiz?            @relation(fields: [quizId], references: [id], onDelete: SetNull)
+  materials   Material[]
+  progress    LessonProgress[]
+  notes       LessonNote[]
+  bookmarks   Bookmark[]
+  discussions Discussion[]
+
+  @@unique([sectionId, slug])
+  @@index([sectionId])
+  @@index([videoId])
+}
+
+model Video {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String        @db.Text
+  transcript  String?       @db.LongText
+  provider    VideoProvider
+  url         String        @db.VarChar(500)
+  durationSec Int
+  subject     String
+  difficulty  Difficulty    @default(SEDANG)
+  categoryId  String
+  thumbnailId String?
+  status      PublishStatus @default(DRAF)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  category         CourseCategory    @relation(fields: [categoryId], references: [id])
+  thumbnail        Media?            @relation("VideoThumbnail", fields: [thumbnailId], references: [id], onDelete: SetNull)
+  lessons          Lesson[]
+  progress         VideoProgress[]
+  notes            LessonNote[]
+  bookmarks        Bookmark[]
+  discussions      Discussion[]
+  products         ProductVideo[]
+  learningSessions LearningSession[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([subject])
+  @@index([thumbnailId])
+}
+
+// Lampiran PDF materi (G.2.3); file disimpan di Cloudinary dengan delivery authenticated.
+model Material {
+  id        String   @id @default(cuid())
+  lessonId  String
+  title     String
+  mediaId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  media  Media  @relation("MaterialFile", fields: [mediaId], references: [id])
+
+  @@index([lessonId])
+  @@index([mediaId])
+}
+
+model Enrollment {
+  id        String           @id @default(cuid())
+  userId    String
+  productId String
+  orderId   String?
+  status    EnrollmentStatus @default(AKTIF)
+  startsAt  DateTime
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, productId])
+  @@index([userId, status])
+  @@index([productId])
+  @@index([orderId])
+}
+
+model LessonProgress {
+  id              String    @id @default(cuid())
+  userId          String
+  lessonId        String
+  completedAt     DateTime?
+  lastPositionSec Int       @default(0)
+  watchedSec      Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([lessonId])
+}
+
+model VideoProgress {
+  id              String    @id @default(cuid())
+  userId          String
+  videoId         String
+  completedAt     DateTime?
+  lastPositionSec Int       @default(0)
+  watchedSec      Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([videoId])
+}
+
+// Catatan pribadi siswa (G.2.6, H.2.5): satu catatan per materi atau per video.
+model LessonNote {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String?
+  videoId   String?
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  video  Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@unique([userId, videoId])
+  @@index([lessonId])
+  @@index([videoId])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String?
+  videoId   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  video  Video?  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@unique([userId, videoId])
+  @@index([lessonId])
+  @@index([videoId])
+}
+
+// Waktu belajar per hari (F.2.8, F.3.3, G.3).
+model LearningSession {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String?
+  videoId   String?
+  date      DateTime @db.Date
+  seconds   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  video  Video?  @relation(fields: [videoId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([courseId])
+  @@index([videoId])
+}
+
+// ─── N.3 Kuis ────────────────────────────────────────────────────────────────
+
+model Quiz {
+  id           String   @id @default(cuid())
+  title        String
+  passingScore Int      @default(70)
+  timeLimitSec Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  lesson    Lesson?
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id         String   @id @default(cuid())
+  quizId     String
+  questionId String
+  order      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  quiz     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@unique([quizId, questionId])
+  @@index([questionId])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  quizId      String
+  userId      String
+  score       Float
+  passed      Boolean
+  answers     Json
+  submittedAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+  @@index([userId])
+}
+
+// ─── N.4 Tryout ──────────────────────────────────────────────────────────────
+
+model Exam {
+  id                String        @id @default(cuid())
+  slug              String        @unique
+  title             String
+  description       String        @db.Text
+  rules             String?       @db.Text
+  imageId           String?
+  categoryId        String
+  durationMin       Int
+  opensAt           DateTime?
+  closesAt          DateTime?
+  maxAttempts       Int           @default(1)
+  shuffleQuestions  Boolean       @default(false)
+  shuffleOptions    Boolean       @default(false)
+  showDiscussion    Boolean       @default(true)
+  discussionOpensAt DateTime?
+  correctScore      Float         @default(1)
+  wrongScore        Float         @default(0)
+  passingGrade      Float
+  status            PublishStatus @default(DRAF)
+  deletedAt         DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  category  CourseCategory @relation(fields: [categoryId], references: [id])
+  image     Media?         @relation("ExamImage", fields: [imageId], references: [id], onDelete: SetNull)
+  sections  ExamSection[]
+  questions ExamQuestion[]
+  attempts  ExamAttempt[]
+  products  ProductExam[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([imageId])
+  @@index([deletedAt])
+}
+
+model ExamSection {
+  id           String   @id @default(cuid())
+  examId       String
+  title        String
+  order        Int
+  durationMin  Int?
+  weight       Float    @default(1)
+  passingGrade Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  exam            Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
+  questions       ExamQuestion[]
+  attemptSections ExamAttemptSection[]
+  resultSections  ExamResultSection[]
+
+  @@unique([examId, order])
+  @@index([examId])
+}
+
+model Question {
+  id                  String        @id @default(cuid())
+  categoryId          String
+  subject             String
+  topic               String
+  difficulty          Difficulty    @default(SEDANG)
+  type                QuestionType
+  body                String        @db.LongText
+  imageId             String?
+  explanation         String        @db.LongText
+  explanationVideoUrl String?       @db.VarChar(500)
+  correctText         String?
+  correctNumber       Float?
+  tolerance           Float?
+  weight              Float         @default(1)
+  status              PublishStatus @default(DRAF)
+  createdById         String
+  deletedAt           DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  category      CourseCategory   @relation(fields: [categoryId], references: [id])
+  image         Media?           @relation("QuestionImage", fields: [imageId], references: [id], onDelete: SetNull)
+  createdBy     User             @relation("QuestionCreatedBy", fields: [createdById], references: [id])
+  options       QuestionOption[]
+  examQuestions ExamQuestion[]
+  quizQuestions QuizQuestion[]
+  answers       ExamAnswer[]
+
+  @@index([categoryId])
+  @@index([topic])
+  @@index([status])
+  @@index([type])
+  @@index([imageId])
+  @@index([createdById])
+  @@index([deletedAt])
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionId String
+  label      String   @db.VarChar(4)
+  body       String   @db.Text
+  imageId    String?
+  isCorrect  Boolean  @default(false)
+  // Skor per opsi untuk soal bergradasi seperti TKP (1–5); null = pakai skor benar/salah.
+  score      Float?
+  order      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  image    Media?   @relation("OptionImage", fields: [imageId], references: [id], onDelete: SetNull)
+
+  @@unique([questionId, order])
+  @@index([questionId])
+  @@index([imageId])
+}
+
+model ExamQuestion {
+  id         String   @id @default(cuid())
+  examId     String
+  sectionId  String
+  questionId String
+  order      Int
+  weight     Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  exam     Exam        @relation(fields: [examId], references: [id], onDelete: Cascade)
+  section  ExamSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id])
+
+  @@unique([sectionId, questionId])
+  @@index([examId])
+  @@index([questionId])
+}
+
+model ExamAttempt {
+  id                String        @id @default(cuid())
+  examId            String
+  userId            String
+  attemptNo         Int
+  status            AttemptStatus @default(BERLANGSUNG)
+  seed              Int
+  startedAt         DateTime
+  deadlineAt        DateTime
+  submittedAt       DateTime?
+  currentQuestionId String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  exam     Exam                 @relation(fields: [examId], references: [id])
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sections ExamAttemptSection[]
+  answers  ExamAnswer[]
+  activity ExamActivityLog[]
+  result   ExamResult?
+
+  @@unique([examId, userId, attemptNo])
+  @@index([userId, status])
+  @@index([examId, status])
+}
+
+model ExamAttemptSection {
+  id          String    @id @default(cuid())
+  attemptId   String
+  sectionId   String
+  startedAt   DateTime?
+  deadlineAt  DateTime?
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  attempt ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  section ExamSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, sectionId])
+  @@index([sectionId])
+}
+
+model ExamAnswer {
+  id           String   @id @default(cuid())
+  attemptId    String
+  questionId   String
+  optionIds    Json?
+  textAnswer   String?  @db.Text
+  numberAnswer Float?
+  isDoubtful   Boolean  @default(false)
+  timeSpentSec Int      @default(0)
+  isCorrect    Boolean?
+  score        Float?
+  gradedById   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  attempt  ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id])
+  gradedBy User?       @relation("GradedBy", fields: [gradedById], references: [id], onDelete: SetNull)
+
+  @@unique([attemptId, questionId])
+  @@index([questionId])
+  @@index([gradedById])
+}
+
+model ExamActivityLog {
+  id        String       @id @default(cuid())
+  attemptId String
+  type      ActivityType
+  meta      Json?
+  at        DateTime     @default(now())
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  attempt ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, at])
+}
+
+model ExamResult {
+  id          String   @id @default(cuid())
+  attemptId   String   @unique
+  totalScore  Float
+  maxScore    Float
+  correct     Int
+  wrong       Int
+  empty       Int
+  durationSec Int
+  passed      Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attempt  ExamAttempt         @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  sections ExamResultSection[]
+  topics   TopicAnalysis[]
+
+  @@index([totalScore])
+}
+
+model ExamResultSection {
+  id        String   @id @default(cuid())
+  resultId  String
+  sectionId String
+  score     Float
+  maxScore  Float
+  correct   Int
+  wrong     Int
+  empty     Int
+  passed    Boolean?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  result  ExamResult  @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  section ExamSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([resultId, sectionId])
+  @@index([sectionId])
+}
+
+model TopicAnalysis {
+  id         String   @id @default(cuid())
+  resultId   String
+  topic      String
+  correct    Int
+  total      Int
+  mastery    Float
+  avgTimeSec Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  result ExamResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@unique([resultId, topic])
+  @@index([topic])
+}
+
+// ─── N.5 Produk dan transaksi ────────────────────────────────────────────────
+
+model Product {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  name           String
+  categoryId     String
+  programType    ProgramType
+  educationLevel EducationLevel @default(UMUM)
+  summary        String         @db.VarChar(500)
+  description    String         @db.Text
+  thumbnailId    String?
+  price          Int
+  promoPrice     Int?
+  activeDays     Int
+  features       Json
+  faq            Json
+  status         PublishStatus  @default(DRAF)
+  salesCount     Int            @default(0)
+  deletedAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  category    CourseCategory  @relation(fields: [categoryId], references: [id])
+  thumbnail   Media?          @relation("ProductThumbnail", fields: [thumbnailId], references: [id], onDelete: SetNull)
+  courses     ProductCourse[]
+  exams       ProductExam[]
+  videos      ProductVideo[]
+  enrollments Enrollment[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  reviews     Review[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([programType])
+  @@index([thumbnailId])
+  @@index([deletedAt])
+}
+
+model ProductCourse {
+  id        String   @id @default(cuid())
+  productId String
+  courseId  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, courseId])
+  @@index([courseId])
+}
+
+model ProductExam {
+  id        String   @id @default(cuid())
+  productId String
+  examId    String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, examId])
+  @@index([examId])
+}
+
+model ProductVideo {
+  id        String   @id @default(cuid())
+  productId String
+  videoId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  video   Video   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, videoId])
+  @@index([videoId])
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([productId])
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  number    String      @unique
+  userId    String
+  subtotal  Int
+  discount  Int         @default(0)
+  total     Int
+  voucherId String?
+  status    OrderStatus @default(MENUNGGU)
+  expiresAt DateTime
+  paidAt    DateTime?
+  deletedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id])
+  voucher      Voucher?      @relation(fields: [voucherId], references: [id], onDelete: SetNull)
+  items        OrderItem[]
+  payments     Payment[]
+  enrollments  Enrollment[]
+  voucherUsage VoucherUsage?
+
+  @@index([userId, status])
+  @@index([status])
+  @@index([voucherId])
+  @@index([deletedAt])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  productId    String
+  nameSnapshot String
+  price        Int
+  promoPrice   Int?
+  activeDays   Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  orderId     String
+  provider    String
+  method      PaymentMethod
+  status      PaymentStatus @default(MENUNGGU)
+  externalId  String?       @unique
+  snapToken   String?
+  vaNumber    String?
+  qrString    String?       @db.Text
+  rawResponse Json?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model Voucher {
+  id           String       @id @default(cuid())
+  code         String       @unique
+  description  String
+  discountType DiscountType
+  value        Int
+  maxDiscount  Int?
+  minPurchase  Int          @default(0)
+  quota        Int?
+  perUserLimit Int          @default(1)
+  startsAt     DateTime
+  endsAt       DateTime
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  orders Order[]
+  usages VoucherUsage[]
+
+  @@index([isActive])
+}
+
+model VoucherUsage {
+  id        String   @id @default(cuid())
+  voucherId String
+  userId    String
+  orderId   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  voucher Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([voucherId, userId])
+  @@index([userId])
+}
+
+// ─── N.6 Interaksi dan konten ────────────────────────────────────────────────
+
+model Review {
+  id          String   @id @default(cuid())
+  userId      String
+  productId   String
+  rating      Int
+  body        String   @db.Text
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId, isPublished])
+}
+
+model Discussion {
+  id        String   @id @default(cuid())
+  lessonId  String?
+  videoId   String?
+  userId    String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson  Lesson?           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  video   Video?            @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replies DiscussionReply[]
+
+  @@index([lessonId])
+  @@index([videoId])
+  @@index([userId])
+}
+
+model DiscussionReply {
+  id           String   @id @default(cuid())
+  discussionId String
+  userId       String
+  body         String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([discussionId])
+  @@index([userId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String           @db.Text
+  href      String?          @db.VarChar(500)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model Article {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  title       String
+  excerpt     String          @db.VarChar(500)
+  body        String          @db.LongText
+  coverId     String?
+  category    ArticleCategory
+  authorId    String
+  status      PublishStatus   @default(DRAF)
+  publishedAt DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  cover  Media? @relation("ArticleCover", fields: [coverId], references: [id], onDelete: SetNull)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([category, status])
+  @@index([authorId])
+  @@index([coverId])
+  @@index([publishedAt])
+}
+
+model Banner {
+  id        String    @id @default(cuid())
+  title     String
+  imageId   String
+  href      String?   @db.VarChar(500)
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  image Media @relation("BannerImage", fields: [imageId], references: [id])
+
+  @@index([isActive, order])
+  @@index([imageId])
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  program     String
+  opening     String   @db.Text
+  body        String   @db.Text
+  isPublished Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, order])
+}
+
+// ─── N.7 Sertifikat dan sistem ───────────────────────────────────────────────
+
+model Certificate {
+  id              String   @id @default(cuid())
+  title           String
+  courseId        String?  @unique
+  templateMediaId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  course        Course?           @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  templateMedia Media?            @relation("CertificateTemplate", fields: [templateMediaId], references: [id], onDelete: SetNull)
+  issued        UserCertificate[]
+
+  @@index([templateMediaId])
+}
+
+model UserCertificate {
+  id            String   @id @default(cuid())
+  certificateId String
+  userId        String
+  number        String   @unique
+  mediaId       String?
+  issuedAt      DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media       Media?      @relation("UserCertificateFile", fields: [mediaId], references: [id], onDelete: SetNull)
+
+  @@unique([certificateId, userId])
+  @@index([userId])
+  @@index([mediaId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  ip        String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Metadata file Cloudinary; model lain merujuk mediaId, bukan URL mentah.
+model Media {
+  id           String            @id @default(cuid())
+  publicId     String            @unique
+  resourceType MediaResourceType
+  format       String
+  version      Int
+  bytes        Int
+  width        Int?
+  height       Int?
+  deliveryType MediaDelivery
+  folder       String
+  uploadedById String
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  uploadedBy       User              @relation(fields: [uploadedById], references: [id])
+  courses          Course[]          @relation("CourseThumbnail")
+  videos           Video[]           @relation("VideoThumbnail")
+  materials        Material[]        @relation("MaterialFile")
+  exams            Exam[]            @relation("ExamImage")
+  questions        Question[]        @relation("QuestionImage")
+  options          QuestionOption[]  @relation("OptionImage")
+  products         Product[]         @relation("ProductThumbnail")
+  articles         Article[]         @relation("ArticleCover")
+  banners          Banner[]          @relation("BannerImage")
+  certificates     Certificate[]     @relation("CertificateTemplate")
+  userCertificates UserCertificate[] @relation("UserCertificateFile")
+
+  @@index([uploadedById])
+  @@index([folder])
+}
+
+// Rate limit berbasis tabel (P.1.4) agar berfungsi di Vercel serverless tanpa Redis.
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
 }
