@@ -37,7 +37,8 @@ test.describe("katalog program (D.2)", () => {
 
   test("filter mobile diterapkan lewat sheet", async ({ page, isMobile }) => {
     test.skip(!isMobile, "khusus mobile");
-    await page.goto("/program");
+    // Tunggu bagian akun di navbar selesai di-stream sebelum membuka sheet (hindari peringatan hydration di dev).
+    await page.goto("/program", { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /^Filter/ }).click();
     const sheet = page.getByRole("dialog", { name: "Filter program" });
     await sheet.getByLabel("Tryout", { exact: true }).check();

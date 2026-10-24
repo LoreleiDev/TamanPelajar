@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { AccountMenu, MobileAccount, NotificationBell, type AccountSummary } from "@/components/layout/account-menu";
 import { Logo } from "@/components/layout/logo";
 import { isActivePath, mainNav } from "@/components/layout/nav-items";
 import { Button } from "@/components/ui/button";
@@ -26,10 +27,10 @@ function SearchForm({ id, className }: { id: string; className?: string }) {
 }
 
 /**
- * Navbar sticky (B.2): logo, enam menu, pencarian, Masuk/Daftar untuk tamu.
- * Notifikasi dan avatar (B.2.4–B.2.5) ditambahkan bersama sesi di Tahap 2.
+ * Navbar sticky (B.2): logo, enam menu, pencarian, notifikasi, foto dan nama pengguna,
+ * atau Masuk/Daftar untuk tamu. `account` diisi HeaderWithAccount dari sesi.
  */
-export function SiteHeader() {
+export function SiteHeader({ account }: { account: AccountSummary | null | "loading" }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -69,14 +70,23 @@ export function SiteHeader() {
               <Search />
             </Link>
           </Button>
-          <div className="hidden items-center gap-2 sm:flex">
-            <Button asChild variant="ghost">
-              <Link href="/masuk">Masuk</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/daftar">Daftar</Link>
-            </Button>
-          </div>
+          {account === "loading" ? (
+            <span aria-hidden="true" className="hidden size-10 animate-pulse rounded-full bg-muted sm:block" />
+          ) : account ? (
+            <div className="hidden items-center gap-1 sm:flex">
+              <NotificationBell unread={account.unread} />
+              <AccountMenu account={account} />
+            </div>
+          ) : (
+            <div className="hidden items-center gap-2 sm:flex">
+              <Button asChild variant="ghost">
+                <Link href="/masuk">Masuk</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/daftar">Daftar</Link>
+              </Button>
+            </div>
+          )}
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -115,18 +125,7 @@ export function SiteHeader() {
                     })}
                   </ul>
                 </nav>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="/masuk" onClick={() => setOpen(false)}>
-                      Masuk
-                    </Link>
-                  </Button>
-                  <Button asChild size="lg">
-                    <Link href="/daftar" onClick={() => setOpen(false)}>
-                      Daftar
-                    </Link>
-                  </Button>
-                </div>
+                {account !== "loading" && <MobileAccount account={account} onNavigate={() => setOpen(false)} />}
               </div>
             </SheetContent>
           </Sheet>

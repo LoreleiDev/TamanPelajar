@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 // Browser diunduh sekali dengan: pnpm exec playwright install chromium
 export default defineConfig({
   testDir: "./e2e",
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   // Dev server + banyak browser sekaligus membuat hydration lambat dan tes yang membuka
   // dialog memicu peringatan hydration mismatch palsu. Tiga worker cukup stabil.

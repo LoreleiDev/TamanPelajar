@@ -78,7 +78,7 @@ export default async function StyleGuidePage() {
         </ul>
         <div
           // Gradient hero diwajibkan CLAUDE.md (B.1, D.1.1)
-          className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-olive p-6 text-white" // taste-skill-ignore
+          className="relative overflow-hidden rounded-xl bg-linear-to-br from-primary to-olive p-6 text-white" // taste-skill-ignore
         >
           <p className="font-semibold">Gradient hero: #3F7042 ke #718A35. Hanya untuk hero dan CTA.</p>
         </div>
