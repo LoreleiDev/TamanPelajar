@@ -8,6 +8,9 @@ export default defineConfig({
   // Dev server + banyak browser sekaligus membuat hydration lambat dan tes yang membuka
   // dialog memicu peringatan hydration mismatch palsu. Tiga worker cukup stabil.
   workers: process.env.CI ? 2 : 3,
+  // Dev server mengompilasi rute saat pertama diminta; navigasi pertama ke /dashboard atau
+  // /admin bisa lebih dari 5 detik bawaan.
+  expect: { timeout: 15_000 },
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",

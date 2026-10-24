@@ -15,6 +15,9 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Sertifikat", robots: { index: false } };
 
+// Dirender blocking agar nomor yang tidak terdaftar mengembalikan 404 (bukan 200 lalu 404).
+export const instant = false;
+
 async function Certificate({ params }: { params: PageProps<"/sertifikat/[nomor]">["params"] }) {
   const { nomor } = await params;
   await connection();
@@ -75,7 +78,10 @@ async function Certificate({ params }: { params: PageProps<"/sertifikat/[nomor]"
 }
 
 // Sertifikat (C.1.9, G.4.6): verifikasi publik dan versi cetak/PDF.
-export default function SertifikatPage({ params }: PageProps<"/sertifikat/[nomor]">) {
+export default async function SertifikatPage({ params }: PageProps<"/sertifikat/[nomor]">) {
+  await connection();
+  const exists = await prisma.userCertificate.count({ where: { number: decodeURIComponent((await params).nomor) } });
+  if (!exists) notFound();
   return (
     <main className="page-container flex max-w-4xl flex-col gap-6 py-10 print:max-w-none print:p-0">
       <Suspense fallback={<Skeleton className="h-[28rem] rounded-2xl" aria-label="Memuat sertifikat" />}>

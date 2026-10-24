@@ -130,7 +130,7 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
             {content.video && (
               <VideoPlayer
                 key={`video-${content.id}`}
-                lessonId={content.id}
+                target={{ kind: "lesson", id: content.id }}
                 title={content.title}
                 video={content.video}
                 initialPositionSec={lesson.lastPositionSec}
@@ -217,7 +217,7 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
               <h2 id="catatan-judul" className="text-lg font-bold">
                 Catatan pribadi
               </h2>
-              <NoteEditor key={`catatan-${content.id}`} lessonId={content.id} initial={content.note} />
+              <NoteEditor key={`catatan-${content.id}`} target={{ kind: "lesson", id: content.id }} initial={content.note} />
             </section>
             <section aria-labelledby="diskusi-judul" className="flex flex-col gap-3">
               <h2 id="diskusi-judul" className="text-lg font-bold">

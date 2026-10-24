@@ -5,9 +5,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { saveProgress } from "@/features/course/actions";
+import { saveVideoProgress } from "@/features/video/actions";
 import { formatClock } from "@/lib/format";
 
 type Video = { provider: "YOUTUBE" | "VIMEO" | "EKSTERNAL"; url: string; durationSec: number };
+/** Progres disimpan ke materi kelas (LessonProgress) atau ke video pustaka (VideoProgress). */
+export type PlayerTarget = { kind: "lesson" | "video"; id: string };
 
 const SAVE_EVERY_SEC = 15;
 
@@ -26,12 +29,12 @@ function embedUrl(video: Video, startSec: number) {
  * diputar lewat embed; progresnya ditandai manual dengan tombol selesai.
  */
 export function VideoPlayer({
-  lessonId,
+  target,
   title,
   video,
   initialPositionSec,
 }: {
-  lessonId: string;
+  target: PlayerTarget;
   title: string;
   video: Video;
   initialPositionSec: number;
@@ -49,12 +52,16 @@ export function VideoPlayer({
     const delta = Math.min(120, Math.round(watched.current));
     watched.current -= delta;
     sinceSave.current = 0;
-    const result = await saveProgress({ lessonId, positionSec: Math.floor(el.currentTime), watchedDeltaSec: delta });
+    const payload = { positionSec: Math.floor(el.currentTime), watchedDeltaSec: delta };
+    const result =
+      target.kind === "lesson"
+        ? await saveProgress({ lessonId: target.id, ...payload })
+        : await saveVideoProgress({ videoId: target.id, ...payload });
     if (result.ok && result.data.certificate) {
       toast.success("Semua materi selesai. Sertifikatmu sudah terbit.");
     }
     if (result.ok && result.data.completed) router.refresh();
-  }, [lessonId, router]);
+  }, [target.kind, target.id, router]);
 
   useEffect(() => {
     const onHide = () => {

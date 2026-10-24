@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { saveNote } from "@/features/course/actions";
+import { saveVideoNote } from "@/features/video/actions";
 
 type Status = "tersimpan" | "mengetik" | "menyimpan" | "gagal";
 
@@ -13,8 +14,11 @@ const labels: Record<Status, string> = {
   gagal: "Gagal menyimpan. Periksa koneksi lalu ketik lagi.",
 };
 
-/** Catatan pribadi per materi (G.2.6), tersimpan otomatis 1,5 detik setelah berhenti mengetik. */
-export function NoteEditor({ lessonId, initial }: { lessonId: string; initial: string }) {
+/**
+ * Catatan pribadi per materi (G.2.6) atau per video (H.2.5), tersimpan otomatis 1,5 detik
+ * setelah berhenti mengetik.
+ */
+export function NoteEditor({ target, initial }: { target: { kind: "lesson" | "video"; id: string }; initial: string }) {
   const [value, setValue] = useState(initial);
   const [status, setStatus] = useState<Status>("tersimpan");
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -27,7 +31,10 @@ export function NoteEditor({ lessonId, initial }: { lessonId: string; initial: s
     clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
       setStatus("menyimpan");
-      const r = await saveNote({ lessonId, content: next });
+      const r =
+        target.kind === "lesson"
+          ? await saveNote({ lessonId: target.id, content: next })
+          : await saveVideoNote({ videoId: target.id, content: next });
       setStatus(r.ok ? "tersimpan" : "gagal");
     }, 1500);
   }
