@@ -75,7 +75,7 @@ export function ProductCard({
                 Lihat detail<span className="sr-only"> {product.name}</span>
               </Link>
             </Button>
-            <BuyButton productName={product.name} />
+            <BuyButton productSlug={product.slug} productName={product.name} />
           </div>
         </div>
       </div>

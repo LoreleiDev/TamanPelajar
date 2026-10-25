@@ -42,39 +42,42 @@ export function MasukForm({ callbackUrl, initialError }: { callbackUrl: string; 
 
   return (
     <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
-      <FormAlert message={error?.message}>
-        {error?.code === "unverified" && (
-          <Link href="/verifikasi-email" className="mt-1 block font-semibold underline underline-offset-4">
-            Kirim ulang tautan verifikasi
-          </Link>
-        )}
-      </FormAlert>
-      <Field label="Email" htmlFor="email" error={errors.email?.message}>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          aria-invalid={Boolean(errors.email)}
-          aria-describedby={describedBy("email", errors.email?.message)}
-          {...form.register("email")}
-        />
-      </Field>
-      <Field label="Password" htmlFor="password" error={errors.password?.message}>
-        <PasswordInput
-          id="password"
-          autoComplete="current-password"
-          aria-invalid={Boolean(errors.password)}
-          aria-describedby={describedBy("password", errors.password?.message)}
-          {...form.register("password")}
-        />
-      </Field>
-      <Link href="/lupa-password" className="-mt-2 self-end text-sm font-semibold text-primary underline-offset-4 hover:underline">
-        Lupa password?
-      </Link>
-      <Button type="submit" size="lg" disabled={pending || !hydrated}>
-        {pending ? "Memeriksa…" : "Masuk"}
-      </Button>
+      {/* Input aktif setelah hydration: teks yang diketik lebih awal tidak tertimpa form. */}
+      <fieldset disabled={!hydrated} className="contents">
+        <FormAlert message={error?.message}>
+          {error?.code === "unverified" && (
+            <Link href="/verifikasi-email" className="mt-1 block font-semibold underline underline-offset-4">
+              Kirim ulang tautan verifikasi
+            </Link>
+          )}
+        </FormAlert>
+        <Field label="Email" htmlFor="email" error={errors.email?.message}>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={describedBy("email", errors.email?.message)}
+            {...form.register("email")}
+          />
+        </Field>
+        <Field label="Password" htmlFor="password" error={errors.password?.message}>
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            aria-invalid={Boolean(errors.password)}
+            aria-describedby={describedBy("password", errors.password?.message)}
+            {...form.register("password")}
+          />
+        </Field>
+        <Link href="/lupa-password" className="-mt-2 self-end text-sm font-semibold text-primary underline-offset-4 hover:underline">
+          Lupa password?
+        </Link>
+        <Button type="submit" size="lg" disabled={pending || !hydrated}>
+          {pending ? "Memeriksa…" : "Masuk"}
+        </Button>
+      </fieldset>
     </form>
   );
 }

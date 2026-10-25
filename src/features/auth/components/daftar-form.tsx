@@ -78,75 +78,78 @@ export function DaftarForm({ callbackUrl }: { callbackUrl: string }) {
 
   return (
     <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
-      <FormAlert message={error} />
-      <Field label="Nama lengkap" htmlFor="name" error={errors.name?.message}>
-        <Input autoComplete="name" {...field("name")} {...form.register("name")} />
-      </Field>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Email" htmlFor="email" error={errors.email?.message}>
-          <Input type="email" autoComplete="email" inputMode="email" {...field("email")} {...form.register("email")} />
+      {/* Input aktif setelah hydration: teks yang diketik lebih awal tidak tertimpa form. */}
+      <fieldset disabled={!hydrated} className="contents">
+        <FormAlert message={error} />
+        <Field label="Nama lengkap" htmlFor="name" error={errors.name?.message}>
+          <Input autoComplete="name" {...field("name")} {...form.register("name")} />
         </Field>
-        <Field label="Nomor WhatsApp" htmlFor="phone" error={errors.phone?.message}>
-          <Input type="tel" autoComplete="tel" inputMode="tel" placeholder="08xxxxxxxxxx" {...field("phone")} {...form.register("phone")} />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Email" htmlFor="email" error={errors.email?.message}>
+            <Input type="email" autoComplete="email" inputMode="email" {...field("email")} {...form.register("email")} />
+          </Field>
+          <Field label="Nomor WhatsApp" htmlFor="phone" error={errors.phone?.message}>
+            <Input type="tel" autoComplete="tel" inputMode="tel" placeholder="08xxxxxxxxxx" {...field("phone")} {...form.register("phone")} />
+          </Field>
+        </div>
+        <Field label="Password" htmlFor="password" error={errors.password?.message} hint="Minimal 8 karakter, memuat huruf dan angka.">
+          <PasswordInput autoComplete="new-password" {...field("password")} {...form.register("password")} />
         </Field>
-      </div>
-      <Field label="Password" htmlFor="password" error={errors.password?.message} hint="Minimal 8 karakter, memuat huruf dan angka.">
-        <PasswordInput autoComplete="new-password" {...field("password")} {...form.register("password")} />
-      </Field>
-      <PasswordStrengthMeter password={password} />
-      <Field label="Ulangi password" htmlFor="confirmPassword" error={errors.confirmPassword?.message}>
-        <PasswordInput autoComplete="new-password" {...field("confirmPassword")} {...form.register("confirmPassword")} />
-      </Field>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Jenjang pendidikan" htmlFor="educationLevel" error={errors.educationLevel?.message}>
-          <NativeSelect {...field("educationLevel")} {...form.register("educationLevel")}>
-            <option value="" disabled>
-              Pilih jenjang
-            </option>
-            {EDUCATION_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
+        <PasswordStrengthMeter password={password} />
+        <Field label="Ulangi password" htmlFor="confirmPassword" error={errors.confirmPassword?.message}>
+          <PasswordInput autoComplete="new-password" {...field("confirmPassword")} {...form.register("confirmPassword")} />
+        </Field>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Jenjang pendidikan" htmlFor="educationLevel" error={errors.educationLevel?.message}>
+            <NativeSelect {...field("educationLevel")} {...form.register("educationLevel")}>
+              <option value="" disabled>
+                Pilih jenjang
               </option>
-            ))}
-          </NativeSelect>
-        </Field>
-        <Field label="Target ujian" htmlFor="examTarget" error={errors.examTarget?.message}>
-          <NativeSelect {...field("examTarget")} {...form.register("examTarget")}>
-            <option value="" disabled>
-              Pilih target
-            </option>
-            {EXAM_TARGETS.map((t) => (
-              <option key={t} value={t}>
-                {t}
+              {EDUCATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label="Target ujian" htmlFor="examTarget" error={errors.examTarget?.message}>
+            <NativeSelect {...field("examTarget")} {...form.register("examTarget")}>
+              <option value="" disabled>
+                Pilih target
               </option>
-            ))}
-          </NativeSelect>
-        </Field>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-start gap-2.5 text-[0.9375rem]">
-          <input type="checkbox" className="mt-1 size-4 shrink-0 accent-primary" {...field("terms")} {...form.register("terms")} />
-          <span>
-            Saya menyetujui{" "}
-            <Link href="/syarat-ketentuan" target="_blank" className="font-semibold text-primary underline underline-offset-4">
-              syarat dan ketentuan
-            </Link>{" "}
-            serta{" "}
-            <Link href="/kebijakan-privasi" target="_blank" className="font-semibold text-primary underline underline-offset-4">
-              kebijakan privasi
-            </Link>
-            .
-          </span>
-        </label>
-        {errors.terms && (
-          <p id="terms-error" className="text-sm text-destructive" role="alert">
-            {errors.terms.message}
-          </p>
-        )}
-      </div>
-      <Button type="submit" size="lg" disabled={pending || !hydrated}>
-        {pending ? "Membuat akun…" : "Buat akun"}
-      </Button>
+              {EXAM_TARGETS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-start gap-2.5 text-[0.9375rem]">
+            <input type="checkbox" className="mt-1 size-4 shrink-0 accent-primary" {...field("terms")} {...form.register("terms")} />
+            <span>
+              Saya menyetujui{" "}
+              <Link href="/syarat-ketentuan" target="_blank" className="font-semibold text-primary underline underline-offset-4">
+                syarat dan ketentuan
+              </Link>{" "}
+              serta{" "}
+              <Link href="/kebijakan-privasi" target="_blank" className="font-semibold text-primary underline underline-offset-4">
+                kebijakan privasi
+              </Link>
+              .
+            </span>
+          </label>
+          {errors.terms && (
+            <p id="terms-error" className="text-sm text-destructive" role="alert">
+              {errors.terms.message}
+            </p>
+          )}
+        </div>
+        <Button type="submit" size="lg" disabled={pending || !hydrated}>
+          {pending ? "Membuat akun…" : "Buat akun"}
+        </Button>
+      </fieldset>
     </form>
   );
 }

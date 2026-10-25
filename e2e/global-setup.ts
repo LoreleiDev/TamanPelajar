@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 
-// Rute yang dikompilasi server dev saat pertama dibuka. Dibuka sekali di sini agar tes
-// paralel tidak berebut kompilasi (konten streaming bisa melewati batas waktu expect).
+// Rute berat dibuka sekali sebelum tes (penting untuk E2E_DEV=1: server dev mengompilasi saat
+// pertama dibuka; tanpa pemanasan, tes paralel berebut kompilasi).
 const warmRoutes = [
   "/",
   "/masuk",

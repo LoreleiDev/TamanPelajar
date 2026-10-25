@@ -60,21 +60,24 @@ export function EmailRequestForm({ mode }: { mode: keyof typeof modes }) {
 
   return (
     <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
-      <FormAlert message={error} />
-      <Field label="Email akun" htmlFor="email" error={emailError}>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          aria-invalid={Boolean(emailError)}
-          aria-describedby={describedBy("email", emailError)}
-          {...form.register("email")}
-        />
-      </Field>
-      <Button type="submit" size="lg" disabled={pending || !hydrated}>
-        {pending ? "Mengirim…" : m.submit}
-      </Button>
+      {/* Input aktif setelah hydration: teks yang diketik lebih awal tidak tertimpa form. */}
+      <fieldset disabled={!hydrated} className="contents">
+        <FormAlert message={error} />
+        <Field label="Email akun" htmlFor="email" error={emailError}>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            aria-invalid={Boolean(emailError)}
+            aria-describedby={describedBy("email", emailError)}
+            {...form.register("email")}
+          />
+        </Field>
+        <Button type="submit" size="lg" disabled={pending || !hydrated}>
+          {pending ? "Mengirim…" : m.submit}
+        </Button>
+      </fieldset>
     </form>
   );
 }

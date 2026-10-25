@@ -5,11 +5,9 @@ export default defineConfig({
   testDir: "./e2e",
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
-  // Dev server + banyak browser sekaligus membuat hydration lambat dan tes yang membuka
-  // dialog memicu peringatan hydration mismatch palsu. Tiga worker cukup stabil.
+  // Banyak browser sekaligus memperlambat server lokal; tiga worker cukup stabil.
   workers: process.env.CI ? 2 : 3,
-  // Dev server mengompilasi rute saat pertama diminta; navigasi pertama ke /dashboard atau
-  // /admin bisa lebih dari 5 detik bawaan.
+  // Halaman dengan streaming data bisa lebih dari 5 detik bawaan saat beban tinggi.
   expect: { timeout: 15_000 },
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -24,10 +22,15 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
     { name: "mobile", use: { ...devices["Pixel 7"], viewport: { width: 375, height: 812 } } },
   ],
+  // Bawaan: build produksi lalu `next start`. Lebih cepat dan stabil daripada server dev yang
+  // mengompilasi rute saat pertama dibuka. E2E_DEV=1 memakai server dev.
+  // `next` dijalankan langsung (bukan lewat pnpm) agar ikut dimatikan saat tes selesai; di
+  // Windows proses anak pnpm bisa tertinggal. Server yang sudah berjalan tidak dipakai ulang
+  // (kecuali E2E_REUSE=1) karena data `use cache`-nya bisa basi setelah seed ulang.
   webServer: {
-    command: "pnpm dev",
+    command: process.env.E2E_DEV ? "node ./node_modules/next/dist/bin/next dev" : "pnpm build && node ./node_modules/next/dist/bin/next start",
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    reuseExistingServer: Boolean(process.env.E2E_REUSE),
+    timeout: 300_000,
   },
 });

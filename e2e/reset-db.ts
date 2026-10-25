@@ -18,6 +18,8 @@ async function resetDb() {
   const prisma = new PrismaClient({ adapter: new PrismaMariaDb(url) });
   try {
     await prisma.rateLimit.deleteMany();
+    // Order tidak ikut terhapus bersama User (relasi tanpa cascade), jadi hapus lebih dulu.
+    await prisma.order.deleteMany({ where: { user: { email: { startsWith: "e2e-" } } } });
     await prisma.user.deleteMany({ where: { email: { startsWith: "e2e-" } } });
     await prisma.verificationToken.deleteMany({ where: { identifier: { startsWith: "e2e-" } } });
     await prisma.user.updateMany({
@@ -29,6 +31,16 @@ async function resetDb() {
     const products = await prisma.product.findMany({ where: { exams: { some: {} }, deletedAt: null }, select: { id: true } });
     const now = new Date();
     for (const project of ["desktop", "mobile"]) {
+      // Pembeli tanpa paket untuk alur keranjang dan checkout (K).
+      await prisma.user.create({
+        data: {
+          email: `e2e-beli-${project}@tamanpelajar.test`,
+          name: `Pembeli ${project === "desktop" ? "Desktop" : "Mobile"}`,
+          passwordHash,
+          emailVerified: now,
+          profile: { create: { phone: "081288880000", educationLevel: "UMUM", examTarget: "SKD CPNS", completedAt: now } },
+        },
+      });
       await prisma.user.create({
         data: {
           email: `e2e-tryout-${project}@tamanpelajar.test`,

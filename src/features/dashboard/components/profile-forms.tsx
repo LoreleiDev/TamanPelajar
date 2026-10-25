@@ -43,53 +43,56 @@ export function ProfilForm({ email, defaults }: { email: string; defaults: Profi
         }),
       )}
     >
-      <FormAlert message={error} />
-      <Field label="Nama lengkap" htmlFor="name" error={errors.name?.message}>
-        <Input autoComplete="name" {...f("name")} {...form.register("name")} />
-      </Field>
-      <Field label="Email" htmlFor="email-profil" hint="Email tidak bisa diubah dari sini. Hubungi kami bila perlu menggantinya.">
-        <Input id="email-profil" value={email} readOnly disabled />
-      </Field>
-      <Field label="Nomor WhatsApp" htmlFor="phone" error={errors.phone?.message}>
-        <Input type="tel" autoComplete="tel" inputMode="tel" {...f("phone")} {...form.register("phone")} />
-      </Field>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Jenjang pendidikan" htmlFor="educationLevel" error={errors.educationLevel?.message}>
-          <NativeSelect {...f("educationLevel")} {...form.register("educationLevel")}>
-            <option value="" disabled>
-              Pilih jenjang
-            </option>
-            {EDUCATION_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
+      {/* Input aktif setelah hydration: teks yang diketik lebih awal tidak tertimpa form. */}
+      <fieldset disabled={!hydrated} className="contents">
+        <FormAlert message={error} />
+        <Field label="Nama lengkap" htmlFor="name" error={errors.name?.message}>
+          <Input autoComplete="name" {...f("name")} {...form.register("name")} />
+        </Field>
+        <Field label="Email" htmlFor="email-profil" hint="Email tidak bisa diubah dari sini. Hubungi kami bila perlu menggantinya.">
+          <Input id="email-profil" value={email} readOnly disabled />
+        </Field>
+        <Field label="Nomor WhatsApp" htmlFor="phone" error={errors.phone?.message}>
+          <Input type="tel" autoComplete="tel" inputMode="tel" {...f("phone")} {...form.register("phone")} />
+        </Field>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Jenjang pendidikan" htmlFor="educationLevel" error={errors.educationLevel?.message}>
+            <NativeSelect {...f("educationLevel")} {...form.register("educationLevel")}>
+              <option value="" disabled>
+                Pilih jenjang
               </option>
-            ))}
-          </NativeSelect>
-        </Field>
-        <Field label="Target ujian" htmlFor="examTarget" error={errors.examTarget?.message}>
-          <NativeSelect {...f("examTarget")} {...form.register("examTarget")}>
-            <option value="" disabled>
-              Pilih target
-            </option>
-            {EXAM_TARGETS.map((t) => (
-              <option key={t} value={t}>
-                {t}
+              {EDUCATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label="Target ujian" htmlFor="examTarget" error={errors.examTarget?.message}>
+            <NativeSelect {...f("examTarget")} {...form.register("examTarget")}>
+              <option value="" disabled>
+                Pilih target
               </option>
-            ))}
-          </NativeSelect>
-        </Field>
-      </div>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Sekolah atau kampus (opsional)" htmlFor="school" error={errors.school?.message}>
-          <Input autoComplete="organization" {...f("school")} {...form.register("school")} />
-        </Field>
-        <Field label="Kota (opsional)" htmlFor="city" error={errors.city?.message}>
-          <Input autoComplete="address-level2" {...f("city")} {...form.register("city")} />
-        </Field>
-      </div>
-      <Button type="submit" className="self-start" disabled={pending || !hydrated}>
-        {pending ? "Menyimpan…" : "Simpan profil"}
-      </Button>
+              {EXAM_TARGETS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Sekolah atau kampus (opsional)" htmlFor="school" error={errors.school?.message}>
+            <Input autoComplete="organization" {...f("school")} {...form.register("school")} />
+          </Field>
+          <Field label="Kota (opsional)" htmlFor="city" error={errors.city?.message}>
+            <Input autoComplete="address-level2" {...f("city")} {...form.register("city")} />
+          </Field>
+        </div>
+        <Button type="submit" className="self-start" disabled={pending || !hydrated}>
+          {pending ? "Menyimpan…" : "Simpan profil"}
+        </Button>
+      </fieldset>
     </form>
   );
 }
@@ -126,22 +129,25 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
         }),
       )}
     >
-      <FormAlert message={error} />
-      {hasPassword && (
-        <Field label="Password lama" htmlFor="currentPassword" error={errors.currentPassword?.message}>
-          <PasswordInput autoComplete="current-password" {...f("currentPassword")} {...form.register("currentPassword")} />
+      {/* Input aktif setelah hydration: teks yang diketik lebih awal tidak tertimpa form. */}
+      <fieldset disabled={!hydrated} className="contents">
+        <FormAlert message={error} />
+        {hasPassword && (
+          <Field label="Password lama" htmlFor="currentPassword" error={errors.currentPassword?.message}>
+            <PasswordInput autoComplete="current-password" {...f("currentPassword")} {...form.register("currentPassword")} />
+          </Field>
+        )}
+        <Field label="Password baru" htmlFor="password" error={errors.password?.message} hint="Minimal 8 karakter, memuat huruf dan angka.">
+          <PasswordInput autoComplete="new-password" {...f("password")} {...form.register("password")} />
         </Field>
-      )}
-      <Field label="Password baru" htmlFor="password" error={errors.password?.message} hint="Minimal 8 karakter, memuat huruf dan angka.">
-        <PasswordInput autoComplete="new-password" {...f("password")} {...form.register("password")} />
-      </Field>
-      <PasswordStrengthMeter password={password ?? ""} />
-      <Field label="Ulangi password baru" htmlFor="confirmPassword" error={errors.confirmPassword?.message}>
-        <PasswordInput autoComplete="new-password" {...f("confirmPassword")} {...form.register("confirmPassword")} />
-      </Field>
-      <Button type="submit" variant="outline" className="self-start" disabled={pending || !hydrated}>
-        {pending ? "Menyimpan…" : hasPassword ? "Ganti password" : "Buat password"}
-      </Button>
+        <PasswordStrengthMeter password={password ?? ""} />
+        <Field label="Ulangi password baru" htmlFor="confirmPassword" error={errors.confirmPassword?.message}>
+          <PasswordInput autoComplete="new-password" {...f("confirmPassword")} {...form.register("confirmPassword")} />
+        </Field>
+        <Button type="submit" variant="outline" className="self-start" disabled={pending || !hydrated}>
+          {pending ? "Menyimpan…" : hasPassword ? "Ganti password" : "Buat password"}
+        </Button>
+      </fieldset>
     </form>
   );
 }

@@ -3,14 +3,13 @@
 import { Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 
-import { AccountMenu, MobileAccount, NotificationBell, type AccountSummary } from "@/components/layout/account-menu";
+import { CloseMobileMenuContext } from "@/components/layout/account-menu";
 import { Logo } from "@/components/layout/logo";
 import { isActivePath, mainNav } from "@/components/layout/nav-items";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
@@ -27,21 +26,51 @@ function SearchForm({ id, className }: { id: string; className?: string }) {
   );
 }
 
-type Account = AccountSummary | null | "loading";
+function MainNavLinks({ pathname, onNavigate, mobile = false }: { pathname: string; onNavigate?: () => void; mobile?: boolean }) {
+  return mainNav.map((item) => {
+    const active = isActivePath(pathname, item.href);
+    return (
+      <li key={item.href}>
+        <Link
+          href={item.href}
+          onClick={onNavigate}
+          aria-current={active ? "page" : undefined}
+          className={
+            mobile
+              ? cn("block rounded-lg px-3 py-3 text-base font-semibold", active ? "bg-accent text-primary" : "text-foreground hover:bg-secondary")
+              : cn(
+                  "rounded-md px-2.5 py-2 text-[0.9375rem] font-semibold transition-colors duration-150 hover:text-primary",
+                  active ? "text-primary" : "text-foreground",
+                )
+          }
+        >
+          {item.label}
+        </Link>
+      </li>
+    );
+  });
+}
 
-/**
- * Navbar sticky (B.2): logo, enam menu, pencarian, notifikasi, foto dan nama pengguna,
- * atau Masuk/Daftar untuk tamu. `account` diisi HeaderWithAccount dari sesi.
- */
-export function SiteHeader({ account }: { account: Account }) {
-  return <SiteHeaderView account={account} pathname={usePathname()} />;
+/** Menu dengan penanda halaman aktif; usePathname() butuh Suspense di rute dinamis. */
+function ActiveNavLinks(props: { onNavigate?: () => void; mobile?: boolean }) {
+  return <MainNavLinks pathname={usePathname()} {...props} />;
+}
+
+function NavLinks(props: { onNavigate?: () => void; mobile?: boolean }) {
+  return (
+    <Suspense fallback={<MainNavLinks pathname="" {...props} />}>
+      <ActiveNavLinks {...props} />
+    </Suspense>
+  );
 }
 
 /**
- * Navbar tanpa membaca URL, untuk kerangka statis (fallback Suspense). Di rute dinamis,
- * usePathname() di luar Suspense menghambat prerender (cacheComponents).
+ * Navbar sticky (B.2): logo, enam menu, pencarian, keranjang, notifikasi, foto dan nama
+ * pengguna, atau Masuk/Daftar untuk tamu. Kerangka navbar statis; hanya penanda menu aktif
+ * dan slot akun (dari HeaderWithAccount) yang di-stream, sehingga teks di kolom pencarian
+ * tidak hilang saat data akun tiba.
  */
-export function SiteHeaderView({ account, pathname }: { account: Account; pathname: string }) {
+export function SiteHeader({ account, mobileAccount }: { account: ReactNode; mobileAccount: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -53,23 +82,7 @@ export function SiteHeaderView({ account, pathname }: { account: Account; pathna
 
         <nav aria-label="Menu utama" className="ml-2 hidden lg:block">
           <ul className="flex items-center gap-1">
-            {mainNav.map((item) => {
-              const active = isActivePath(pathname, item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "rounded-md px-2.5 py-2 text-[0.9375rem] font-semibold transition-colors duration-150 hover:text-primary",
-                      active ? "text-primary" : "text-foreground",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
+            <NavLinks />
           </ul>
         </nav>
 
@@ -80,23 +93,7 @@ export function SiteHeaderView({ account, pathname }: { account: Account; pathna
               <Search />
             </Link>
           </Button>
-          {account === "loading" ? (
-            <Skeleton aria-hidden="true" className="hidden size-10 rounded-full sm:block" />
-          ) : account ? (
-            <div className="hidden items-center gap-1 sm:flex">
-              <NotificationBell unread={account.unread} />
-              <AccountMenu account={account} />
-            </div>
-          ) : (
-            <div className="hidden items-center gap-2 sm:flex">
-              <Button asChild variant="ghost">
-                <Link href="/masuk">Masuk</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/daftar">Daftar</Link>
-              </Button>
-            </div>
-          )}
+          {account}
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -115,27 +112,10 @@ export function SiteHeaderView({ account, pathname }: { account: Account; pathna
                 <SearchForm id="cari-mobile" />
                 <nav aria-label="Menu utama">
                   <ul className="flex flex-col">
-                    {mainNav.map((item) => {
-                      const active = isActivePath(pathname, item.href);
-                      return (
-                        <li key={item.href}>
-                          <Link
-                            href={item.href}
-                            onClick={() => setOpen(false)}
-                            aria-current={active ? "page" : undefined}
-                            className={cn(
-                              "block rounded-lg px-3 py-3 text-base font-semibold",
-                              active ? "bg-accent text-primary" : "text-foreground hover:bg-secondary",
-                            )}
-                          >
-                            {item.label}
-                          </Link>
-                        </li>
-                      );
-                    })}
+                    <NavLinks mobile onNavigate={() => setOpen(false)} />
                   </ul>
                 </nav>
-                {account !== "loading" && <MobileAccount account={account} onNavigate={() => setOpen(false)} />}
+                <CloseMobileMenuContext.Provider value={() => setOpen(false)}>{mobileAccount}</CloseMobileMenuContext.Provider>
               </div>
             </SheetContent>
           </Sheet>

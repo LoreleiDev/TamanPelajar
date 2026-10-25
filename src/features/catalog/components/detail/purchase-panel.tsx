@@ -30,7 +30,7 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
           </li>
         ))}
       </ul>
-      <BuyButton productName={product.name} size="lg" className="w-full" />
+      <BuyButton productSlug={product.slug} productName={product.name} size="lg" className="w-full" />
       <p className="text-sm text-muted-foreground">
         Pembayaran lewat virtual account, QRIS, e-wallet, atau transfer bank. Paket aktif otomatis setelah pembayaran
         terverifikasi.

@@ -55,29 +55,32 @@ export function ResetPasswordForm({ token }: { token: string }) {
 
   return (
     <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
-      <FormAlert message={error} />
-      <Field label="Password baru" htmlFor="password" error={errors.password?.message} hint="Minimal 8 karakter, memuat huruf dan angka.">
-        <PasswordInput
-          id="password"
-          autoComplete="new-password"
-          aria-invalid={Boolean(errors.password)}
-          aria-describedby={describedBy("password", errors.password?.message)}
-          {...form.register("password")}
-        />
-      </Field>
-      <PasswordStrengthMeter password={password} />
-      <Field label="Ulangi password baru" htmlFor="confirmPassword" error={errors.confirmPassword?.message}>
-        <PasswordInput
-          id="confirmPassword"
-          autoComplete="new-password"
-          aria-invalid={Boolean(errors.confirmPassword)}
-          aria-describedby={describedBy("confirmPassword", errors.confirmPassword?.message)}
-          {...form.register("confirmPassword")}
-        />
-      </Field>
-      <Button type="submit" size="lg" disabled={pending || !hydrated}>
-        {pending ? "Menyimpan…" : "Simpan password baru"}
-      </Button>
+      {/* Input aktif setelah hydration: teks yang diketik lebih awal tidak tertimpa form. */}
+      <fieldset disabled={!hydrated} className="contents">
+        <FormAlert message={error} />
+        <Field label="Password baru" htmlFor="password" error={errors.password?.message} hint="Minimal 8 karakter, memuat huruf dan angka.">
+          <PasswordInput
+            id="password"
+            autoComplete="new-password"
+            aria-invalid={Boolean(errors.password)}
+            aria-describedby={describedBy("password", errors.password?.message)}
+            {...form.register("password")}
+          />
+        </Field>
+        <PasswordStrengthMeter password={password} />
+        <Field label="Ulangi password baru" htmlFor="confirmPassword" error={errors.confirmPassword?.message}>
+          <PasswordInput
+            id="confirmPassword"
+            autoComplete="new-password"
+            aria-invalid={Boolean(errors.confirmPassword)}
+            aria-describedby={describedBy("confirmPassword", errors.confirmPassword?.message)}
+            {...form.register("confirmPassword")}
+          />
+        </Field>
+        <Button type="submit" size="lg" disabled={pending || !hydrated}>
+          {pending ? "Menyimpan…" : "Simpan password baru"}
+        </Button>
+      </fieldset>
     </form>
   );
 }

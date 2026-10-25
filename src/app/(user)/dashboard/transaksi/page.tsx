@@ -6,6 +6,7 @@ import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboa
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { getOrders } from "@/features/dashboard/queries";
+import { expireDueOrders } from "@/features/payment/orders";
 import { formatRupiah, formatTanggalJam } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
 
@@ -29,10 +30,11 @@ const methodLabel = {
 
 async function Content() {
   const user = await requireUserPage("/dashboard/transaksi");
+  await expireDueOrders(user.id);
   const orders = await getOrders(user.id);
   return (
     <>
-      <DashboardHeading title="Transaksi">Riwayat pesanan paket. Pembayaran dan invoice dibuka dari halaman checkout.</DashboardHeading>
+      <DashboardHeading title="Transaksi">Riwayat pesanan paket. Buka nomor pesanan untuk membayar atau melihat invoice.</DashboardHeading>
       {orders.length === 0 ? (
         <EmptyState
           title="Belum ada transaksi"
@@ -45,7 +47,7 @@ async function Content() {
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[44rem] text-left">
+          <table className="w-full min-w-176 text-left">
             <caption className="sr-only">Riwayat transaksi</caption>
             <thead className="bg-secondary text-sm">
               <tr>
@@ -60,7 +62,11 @@ async function Content() {
             <tbody className="tabular-nums">
               {orders.map((o) => (
                 <tr key={o.number} className="border-t border-border align-top" /* taste-skill-ignore: baris tabel */>
-                  <th scope="row" className="px-4 py-3 font-semibold">{o.number}</th>
+                  <th scope="row" className="px-4 py-3 font-semibold">
+                    <Link href={`/transaksi/${o.number}`} className="text-primary hover:underline">
+                      {o.number}
+                    </Link>
+                  </th>
                   <td className="px-4 py-3">{o.items.map((i) => i.nameSnapshot).join(", ")}</td>
                   <td className="px-4 py-3 text-right">
                     {formatRupiah(o.total)}

@@ -40,3 +40,17 @@ test("halaman yang tidak ada menampilkan 404 khusus", async ({ page }) => {
   expect(res?.status()).toBe(404);
   await expect(page.getByRole("heading", { name: "Halaman ini tidak ditemukan" })).toBeVisible();
 });
+
+test("slug yang tidak ada memberi status 404 asli, bukan soft 404 (Q.2, P.2.7)", async ({ request }) => {
+  for (const path of [
+    "/paket/tidak-ada",
+    "/tryout/tidak-ada",
+    "/video/tidak-ada",
+    "/kelas/tidak-ada",
+    "/kelas/tes-wawasan-kebangsaan/tidak-ada",
+    "/sertifikat/TIDAK-ADA",
+  ]) {
+    expect((await request.get(path)).status(), path).toBe(404);
+  }
+  expect((await request.get("/kelas/tes-wawasan-kebangsaan")).status()).toBe(200);
+});

@@ -62,47 +62,50 @@ export function LengkapiProfilForm({
 
   return (
     <form onSubmit={onSubmit} method="post" noValidate className="flex flex-col gap-5">
-      <FormAlert message={error} />
-      <Field label="Nomor WhatsApp" htmlFor="phone" error={errors.phone?.message}>
-        <Input type="tel" autoComplete="tel" inputMode="tel" placeholder="08xxxxxxxxxx" {...field("phone")} {...form.register("phone")} />
-      </Field>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Jenjang pendidikan" htmlFor="educationLevel" error={errors.educationLevel?.message}>
-          <NativeSelect {...field("educationLevel")} {...form.register("educationLevel")}>
-            <option value="" disabled>
-              Pilih jenjang
-            </option>
-            {EDUCATION_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
+      {/* Input aktif setelah hydration: teks yang diketik lebih awal tidak tertimpa form. */}
+      <fieldset disabled={!hydrated} className="contents">
+        <FormAlert message={error} />
+        <Field label="Nomor WhatsApp" htmlFor="phone" error={errors.phone?.message}>
+          <Input type="tel" autoComplete="tel" inputMode="tel" placeholder="08xxxxxxxxxx" {...field("phone")} {...form.register("phone")} />
+        </Field>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Jenjang pendidikan" htmlFor="educationLevel" error={errors.educationLevel?.message}>
+            <NativeSelect {...field("educationLevel")} {...form.register("educationLevel")}>
+              <option value="" disabled>
+                Pilih jenjang
               </option>
-            ))}
-          </NativeSelect>
-        </Field>
-        <Field label="Target ujian" htmlFor="examTarget" error={errors.examTarget?.message}>
-          <NativeSelect {...field("examTarget")} {...form.register("examTarget")}>
-            <option value="" disabled>
-              Pilih target
-            </option>
-            {EXAM_TARGETS.map((t) => (
-              <option key={t} value={t}>
-                {t}
+              {EDUCATION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label="Target ujian" htmlFor="examTarget" error={errors.examTarget?.message}>
+            <NativeSelect {...field("examTarget")} {...form.register("examTarget")}>
+              <option value="" disabled>
+                Pilih target
               </option>
-            ))}
-          </NativeSelect>
-        </Field>
-      </div>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Sekolah atau kampus (opsional)" htmlFor="school" error={errors.school?.message}>
-          <Input autoComplete="organization" {...field("school")} {...form.register("school")} />
-        </Field>
-        <Field label="Kota (opsional)" htmlFor="city" error={errors.city?.message}>
-          <Input autoComplete="address-level2" {...field("city")} {...form.register("city")} />
-        </Field>
-      </div>
-      <Button type="submit" size="lg" disabled={pending || !hydrated}>
-        {pending ? "Menyimpan…" : "Simpan dan lanjutkan"}
-      </Button>
+              {EXAM_TARGETS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Sekolah atau kampus (opsional)" htmlFor="school" error={errors.school?.message}>
+            <Input autoComplete="organization" {...field("school")} {...form.register("school")} />
+          </Field>
+          <Field label="Kota (opsional)" htmlFor="city" error={errors.city?.message}>
+            <Input autoComplete="address-level2" {...field("city")} {...form.register("city")} />
+          </Field>
+        </div>
+        <Button type="submit" size="lg" disabled={pending || !hydrated}>
+          {pending ? "Menyimpan…" : "Simpan dan lanjutkan"}
+        </Button>
+      </fieldset>
     </form>
   );
 }
