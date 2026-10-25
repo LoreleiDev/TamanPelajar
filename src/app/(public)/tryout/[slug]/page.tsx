@@ -1,5 +1,6 @@
 import { CircleCheck, Clock, History, Lock, PlayCircle } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -133,6 +134,11 @@ export default async function TryoutDetailPage({ params }: PageProps<"/tryout/[s
         eyebrow="Petunjuk tryout"
         title={exam.title}
         description={exam.description}
+        aside={
+          exam.imageUrl ? (
+            <Image src={exam.imageUrl} alt="" width={720} height={405} sizes="22rem" className="aspect-video w-full rounded-xl object-cover" />
+          ) : undefined
+        }
       />
 
       <div className="page-container grid gap-10 py-10 md:py-12 lg:grid-cols-[minmax(0,1fr)_22rem] xl:gap-14">

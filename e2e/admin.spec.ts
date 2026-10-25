@@ -18,7 +18,7 @@ const sasaran = (project: string) => `e2e-sasaran-${project}@tamanpelajar.test`;
 async function bukaSasaran(page: Page, project: string) {
   await page.goto(`/admin/pengguna?q=${encodeURIComponent(sasaran(project))}`);
   await page.getByRole("table", { name: "Daftar pengguna" }).getByRole("link", { name: /^Sasaran Admin/ }).click();
-  await expect(page).toHaveURL(/\/admin\/pengguna\/[a-z0-9]+$/);
+  await expect(page).toHaveURL(/\/admin\/pengguna\/[a-z0-9]{20,}$/);
 }
 
 test.describe("panel admin (M)", () => {
@@ -84,7 +84,7 @@ test.describe("panel admin (M)", () => {
     await expect(dialog.getByText("Email ini sudah dipakai akun lain")).toBeVisible();
     await dialog.getByLabel("Email").fill(`e2e-baru-${info.project.name}@tamanpelajar.test`);
     await dialog.getByRole("button", { name: "Simpan pengguna" }).click();
-    await expect(page).toHaveURL(/\/admin\/pengguna\/[a-z0-9]+$/);
+    await expect(page).toHaveURL(/\/admin\/pengguna\/[a-z0-9]{20,}$/);
     await expect(page.getByRole("heading", { level: 1, name: "Pengguna Baru E2E" })).toBeVisible();
   });
 
@@ -121,7 +121,7 @@ test.describe("panel admin (M)", () => {
     await expect(page.getByText("Potongan persen maksimal 100")).toBeVisible();
     await page.getByLabel("Nilai (%)").fill("15");
     await page.getByRole("button", { name: "Buat voucher" }).click();
-    await expect(page).toHaveURL(/\/admin\/voucher\/[a-z0-9]+$/);
+    await expect(page).toHaveURL(/\/admin\/voucher\/[a-z0-9]{20,}$/);
     await expect(page.getByRole("heading", { level: 1, name: code })).toBeVisible();
 
     await page.getByRole("button", { name: "Nonaktifkan" }).click();
@@ -150,7 +150,7 @@ test.describe("panel admin (M)", () => {
     await expect(page.getByText("Tandai tepat satu jawaban benar")).toBeVisible();
     await page.getByRole("radio").nth(1).check();
     await page.getByRole("button", { name: "Buat soal" }).click();
-    await expect(page).toHaveURL(/\/admin\/bank-soal\/[a-z0-9]+$/);
+    await expect(page).toHaveURL(/\/admin\/bank-soal\/[a-z0-9]{20,}$/);
 
     await page.getByRole("tab", { name: "Pratinjau" }).click();
     await expect(page.getByRole("tabpanel").getByText(body)).toBeVisible();
@@ -176,7 +176,7 @@ test.describe("panel admin (M)", () => {
     await expect(page.getByLabel("Slug URL")).toHaveValue(`tryout-uji-admin-${info.project.name}`);
     await page.getByLabel("Deskripsi").fill("Tryout untuk menguji panel admin secara otomatis.");
     await page.getByRole("button", { name: "Buat tryout" }).click();
-    await expect(page).toHaveURL(/\/admin\/tryout\/[a-z0-9]+\?tab=soal$/);
+    await expect(page).toHaveURL(/\/admin\/tryout\/[a-z0-9]{20,}\?tab=soal$/);
 
     await page.getByRole("button", { name: "Tambah subtes" }).click();
     await page.getByRole("dialog").getByLabel("Nama subtes").fill("Bagian Uji");

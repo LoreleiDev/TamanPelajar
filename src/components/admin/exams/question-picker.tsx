@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/features/auth/components/native-select";
-import { cariSoalTryout, tambahSoalTryout } from "@/features/admin/exams/actions";
+import type { ActionResult } from "@/lib/action-result";
 import { difficultyLabel, questionTypeLabel, type QuestionTypeCode } from "@/features/admin/questions/schemas";
 
-interface Found {
+export interface Found {
   id: string;
   excerpt: string;
   subject: string;
@@ -22,21 +22,32 @@ interface Found {
   status: "DRAF" | "TERBIT" | "ARSIP";
 }
 
-/** Pilih soal dari bank soal untuk satu subtes (M.6.8). */
+export interface PickerFilter {
+  q: string;
+  categoryId: string;
+  subject: string;
+  difficulty: string;
+}
+
+/** Pilih soal dari bank soal untuk subtes tryout (M.6.8) atau kuis materi (L.2.5). */
 export function QuestionPicker({
-  examId,
-  sectionId,
-  sectionTitle,
+  id: sectionId,
+  targetTitle: sectionTitle,
   categories,
   defaultCategoryId,
   subjects,
+  note,
+  search: searchAction,
+  add: addAction,
 }: {
-  examId: string;
-  sectionId: string;
-  sectionTitle: string;
+  id: string;
+  targetTitle: string;
   categories: { id: string; name: string }[];
   defaultCategoryId: string;
   subjects: string[];
+  note: string;
+  search: (filter: PickerFilter) => Promise<ActionResult<Found[]>>;
+  add: (questionIds: string[]) => Promise<ActionResult<{ added: number }>>;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -49,14 +60,14 @@ export function QuestionPicker({
   const search = (next = filter) =>
     start(async () => {
       setError(undefined);
-      const r = await cariSoalTryout({ examId, ...next });
+      const r = await searchAction(next);
       if (!r.ok) return setError(r.error);
       setRows(r.data);
     });
 
   const add = () =>
     start(async () => {
-      const r = await tambahSoalTryout({ sectionId, questionIds: [...picked] });
+      const r = await addAction([...picked]);
       if (!r.ok) return setError(r.error);
       toast.success(`${r.data.added} soal ditambahkan ke ${sectionTitle}.`);
       setPicked(new Set());
@@ -81,7 +92,7 @@ export function QuestionPicker({
       <DialogContent className="flex max-h-[90dvh] flex-col gap-4 p-6 sm:max-w-3xl">
         <DialogHeader className="text-left">
           <DialogTitle className="text-lg font-bold">Tambah soal ke {sectionTitle}</DialogTitle>
-          <DialogDescription>Soal yang sudah ada di tryout ini tidak ditampilkan. Soal draf bisa dipakai, tetapi terbitkan sebelum tryout dibuka.</DialogDescription>
+          <DialogDescription>{note}</DialogDescription>
         </DialogHeader>
         <form
           className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_10rem_8rem_auto] sm:items-end"

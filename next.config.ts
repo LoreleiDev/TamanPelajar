@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
     agentFeedback: true,
   },
   cacheComponents: true,
+  // Thumbnail paket, kelas, dan video dari Cloudinary (next/image).
+  images: { remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }] },
   partialPrefetching: true,
   // Sementara: halaman transaksi lengkap (K.3, bayar, invoice) dibangun di Tahap 4.
   // Bottom nav dan menu akun menautkan ke /transaksi, jadi dialihkan ke riwayat di dashboard.

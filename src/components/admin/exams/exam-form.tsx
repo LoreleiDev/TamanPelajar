@@ -16,7 +16,7 @@ import { describedBy, Field, FormAlert } from "@/features/auth/components/form-p
 import { NativeSelect } from "@/features/auth/components/native-select";
 import { simpanTryout } from "@/features/admin/exams/actions";
 import { examSchema, type ExamInput, type ExamOutput } from "@/features/admin/exams/schemas";
-import { slugify } from "@/features/admin/form-rules";
+import { shouldAutoSlug, slugify } from "@/features/admin/form-rules";
 
 /** Pengaturan tryout (M.6.1–M.6.6). */
 export function ExamForm({ defaults, categories, image }: { defaults: ExamInput; categories: { id: string; name: string }[]; image: MediaValue | null }) {
@@ -42,7 +42,7 @@ export function ExamForm({ defaults, categories, image }: { defaults: ExamInput;
             {...f("title")}
             {...form.register("title", {
               onBlur: (e) => {
-                if (!form.getValues("slug")) form.setValue("slug", slugify(e.target.value));
+                if (shouldAutoSlug(form.getValues("slug"), e)) form.setValue("slug", slugify(e.target.value));
               },
             })}
           />

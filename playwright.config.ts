@@ -19,8 +19,12 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
-    { name: "mobile", use: { ...devices["Pixel 7"], viewport: { width: 375, height: 812 } } },
+    { name: "desktop", testIgnore: /admin-konten/, use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
+    { name: "mobile", testIgnore: /admin-konten/, use: { ...devices["Pixel 7"], viewport: { width: 375, height: 812 } } },
+    // Tes konten admin menerbitkan paket uji yang ikut terhitung di katalog, jadi baru
+    // dijalankan setelah tes lain selesai.
+    { name: "konten-desktop", testMatch: /admin-konten/, dependencies: ["desktop", "mobile"], use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
+    { name: "konten-mobile", testMatch: /admin-konten/, dependencies: ["desktop", "mobile"], use: { ...devices["Pixel 7"], viewport: { width: 375, height: 812 } } },
   ],
   // Bawaan: build produksi lalu `next start`. Lebih cepat dan stabil daripada server dev yang
   // mengompilasi rute saat pertama dibuka. E2E_DEV=1 memakai server dev.

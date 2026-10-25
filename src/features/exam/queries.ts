@@ -94,6 +94,7 @@ export async function getExamDetail(slug: string) {
       wrongScore: true,
       passingGrade: true,
       category: { select: { name: true, shortName: true } },
+      image: { select: { publicId: true } },
       sections: {
         orderBy: { order: "asc" },
         select: { id: true, title: true, durationMin: true, passingGrade: true, weight: true, _count: { select: { questions: true } } },
@@ -107,9 +108,10 @@ export async function getExamDetail(slug: string) {
     },
   });
   if (!e) return null;
-  const { _count, sections, products, ...rest } = e;
+  const { _count, sections, products, image, ...rest } = e;
   return {
     ...rest,
+    imageUrl: image ? imageUrl(image.publicId, 720) : null,
     questionCount: _count.questions,
     sections: sections.map(({ _count: c, ...s }) => ({ ...s, questionCount: c.questions })),
     products: products.map((p) => p.product),

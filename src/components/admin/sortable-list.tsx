@@ -13,7 +13,7 @@ import {
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -40,6 +40,8 @@ export function SortableList<T extends { id: string }>({
   renderItem: (item: T, handle: ReactNode) => ReactNode;
   className?: string;
 }) {
+  // ID stabil: tanpa ini ID aksesibilitas dnd-kit berbeda antara server dan client (hydration mismatch).
+  const dndId = useId();
   const [order, setOrder] = useState(items);
   const [prevItems, setPrevItems] = useState(items);
   // Data baru dari server (setelah refresh) menggantikan urutan lokal.
@@ -73,6 +75,7 @@ export function SortableList<T extends { id: string }>({
 
   return (
     <DndContext
+      id={dndId}
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={onDragEnd}

@@ -263,8 +263,30 @@ Dua batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, buil
 
 **Pengujian:** lint, typecheck, build lulus; unit 64/64; e2e 109/109 dua kali berturut-turut (desktop + mobile). Pemeriksa desain: 0 FAIL (panel admin diperiksa dengan mode `--app` karena layar padat fungsional). Review visual 1440 dan 375 px untuk semua halaman admin: tanpa error console dan scroll horizontal.
 
+### `feat/L-kelas-produk-konten` (batch B1)
+- [x] **M.1 Program** Kategori ujian: tambah, ubah (nama, singkatan, slug, sasaran, urutan), hapus bila belum dipakai
+- [x] **L.1, L.2.1, C.2.2** Kelas: pengaturan (program, mata pelajaran, tingkat, ringkasan, deskripsi, status), kunci materi berurutan, aktif/nonaktif sertifikat (tidak bisa dimatikan setelah ada sertifikat terbit), hapus (soft delete)
+- [x] **L.2.2** Bab dan materi diurutkan dengan seret-dan-lepas (juga keyboard: Spasi lalu panah); pindah materi antarbab dari halaman materi; bab kosong bisa dihapus
+- [x] **L.2.10, G.4.10** Bab baru 1 dan 2 otomatis gratis; tanda gratis bisa diubah per bab
+- [x] **L.2.3–L.2.5** Materi video (dari pustaka), PDF, bacaan, kuis, tugas; isi HTML tersanitasi; lampiran PDF diunggah ke Cloudinary sebagai file berbayar (authenticated); kuis: nilai lulus dan soal dari bank soal (tanpa essay), urutan seret-dan-lepas
+- [x] **L.2.4** Video pustaka: URL YouTube/Vimeo/berkas MP4-WebM dengan deteksi penyedia, durasi menit:detik, transkrip; durasi materi yang memakai video ikut diperbarui; hapus hanya bila tidak dipakai materi
+- [x] **L.2.6, C.2.5** Tab Peserta kelas: progres materi, waktu tonton, akses paket, aktivitas terakhir
+- [x] **M.4, C.2.3** Paket produk: nama, slug, program, jenis, jenjang, ringkasan, deskripsi, thumbnail, harga dan harga promo, masa aktif, fitur, FAQ, status, serta kelas, tryout, dan video yang termasuk; hapus (soft delete, akses pembeli tetap berlaku)
+- [x] **M.6.1** Gambar tryout tampil di halaman petunjuk; thumbnail paket tampil di kartu dan detail paket (`next/image` dari Cloudinary)
+- [x] Tes unit deteksi penyedia video dan durasi; e2e `admin-konten.spec.ts` (program, video, kelas dan kurikulum, paket) dijalankan setelah proyek lain agar paket uji tidak memengaruhi hitungan katalog
+
+**Bug yang ditemukan dan diperbaiki:**
+- Halaman paket publik menampilkan kelas dan tryout yang masih draf atau sudah dihapus; kini hanya yang terbit yang ditampilkan dan dihitung
+- Slug otomatis dari judul tergabung dengan teks yang diketik bila pengguna langsung pindah ke kolom slug ("paket-a" menjadi "paket-apaket-a")
+- ID aksesibilitas dnd-kit berbeda antara server dan client (hydration mismatch)
+- Teks `sr-only` di kolom terakhir tabel lolos dari wadah geser dan membuat halaman meluber di 375 px
+- Thumbnail kelas dan video tidak pernah ditampilkan publik, jadi kolom unggahnya dihapus dari form (tidak ada kontrol tanpa efek)
+- Tes: regex ID `[a-z0-9]+` juga cocok dengan `/baru` sehingga beberapa tes lanjut sebelum data tersimpan; kini memakai panjang cuid
+
+**Pengujian:** lint, typecheck, build lulus; unit 66/66; e2e 117/117 dua kali berturut-turut. Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px untuk semua halaman batch ini.
+
 ### Belum (batch berikutnya)
-- Program, kelas (bab/materi seret-dan-lepas, PDF, bab gratis), video, paket produk, peserta kelas, diskusi, informasi, banner, testimoni, sertifikat, laporan, pengaturan
+- Diskusi, informasi/artikel (termasuk halaman publik D.4), banner, testimoni, sertifikat, laporan, pengaturan
 
 ## Tahap 6 — Pengujian dan penyempurnaan
 

@@ -2,6 +2,10 @@
 
 import {
   Banknote,
+  BookOpen,
+  FolderTree,
+  Package,
+  PlayCircle,
   ClipboardCheck,
   ClipboardList,
   FileQuestion,
@@ -47,6 +51,10 @@ const groups: { title: string; items: Item[] }[] = [
   {
     title: "Konten belajar",
     items: [
+      { href: "/admin/program", label: "Program", icon: FolderTree },
+      { href: "/admin/kelas", label: "Kelas", icon: BookOpen },
+      { href: "/admin/video", label: "Video", icon: PlayCircle },
+      { href: "/admin/produk", label: "Paket Produk", icon: Package },
       { href: "/admin/tryout", label: "Tryout", icon: ClipboardList },
       { href: "/admin/bank-soal", label: "Bank Soal", icon: FileQuestion },
       { href: "/admin/penilaian", label: "Penilaian", icon: ClipboardCheck, badge: "penilaian" },

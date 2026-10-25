@@ -83,3 +83,13 @@ export function slugify(text: string) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 120);
 }
+
+/**
+ * Isi slug dari judul saat kolom judul ditinggalkan, kecuali slug sudah terisi atau fokus
+ * pindah ke kolom slug (pengguna akan mengetiknya sendiri; mengisi otomatis saat itu membuat
+ * teks yang diketik tergabung dengan slug otomatis).
+ */
+export function shouldAutoSlug(currentSlug: string | undefined, e: { relatedTarget: EventTarget | null }) {
+  const next = e.relatedTarget as { name?: string } | null;
+  return !currentSlug && next?.name !== "slug";
+}

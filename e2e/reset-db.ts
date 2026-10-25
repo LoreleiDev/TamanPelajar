@@ -26,6 +26,12 @@ async function resetDb() {
     // Tryout dan soal buatan tes admin (dihapus permanen agar slug bisa dipakai lagi).
     await prisma.exam.deleteMany({ where: { slug: { startsWith: "tryout-uji-admin-" } } });
     await prisma.question.deleteMany({ where: { body: { startsWith: "Soal uji e2e" }, examQuestions: { none: {} } } });
+    // Konten buatan tes admin konten (e2e/admin-konten.spec.ts).
+    await prisma.product.deleteMany({ where: { slug: { startsWith: "paket-uji-admin-" } } });
+    await prisma.certificate.deleteMany({ where: { course: { slug: { startsWith: "kelas-uji-admin-" } } } });
+    await prisma.course.deleteMany({ where: { slug: { startsWith: "kelas-uji-admin-" } } });
+    await prisma.video.deleteMany({ where: { slug: { startsWith: "video-uji-admin-" } } });
+    await prisma.courseCategory.deleteMany({ where: { slug: { startsWith: "program-uji-admin-" } } });
     await prisma.user.updateMany({
       where: { email: { endsWith: "@tamanpelajar.test" } },
       data: { failedLogins: 0, lockedUntil: null },

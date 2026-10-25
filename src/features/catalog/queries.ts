@@ -4,6 +4,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import type { Prisma } from "@/generated/prisma/client";
+import { imageUrl } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 
 import type {
@@ -29,12 +30,18 @@ function cached() {
 
 const published = { status: "TERBIT", deletedAt: null } satisfies Prisma.ProductWhereInput;
 
+// Kelas dan tryout draf atau terhapus tidak ikut dihitung atau ditampilkan di paket publik.
+const visibleCourse = { course: { status: "TERBIT", deletedAt: null } } satisfies Prisma.ProductCourseWhereInput;
+const visibleExam = { exam: { status: "TERBIT", deletedAt: null } } satisfies Prisma.ProductExamWhereInput;
+
 const summaryInclude = {
   category: { select: { slug: true, name: true, shortName: true } },
+  thumbnail: { select: { publicId: true } },
   courses: {
+    where: visibleCourse,
     select: { course: { select: { sections: { select: { lessons: { select: { videoId: true } } } } } } },
   },
-  _count: { select: { exams: true } },
+  _count: { select: { exams: { where: visibleExam } } },
   reviews: { where: { isPublished: true }, select: { rating: true } },
 } satisfies Prisma.ProductInclude;
 
@@ -54,7 +61,7 @@ function toSummary(p: SummaryRow): ProductSummary {
     programType: p.programType,
     educationLevel: p.educationLevel,
     summary: p.summary,
-    thumbnailUrl: null, // TODO Tahap 5: URL Cloudinary dari thumbnailId
+    thumbnailUrl: p.thumbnail ? imageUrl(p.thumbnail.publicId, 800) : null,
     price: p.price,
     promoPrice: p.promoPrice,
     activeDays: p.activeDays,
@@ -157,7 +164,9 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
     where: { slug, ...published },
     include: {
       category: summaryInclude.category,
+      thumbnail: summaryInclude.thumbnail,
       courses: {
+        where: visibleCourse,
         orderBy: { order: "asc" },
         select: {
           course: {
@@ -173,6 +182,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
         },
       },
       exams: {
+        where: visibleExam,
         orderBy: { order: "asc" },
         select: {
           exam: {

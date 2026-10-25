@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { SortableList } from "@/components/admin/sortable-list";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { hapusSubtes, keluarkanSoalTryout, pindahSubtes, ubahBobotSoalTryout, urutkanSoalTryout } from "@/features/admin/exams/actions";
+import { cariSoalTryout, hapusSubtes, keluarkanSoalTryout, pindahSubtes, tambahSoalTryout, ubahBobotSoalTryout, urutkanSoalTryout } from "@/features/admin/exams/actions";
 import { difficultyLabel, questionTypeLabel, type QuestionTypeCode } from "@/features/admin/questions/schemas";
 
 import { QuestionPicker } from "./question-picker";
@@ -146,7 +146,7 @@ export function ExamStructure({
               label={`Soal subtes ${s.title}`}
               itemLabel={(q) => `soal ${s.questions.indexOf(q) + 1}`}
               disabled={locked}
-              className="divide-y divide-border rounded-lg border border-border"
+              className="divide-y divide-border overflow-hidden rounded-lg border border-border"
               onReorder={(ids) => run(urutkanSoalTryout({ sectionId: s.id, ids }))}
               renderItem={(q, handle) => (
                 <div className="flex items-start gap-2 px-2 py-2.5 sm:gap-3 sm:px-3">
@@ -192,7 +192,16 @@ export function ExamStructure({
           )}
           {!locked && (
             <div>
-              <QuestionPicker examId={examId} sectionId={s.id} sectionTitle={s.title} categories={categories} defaultCategoryId={categoryId} subjects={subjects} />
+              <QuestionPicker
+                id={s.id}
+                targetTitle={s.title}
+                categories={categories}
+                defaultCategoryId={categoryId}
+                subjects={subjects}
+                note="Soal yang sudah ada di tryout ini tidak ditampilkan. Soal draf bisa dipakai, tetapi terbitkan sebelum tryout dibuka."
+                search={(filter) => cariSoalTryout({ examId, ...filter })}
+                add={(questionIds) => tambahSoalTryout({ sectionId: s.id, questionIds })}
+              />
             </div>
           )}
         </section>
