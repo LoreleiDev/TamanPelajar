@@ -8,20 +8,20 @@ import { confirmAlert } from "@/lib/alert";
 
 /**
  * Membungkus tombol "Keluar": minta konfirmasi lewat SweetAlert, lalu jalankan signOut di
- * server. Popup tetap menampilkan loader sampai pengalihan ke beranda.
+ * server. Popup langsung ditutup saat disetujui, tanpa loader.
  */
 export function LogoutButton({ children }: { children: ReactNode }) {
   return (
     <Slot.Root
-      onClick={() => {
+      onClick={async () => {
         // Tidak memanggil preventDefault agar menu dropdown menutup seperti biasa saat item dipilih.
-        void confirmAlert({
+        const ok = await confirmAlert({
           title: "Keluar dari akun?",
           text: "Progres belajar dan jawaban tryout tetap tersimpan. Kamu bisa masuk lagi kapan saja.",
           confirmLabel: "Ya, keluar",
           icon: "question",
-          onConfirm: () => keluar(),
         });
+        if (ok) await keluar();
       }}
     >
       {children}
