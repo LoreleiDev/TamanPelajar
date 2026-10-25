@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { CertificateTitleForm } from "@/components/admin/certificate-title-form";
+import { CertificateSettingsForm } from "@/components/admin/certificate-settings-form";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Button } from "@/components/ui/button";
 import { listCertificates } from "@/features/admin/certificates";
 import { adminPage } from "@/features/admin/guard";
 import { formatTanggal } from "@/lib/format";
@@ -17,7 +18,7 @@ async function Content() {
   return (
     <>
       {certificates.length === 0 ? (
-        <EmptyState title="Belum ada sertifikat" description="Aktifkan sertifikat di pengaturan kelas; siswa mendapatkannya setelah menyelesaikan semua materi." />
+        <EmptyState title="Belum ada sertifikat" description="Aktifkan sertifikat di pengaturan kelas, lalu buat batch dan atur syaratnya di sini." />
       ) : (
         <ol className="flex flex-col gap-4">
           {certificates.map((c) => (
@@ -35,7 +36,18 @@ async function Content() {
                   </h2>
                   <span className="text-sm text-muted-foreground tabular-nums">{c._count.issued} sertifikat terbit</span>
                 </header>
-                <CertificateTitleForm id={c.id} title={c.title} />
+                {c.course && c.course._count.batches === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Belum ada batch, jadi bagian sertifikat tidak tampil untuk siswa.{" "}
+                    <Link href={`/admin/kelas/${c.course.id}?tab=batch`} className="font-semibold text-primary hover:underline">
+                      Buat batch
+                    </Link>
+                  </p>
+                )}
+                <CertificateSettingsForm
+                  defaults={{ id: c.id, title: c.title, minScore: c.minScore, practicalInstructions: c.practicalInstructions ?? "", practicalTemplateId: c.practicalTemplate?.id ?? null }}
+                  template={c.practicalTemplate ? { id: c.practicalTemplate.id, url: null, name: c.practicalTemplate.publicId.split("/").pop() } : null}
+                />
                 {c.issued.length > 0 && (
                   <details>
                     <summary className="cursor-pointer text-sm font-semibold text-primary">Lihat penerima</summary>
@@ -97,7 +109,16 @@ async function Content() {
 export default function AdminCertificatesPage() {
   return (
     <>
-      <DashboardHeading title="Sertifikat">Sertifikat terbit otomatis saat siswa menyelesaikan semua materi kelas. Nomornya bisa diverifikasi di halaman publik.</DashboardHeading>
+      <DashboardHeading
+        title="Sertifikat"
+        action={
+          <Button asChild variant="outline">
+            <Link href="/admin/tugas-praktik">Nilai tugas praktik</Link>
+          </Button>
+        }
+      >
+        Sertifikat terbit setelah siswa menyelesaikan semua materi, rata-rata kuisnya mencapai nilai minimal, dan tugas praktiknya disetujui. Nomornya bisa diverifikasi di halaman publik.
+      </DashboardHeading>
       <Suspense fallback={<DashboardSkeleton />}>
         <Content />
       </Suspense>

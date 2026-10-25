@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { DeleteButton } from "@/components/admin/delete-button";
+import { BatchManager } from "@/components/admin/courses/batch-manager";
 import { CourseForm } from "@/components/admin/courses/course-form";
 import { CurriculumEditor } from "@/components/admin/courses/curriculum-editor";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
@@ -15,7 +16,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hapusKelas } from "@/features/admin/courses/actions";
-import { getAdminCourse, getCourseParticipants } from "@/features/admin/courses/queries";
+import { getAdminCourse, getCourseBatches, getCourseParticipants } from "@/features/admin/courses/queries";
 import { getExamCategories } from "@/features/admin/exams/queries";
 import { adminPage } from "@/features/admin/guard";
 import { publishLabel, publishTone } from "@/features/admin/labels";
@@ -71,6 +72,10 @@ async function Participants({ courseId }: { courseId: string }) {
   );
 }
 
+async function Batches({ courseId, hasCertificate }: { courseId: string; hasCertificate: boolean }) {
+  return <BatchManager courseId={courseId} batches={await getCourseBatches(courseId)} hasCertificate={hasCertificate} />;
+}
+
 async function Content({ params, searchParams }: { params: PageProps<"/admin/kelas/[id]">["params"]; searchParams: PageProps<"/admin/kelas/[id]">["searchParams"] }) {
   const { id } = await params;
   const { tab } = await searchParams;
@@ -112,11 +117,12 @@ async function Content({ params, searchParams }: { params: PageProps<"/admin/kel
         {publishLabel[c.status]}
       </StatusBadge>
 
-      <Tabs defaultValue={tab === "kurikulum" || tab === "peserta" ? tab : "pengaturan"}>
+      <Tabs defaultValue={tab === "kurikulum" || tab === "peserta" || tab === "batch" ? tab : "pengaturan"}>
         <TabsList>
           <TabsTrigger value="pengaturan">Pengaturan</TabsTrigger>
           <TabsTrigger value="kurikulum">Kurikulum</TabsTrigger>
           <TabsTrigger value="peserta">Peserta</TabsTrigger>
+          <TabsTrigger value="batch">Batch</TabsTrigger>
         </TabsList>
         <TabsContent value="pengaturan" className="pt-4">
           <CourseForm
@@ -164,6 +170,11 @@ async function Content({ params, searchParams }: { params: PageProps<"/admin/kel
         <TabsContent value="peserta" className="pt-4">
           <Suspense fallback={<DashboardSkeleton />}>
             <Participants courseId={c.id} />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="batch" className="pt-4">
+          <Suspense fallback={<DashboardSkeleton />}>
+            <Batches courseId={c.id} hasCertificate={Boolean(c.certificate)} />
           </Suspense>
         </TabsContent>
       </Tabs>

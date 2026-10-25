@@ -1,5 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { imageUrl } from "@/lib/cloudinary";
+import { toJakartaInput } from "@/lib/datetime";
+import { formatTanggal } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 import { adminOnly } from "../guard";
@@ -125,4 +127,25 @@ export async function getCourseParticipants(courseId: string) {
   }
   const rows = [...map.values()].sort((a, b) => (b.last?.getTime() ?? 0) - (a.last?.getTime() ?? 0));
   return { lessonTotal, rows };
+}
+
+/** Batch kelas untuk tab Batch (revisi RMED): periode WIB, fase, dan ringkasan peserta. */
+export async function getCourseBatches(courseId: string, now = new Date()) {
+  await adminOnly();
+  const rows = await prisma.courseBatch.findMany({
+    where: { courseId },
+    orderBy: { startsAt: "desc" },
+    select: { id: true, name: true, startsAt: true, endsAt: true, participants: { select: { status: true } } },
+  });
+  return rows.map((b) => ({
+    id: b.id,
+    name: b.name,
+    startsOn: toJakartaInput(b.startsAt).slice(0, 10),
+    endsOn: toJakartaInput(b.endsAt).slice(0, 10),
+    period: `${formatTanggal(b.startsAt)} – ${formatTanggal(b.endsAt)}`,
+    phase: (b.startsAt > now ? "akan-datang" : b.endsAt < now ? "selesai" : "berjalan") as "berjalan" | "akan-datang" | "selesai",
+    participants: b.participants.length,
+    passed: b.participants.filter((p) => p.status === "LULUS").length,
+    waiting: b.participants.filter((p) => p.status === "MENUNGGU_PENILAIAN").length,
+  }));
 }

@@ -52,35 +52,13 @@ async function addStudyTime(userId: string, courseId: string, seconds: number) {
   else await prisma.learningSession.create({ data: { userId, courseId, date, seconds } });
 }
 
-/** Terbitkan sertifikat sekali saat semua materi kelas selesai (G.4.6). */
-async function maybeIssueCertificate(userId: string, courseId: string) {
-  const [total, done, certificate] = await Promise.all([
+/** Semua materi kelas selesai? Dipakai untuk mengarahkan siswa ke syarat sertifikat. */
+async function isCourseDone(userId: string, courseId: string) {
+  const [total, done] = await Promise.all([
     prisma.lesson.count({ where: { section: { courseId } } }),
     prisma.lessonProgress.count({ where: { userId, completedAt: { not: null }, lesson: { section: { courseId } } } }),
-    prisma.certificate.findUnique({ where: { courseId }, include: { course: { select: { title: true, slug: true } } } }),
   ]);
-  if (!certificate || total === 0 || done < total) return null;
-  const existing = await prisma.userCertificate.findUnique({
-    where: { certificateId_userId: { certificateId: certificate.id, userId } },
-  });
-  if (existing) return existing.number;
-
-  const year = new Date().getUTCFullYear();
-  const count = await prisma.userCertificate.count({ where: { certificateId: certificate.id } });
-  const number = `TP-${year}-${certificate.course!.slug.slice(0, 3).toUpperCase()}-${String(count + 1).padStart(4, "0")}-${userId.slice(-4).toUpperCase()}`;
-  await prisma.$transaction([
-    prisma.userCertificate.create({ data: { certificateId: certificate.id, userId, number, issuedAt: new Date() } }),
-    prisma.notification.create({
-      data: {
-        userId,
-        type: "KELAS",
-        title: "Sertifikat terbit",
-        body: `Selamat, semua materi ${certificate.course!.title} selesai. Sertifikatmu sudah bisa diunduh.`,
-        href: `/sertifikat/${number}`,
-      },
-    }),
-  ]);
-  return number;
+  return total > 0 && done >= total;
 }
 
 async function setCompleted(userId: string, lessonId: string, courseId: string, completed: boolean) {
@@ -89,14 +67,15 @@ async function setCompleted(userId: string, lessonId: string, courseId: string, 
     create: { userId, lessonId, completedAt: completed ? new Date() : null },
     update: { completedAt: completed ? new Date() : null },
   });
-  return completed ? maybeIssueCertificate(userId, courseId) : null;
+  // Sertifikat tidak terbit di sini: butuh nilai minimal dan tugas praktik yang disetujui admin.
+  return completed ? isCourseDone(userId, courseId) : false;
 }
 
 /**
  * Simpan posisi video dan waktu tonton (G.4.1, G.4.2, H.2.8). Materi otomatis selesai
  * bila sudah ditonton 90% durasinya.
  */
-export async function saveProgress(input: z.input<typeof progressSchema>): Promise<ActionResult<{ completed: boolean; certificate: string | null }>> {
+export async function saveProgress(input: z.input<typeof progressSchema>): Promise<ActionResult<{ completed: boolean; courseDone: boolean }>> {
   const g = await guard(progressSchema, input);
   if ("error" in g) return g.error!;
   const { user, data, courseId } = g;
@@ -113,19 +92,19 @@ export async function saveProgress(input: z.input<typeof progressSchema>): Promi
   });
   await addStudyTime(user.id, courseId, data.watchedDeltaSec);
 
-  let certificate: string | null = null;
+  let courseDone = false;
   const reached = duration > 0 && (row.watchedSec >= duration * 0.9 || data.positionSec >= duration * 0.97);
-  if (reached && !row.completedAt) certificate = await setCompleted(user.id, data.lessonId, courseId, true);
-  return ok({ completed: Boolean(row.completedAt) || reached, certificate });
+  if (reached && !row.completedAt) courseDone = await setCompleted(user.id, data.lessonId, courseId, true);
+  return ok({ completed: Boolean(row.completedAt) || reached, courseDone });
 }
 
 /** Tandai selesai atau batalkan (G.2.5). */
-export async function markComplete(input: z.input<typeof markCompleteSchema>): Promise<ActionResult<{ certificate: string | null }>> {
+export async function markComplete(input: z.input<typeof markCompleteSchema>): Promise<ActionResult<{ courseDone: boolean }>> {
   const g = await guard(markCompleteSchema, input);
   if ("error" in g) return g.error!;
-  const certificate = await setCompleted(g.user.id, g.data.lessonId, g.courseId, g.data.completed);
+  const courseDone = await setCompleted(g.user.id, g.data.lessonId, g.courseId, g.data.completed);
   revalidatePath("/kelas", "layout");
-  return ok({ certificate });
+  return ok({ courseDone });
 }
 
 /** Catatan pribadi per materi (G.2.6). Catatan kosong dihapus. */
@@ -172,7 +151,7 @@ export interface QuizResult {
   passed: boolean;
   passingScore: number;
   questions: { id: string; status: "BENAR" | "SALAH" | "KOSONG" | "MENUNGGU_PENILAIAN"; correctOptionIds: string[]; correctText: string | null; explanation: string }[];
-  certificate: string | null;
+  courseDone: boolean;
 }
 
 /** Kuis setelah materi (G.4.5). Dinilai di server; kunci dikirim hanya setelah dikumpulkan. */
@@ -223,14 +202,14 @@ export async function submitQuiz(input: QuizSubmitInput): Promise<ActionResult<Q
   await prisma.quizAttempt.create({
     data: { quizId: lesson.quiz.id, userId: user.id, score, passed, answers: data.answers, submittedAt: new Date() },
   });
-  const certificate = passed ? await setCompleted(user.id, data.lessonId, courseId, true) : null;
+  const courseDone = passed ? await setCompleted(user.id, data.lessonId, courseId, true) : false;
   revalidatePath("/kelas", "layout");
 
   return ok({
     score,
     passed,
     passingScore: lesson.quiz.passingScore,
-    certificate,
+    courseDone,
     questions: qs.map((q, i) => ({
       id: q.id,
       status: result.questions[i].status,

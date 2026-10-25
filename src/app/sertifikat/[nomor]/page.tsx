@@ -45,7 +45,7 @@ async function Certificate({ params }: { params: PageProps<"/sertifikat/[nomor]"
             <p className="text-lg font-semibold text-muted-foreground">Sertifikat penyelesaian kelas</p>
             <h1 className="text-title text-primary uppercase">{cert.user.name}</h1>
             <p className="text-lead max-w-[48ch]">
-              telah menyelesaikan seluruh materi kelas <strong>{cert.certificate.course?.title ?? cert.certificate.title}</strong>{" "}
+              telah menyelesaikan seluruh materi, kuis, dan tugas praktik kelas <strong>{cert.certificate.course?.title ?? cert.certificate.title}</strong>{" "}
               di Taman Pelajar.
             </p>
           </div>

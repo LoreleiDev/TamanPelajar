@@ -33,7 +33,7 @@ export function LessonActions({
             const r = await markComplete({ lessonId, completed: !completed });
             if (!r.ok) return void toast.error(r.error);
             toast.success(completed ? "Tanda selesai dibatalkan." : "Materi ditandai selesai.");
-            if (r.data.certificate) toast.success("Semua materi selesai. Sertifikatmu sudah terbit.");
+            if (r.data.courseDone) toast.success("Semua materi selesai. Cek syarat sertifikat di panel kelas.");
             router.refresh();
           })
         }

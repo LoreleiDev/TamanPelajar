@@ -36,5 +36,7 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: Boolean(process.env.E2E_REUSE),
     timeout: 300_000,
+    // Alur checkout e2e memakai pembayaran simulasi, apa pun PAYMENT_MODE di .env.
+    env: { PAYMENT_MODE: "simulasi" },
   },
 });

@@ -99,17 +99,3 @@ export async function simpanKontak(input: unknown): Promise<ActionResult<null>> 
     return ok(null);
   });
 }
-
-/** Judul sertifikat yang tercetak di halaman sertifikat siswa. */
-export async function ubahJudulSertifikat(input: unknown): Promise<ActionResult<null>> {
-  return adminAction(async (admin) => {
-    const parsed = z
-      .object({ id: z.string().min(1), title: z.string().trim().min(5, "Judul minimal 5 karakter").max(150, "Judul terlalu panjang") })
-      .safeParse(input);
-    if (!parsed.success) return invalidInput(parsed.error);
-    const before = await prisma.certificate.update({ where: { id: parsed.data.id }, data: { title: parsed.data.title }, select: { title: true } });
-    await audit(prisma, admin, "sertifikat.ubah", "Certificate", parsed.data.id, { before, after: { title: parsed.data.title } });
-    revalidatePath("/admin/sertifikat");
-    return ok(null);
-  });
-}

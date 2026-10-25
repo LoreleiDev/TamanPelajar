@@ -2,6 +2,7 @@
 
 import {
   Award,
+  FolderCheck,
   BarChart3,
   GalleryHorizontal,
   MessagesSquare,
@@ -33,7 +34,7 @@ import { cn } from "@/lib/utils";
 
 // Menu panel administrator (M.1), dikelompokkan agar 16+ menu tetap mudah dipindai.
 // Menu ditambahkan ke sini bersamaan dengan halamannya, jadi tidak ada tautan mati.
-export type AdminBadges = Partial<Record<"penilaian" | "diskusi" | "transaksi", number>>;
+export type AdminBadges = Partial<Record<"penilaian" | "diskusi" | "transaksi" | "tugas", number>>;
 
 interface Item {
   href: string;
@@ -70,6 +71,7 @@ const groups: { title: string; items: Item[] }[] = [
       { href: "/admin/penilaian", label: "Penilaian", icon: ClipboardCheck, badge: "penilaian" },
       { href: "/admin/diskusi", label: "Diskusi", icon: MessagesSquare, badge: "diskusi" },
       { href: "/admin/sertifikat", label: "Sertifikat", icon: Award },
+      { href: "/admin/tugas-praktik", label: "Tugas Praktik", icon: FolderCheck, badge: "tugas" },
     ],
   },
   {

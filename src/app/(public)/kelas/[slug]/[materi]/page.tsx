@@ -15,6 +15,8 @@ import { VideoPlayer } from "@/components/course/video-player";
 import { GrowthProgress } from "@/components/shared/growth-progress";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CertificateTrackSummary } from "@/features/certificate/components/certificate-track";
+import { syncCertificateTrack } from "@/features/certificate/service";
 import { getCourseOutline, getLearnerState, getLessonContent } from "@/features/course/queries";
 import { formatStudyTime, formatTanggal } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
@@ -28,6 +30,8 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
   const user = await requireUserPage(`/kelas/${slug}/${materi}`);
   const outline = await getCourseOutline(slug);
   if (!outline) notFound();
+  // Sinkron batch lebih dulu: memulai ulang batch gratis bisa mengosongkan progres lama.
+  const track = user.role === "USER" ? await syncCertificateTrack(user.id, outline.id) : null;
   const state = await getLearnerState(outline, user);
   const index = state.lessons.findIndex((l) => l.slug === materi);
   if (index < 0) notFound();
@@ -67,12 +71,9 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
             </dd>
           </div>
         </dl>
-        {state.certificateNumber && (
-          <Button asChild size="sm" variant="outline" className="bg-background">
-            <Link href={`/sertifikat/${state.certificateNumber}`}>Lihat sertifikat</Link>
-          </Button>
-        )}
       </section>
+      {/* Sertifikat berbasis batch; tidak tampil bila kelas belum punya batch. */}
+      {track && <CertificateTrackSummary track={track} />}
       {/* Riwayat belajar (G.4.9) */}
       {state.recent.length > 0 && (
         <section aria-labelledby="riwayat-judul" className="flex flex-col gap-2">

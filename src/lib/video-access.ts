@@ -1,3 +1,4 @@
+import { getRetakeAccess } from "@/features/certificate/service";
 import type { LessonAccess } from "@/lib/access-rules";
 import { prisma } from "@/lib/prisma";
 
@@ -35,5 +36,10 @@ export async function canAccessVideo(user: User, videoId: string): Promise<Lesso
     },
     select: { id: true },
   });
-  return enrolled ? "terbuka" : "perlu-langganan";
+  if (enrolled) return "terbuka";
+  // Ulang gratis batch berikutnya juga membuka video kelas itu.
+  for (const courseId of new Set(courseIds)) {
+    if (await getRetakeAccess(user.id, courseId)) return "terbuka";
+  }
+  return "perlu-langganan";
 }

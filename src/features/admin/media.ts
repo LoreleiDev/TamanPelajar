@@ -9,10 +9,12 @@ export type MediaFolder = (typeof MEDIA_FOLDERS)[number];
 export const IMAGE_FORMATS = ["jpg", "jpeg", "png", "webp", "gif"] as const;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const MAX_PDF_BYTES = 20 * 1024 * 1024;
+/** Template tugas praktik sertifikat: dokumen atau arsip, maks. 20 MB. */
+export const DOCUMENT_FORMATS = ["pdf", "docx", "zip"] as const;
 
 export const signatureRequestSchema = z.object({
   folder: z.enum(MEDIA_FOLDERS),
-  kind: z.enum(["image", "pdf"]),
+  kind: z.enum(["image", "pdf", "dokumen"]),
   format: z.string().trim().toLowerCase().max(10),
   bytes: z.number().int().positive(),
 });
@@ -25,13 +27,18 @@ export function uploadRejection(req: SignatureRequest): string | null {
     if (req.bytes > MAX_IMAGE_BYTES) return "Ukuran gambar maksimal 5 MB.";
     return null;
   }
+  if (req.kind === "dokumen") {
+    if (!(DOCUMENT_FORMATS as readonly string[]).includes(req.format)) return "Template harus PDF, DOCX, atau ZIP.";
+    if (req.bytes > MAX_PDF_BYTES) return "Ukuran file maksimal 20 MB.";
+    return null;
+  }
   if (req.format !== "pdf") return "File materi harus PDF.";
   if (req.bytes > MAX_PDF_BYTES) return "Ukuran PDF maksimal 20 MB.";
   return null;
 }
 
-/** PDF materi dan sertifikat berbayar memakai delivery authenticated; gambar publik memakai upload. */
-export const deliveryFor = (req: Pick<SignatureRequest, "kind">) => (req.kind === "pdf" ? "authenticated" : "upload");
+/** PDF materi, template tugas, dan sertifikat memakai delivery authenticated; gambar publik memakai upload. */
+export const deliveryFor = (req: Pick<SignatureRequest, "kind">) => (req.kind === "image" ? "upload" : "authenticated");
 
 export const uploadResultSchema = z.object({
   public_id: z.string().min(1).max(255),

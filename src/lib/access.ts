@@ -1,3 +1,4 @@
+import { getRetakeAccess } from "@/features/certificate/service";
 import { resolveLessonAccess, type AccessInput, type LessonAccess } from "@/lib/access-rules";
 import { prisma } from "@/lib/prisma";
 
@@ -6,9 +7,12 @@ export { resolveLessonAccess, type AccessInput, type LessonAccess };
 // Akses materi kelas (C.5, G.4.3, G.4.10–G.4.12, K.5). Satu sumber aturan untuk query
 // halaman, URL video, dan signed URL PDF. Materi terkunci tidak pernah dikirim ke client.
 
-/** Langganan aktif dari paket mana pun yang mencakup kelas ini. */
+/**
+ * Langganan aktif dari paket mana pun yang mencakup kelas ini. Siswa yang gagal di batch
+ * sebelumnya mendapat akses ulang gratis selama batch berikutnya berjalan (revisi RMED).
+ */
 export async function getCourseEnrollment(userId: string, courseId: string) {
-  return prisma.enrollment.findFirst({
+  const paid = await prisma.enrollment.findFirst({
     where: {
       userId,
       status: "AKTIF",
@@ -18,6 +22,9 @@ export async function getCourseEnrollment(userId: string, courseId: string) {
     orderBy: { expiresAt: "desc" },
     select: { expiresAt: true, product: { select: { name: true, slug: true } } },
   });
+  if (paid) return paid;
+  const retake = await getRetakeAccess(userId, courseId);
+  return retake ? { expiresAt: retake.endsAt, product: { name: `Ulang gratis ${retake.batchName}`, slug: "" } } : null;
 }
 
 /**

@@ -140,6 +140,22 @@ enum MediaDelivery {
   AUTHENTICATED
 }
 
+// Status siswa dalam satu batch kelas (sertifikat + tugas praktik).
+enum BatchParticipantStatus {
+  BERJALAN
+  MENUNGGU_PENILAIAN
+  REVISI
+  LULUS
+  GAGAL
+}
+
+enum SubmissionStatus {
+  MENUNGGU
+  DISETUJUI
+  REVISI
+  DITOLAK
+}
+
 enum ProgramType {
   KELAS
   TRYOUT
@@ -175,8 +191,8 @@ model User {
   learningSessions    LearningSession[]
   quizAttempts        QuizAttempt[]
   examAttempts        ExamAttempt[]
-  gradedAnswers       ExamAnswer[]         @relation("GradedBy")
-  questionsCreated    Question[]           @relation("QuestionCreatedBy")
+  gradedAnswers       ExamAnswer[]          @relation("GradedBy")
+  questionsCreated    Question[]            @relation("QuestionCreatedBy")
   cart                Cart?
   orders              Order[]
   voucherUsages       VoucherUsage[]
@@ -186,6 +202,8 @@ model User {
   notifications       Notification[]
   articles            Article[]
   certificates        UserCertificate[]
+  batchParticipations BatchParticipant[]
+  reviewedSubmissions PracticalSubmission[] @relation("SubmissionReviewer")
   auditLogs           AuditLog[]
   mediaUploaded       Media[]
 
@@ -294,6 +312,7 @@ model Course {
   sections         CourseSection[]
   products         ProductCourse[]
   certificate      Certificate?
+  batches          CourseBatch[]
   learningSessions LearningSession[]
 
   @@index([categoryId])
@@ -1172,18 +1191,83 @@ model Testimonial {
 // ─── N.7 Sertifikat dan sistem ───────────────────────────────────────────────
 
 model Certificate {
-  id              String   @id @default(cuid())
-  title           String
-  courseId        String?  @unique
-  templateMediaId String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  title                 String
+  courseId              String?  @unique
+  templateMediaId       String?
+  /// Rata-rata minimal nilai terbaik setiap kuis kelas (0–100).
+  minScore              Int      @default(80)
+  practicalInstructions String?  @db.Text
+  /// File template tugas praktik (PDF/DOCX/ZIP, delivery authenticated).
+  practicalTemplateId   String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  course        Course?           @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  templateMedia Media?            @relation("CertificateTemplate", fields: [templateMediaId], references: [id], onDelete: SetNull)
-  issued        UserCertificate[]
+  course            Course?           @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  templateMedia     Media?            @relation("CertificateTemplate", fields: [templateMediaId], references: [id], onDelete: SetNull)
+  practicalTemplate Media?            @relation("PracticalTemplate", fields: [practicalTemplateId], references: [id], onDelete: SetNull)
+  issued            UserCertificate[]
 
   @@index([templateMediaId])
+  @@index([practicalTemplateId])
+}
+
+/// Angkatan belajar per kelas. Tugas praktik dikirim paling lambat endsAt.
+model CourseBatch {
+  id        String   @id @default(cuid())
+  courseId  String
+  name      String
+  startsAt  DateTime
+  endsAt    DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course       Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  participants BatchParticipant[]
+
+  @@index([courseId, startsAt])
+}
+
+model BatchParticipant {
+  id         String                 @id @default(cuid())
+  batchId    String
+  userId     String
+  status     BatchParticipantStatus @default(BERJALAN)
+  /// true bila ikut gratis karena gagal di batch sebelumnya.
+  isRetake   Boolean                @default(false)
+  finalScore Float?
+  failReason String?                @db.VarChar(300)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  batch       CourseBatch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions PracticalSubmission[]
+  certificate UserCertificate?
+
+  @@unique([batchId, userId])
+  @@index([userId])
+  @@index([status])
+}
+
+model PracticalSubmission {
+  id            String           @id @default(cuid())
+  participantId String
+  driveUrl      String           @db.VarChar(500)
+  note          String?          @db.VarChar(1000)
+  status        SubmissionStatus @default(MENUNGGU)
+  reviewNote    String?          @db.Text
+  reviewedById  String?
+  reviewedAt    DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  participant BatchParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  reviewedBy  User?            @relation("SubmissionReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([participantId])
+  @@index([status])
+  @@index([reviewedById])
 }
 
 model UserCertificate {
@@ -1192,13 +1276,15 @@ model UserCertificate {
   userId        String
   number        String   @unique
   mediaId       String?
+  participantId String?  @unique
   issuedAt      DateTime
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media       Media?      @relation("UserCertificateFile", fields: [mediaId], references: [id], onDelete: SetNull)
+  certificate Certificate       @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media       Media?            @relation("UserCertificateFile", fields: [mediaId], references: [id], onDelete: SetNull)
+  participant BatchParticipant? @relation(fields: [participantId], references: [id], onDelete: SetNull)
 
   @@unique([certificateId, userId])
   @@index([userId])
@@ -1248,18 +1334,19 @@ model Media {
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 
-  uploadedBy       User              @relation(fields: [uploadedById], references: [id])
-  courses          Course[]          @relation("CourseThumbnail")
-  videos           Video[]           @relation("VideoThumbnail")
-  materials        Material[]        @relation("MaterialFile")
-  exams            Exam[]            @relation("ExamImage")
-  questions        Question[]        @relation("QuestionImage")
-  options          QuestionOption[]  @relation("OptionImage")
-  products         Product[]         @relation("ProductThumbnail")
-  articles         Article[]         @relation("ArticleCover")
-  banners          Banner[]          @relation("BannerImage")
-  certificates     Certificate[]     @relation("CertificateTemplate")
-  userCertificates UserCertificate[] @relation("UserCertificateFile")
+  uploadedBy         User              @relation(fields: [uploadedById], references: [id])
+  courses            Course[]          @relation("CourseThumbnail")
+  videos             Video[]           @relation("VideoThumbnail")
+  materials          Material[]        @relation("MaterialFile")
+  exams              Exam[]            @relation("ExamImage")
+  questions          Question[]        @relation("QuestionImage")
+  options            QuestionOption[]  @relation("OptionImage")
+  products           Product[]         @relation("ProductThumbnail")
+  articles           Article[]         @relation("ArticleCover")
+  banners            Banner[]          @relation("BannerImage")
+  certificates       Certificate[]     @relation("CertificateTemplate")
+  practicalTemplates Certificate[]     @relation("PracticalTemplate")
+  userCertificates   UserCertificate[] @relation("UserCertificateFile")
 
   @@index([uploadedById])
   @@index([folder])

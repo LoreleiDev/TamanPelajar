@@ -41,3 +41,24 @@ export function resetPasswordMail(to: string, name: string, token: string): Mail
     text: `Halo ${name},\n\nKami menerima permintaan untuk mengatur ulang password akunmu. Buka tautan berikut untuk membuat password baru:\n${link}\n\nTautan berlaku 1 jam dan hanya bisa dipakai sekali. Jika kamu tidak meminta ini, abaikan email ini; password lama tetap berlaku.\n\nTaman Pelajar`,
   };
 }
+
+/** Hasil penilaian tugas praktik sertifikat (revisi RMED). */
+export function practicalResultMail(
+  to: string,
+  name: string,
+  input: { courseTitle: string; decision: "SETUJUI" | "REVISI" | "TOLAK"; note?: string; href: string; nextBatch?: string | null },
+): MailMessage {
+  const link = `${appUrl()}${input.href}`;
+  const subject = {
+    SETUJUI: `Sertifikat ${input.courseTitle} sudah terbit`,
+    REVISI: `Tugas praktik ${input.courseTitle} perlu revisi`,
+    TOLAK: `Hasil tugas praktik ${input.courseTitle}`,
+  }[input.decision];
+  const body = {
+    SETUJUI: `Tugas praktikmu untuk kelas ${input.courseTitle} disetujui. Sertifikatmu sudah terbit dan bisa diunduh di tautan berikut:`,
+    REVISI: `Tugas praktikmu untuk kelas ${input.courseTitle} perlu diperbaiki. Kirim ulang link tugas sebelum batch berakhir (kesempatan revisi hanya sekali).`,
+    TOLAK: `Tugas praktikmu untuk kelas ${input.courseTitle} belum disetujui. Kamu bisa mengulang kelas ini secara gratis di batch berikutnya${input.nextBatch ? ` (${input.nextBatch})` : ""}.`,
+  }[input.decision];
+  const note = input.note ? `\n\nCatatan dari admin:\n${input.note}` : "";
+  return { to, subject, link, text: `Halo ${name},\n\n${body}${note}\n\n${link}\n\nTaman Pelajar` };
+}

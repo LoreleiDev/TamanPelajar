@@ -27,7 +27,7 @@ async function guard<S extends z.ZodType<{ videoId: string }>>(schema: S, input:
 /** Progres tontonan (H.2.8); selesai otomatis pada 90% durasi. */
 export async function saveVideoProgress(
   input: z.input<typeof videoProgressSchema>,
-): Promise<ActionResult<{ completed: boolean; certificate: string | null }>> {
+): Promise<ActionResult<{ completed: boolean; courseDone: boolean }>> {
   const g = await guard(videoProgressSchema, input);
   if ("error" in g) return g.error!;
   const { user, data } = g;
@@ -50,7 +50,7 @@ export async function saveVideoProgress(
     if (existing) await prisma.learningSession.update({ where: { id: existing.id }, data: { seconds: { increment: data.watchedDeltaSec } } });
     else await prisma.learningSession.create({ data: { userId: user.id, videoId: data.videoId, date, seconds: data.watchedDeltaSec } });
   }
-  return ok({ completed: Boolean(row.completedAt) || reached, certificate: null });
+  return ok({ completed: Boolean(row.completedAt) || reached, courseDone: false });
 }
 
 /** Catatan siswa di halaman video (H.2.5). */

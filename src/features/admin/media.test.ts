@@ -16,4 +16,12 @@ describe("aturan upload", () => {
     expect(deliveryFor({ kind: "pdf" })).toBe("authenticated");
     expect(deliveryFor({ kind: "image" })).toBe("upload");
   });
+
+  it("template tugas: PDF, DOCX, atau ZIP sampai 20 MB, delivery authenticated", () => {
+    expect(uploadRejection({ folder: "sertifikat", kind: "dokumen", format: "docx", bytes: 1000 })).toBeNull();
+    expect(uploadRejection({ folder: "sertifikat", kind: "dokumen", format: "zip", bytes: 19 * 1024 * 1024 })).toBeNull();
+    expect(uploadRejection({ folder: "sertifikat", kind: "dokumen", format: "exe", bytes: 10 })).toMatch(/DOCX/);
+    expect(uploadRejection({ folder: "sertifikat", kind: "dokumen", format: "pdf", bytes: 21 * 1024 * 1024 })).toMatch(/20 MB/);
+    expect(deliveryFor({ kind: "dokumen" })).toBe("authenticated");
+  });
 });

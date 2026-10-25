@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
+import { CertificateTrackCard } from "@/features/certificate/components/certificate-track";
+import { listCertificateTracks } from "@/features/certificate/queries";
 import { getCertificates } from "@/features/dashboard/queries";
 import { formatTanggal } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
@@ -14,14 +16,25 @@ export const metadata: Metadata = { title: "Sertifikat", robots: { index: false 
 
 async function Content() {
   const user = await requireUserPage("/dashboard/sertifikat");
+  // Jalur disinkronkan lebih dulu: persetujuan admin bisa menerbitkan sertifikat baru.
+  const tracks = (await listCertificateTracks(user.id)).filter((t) => !t.certificateNumber);
   const certs = await getCertificates(user.id);
   return (
     <>
-      <DashboardHeading title="Sertifikat">Sertifikat terbit otomatis saat semua materi sebuah kelas selesai.</DashboardHeading>
-      {certs.length === 0 ? (
+      <DashboardHeading title="Sertifikat">
+        Sertifikat terbit setelah semua materi selesai, rata-rata nilai kuis mencapai batas minimal, dan tugas praktikmu disetujui admin.
+      </DashboardHeading>
+      {tracks.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {tracks.map((t) => (
+            <CertificateTrackCard key={t.courseId} track={t} courseTitle={t.courseTitle} courseSlug={t.courseSlug} />
+          ))}
+        </div>
+      )}
+      {certs.length === 0 && tracks.length > 0 ? null : certs.length === 0 ? (
         <EmptyState
           title="Belum ada sertifikat"
-          description="Selesaikan semua materi di satu kelas untuk mendapatkan sertifikat pertamamu."
+          description="Ikuti batch kelas dari paket yang kamu beli, lalu penuhi syaratnya untuk mendapatkan sertifikat pertamamu."
           action={
             <Button asChild>
               <Link href="/dashboard/kelas">Lanjutkan kelas</Link>
@@ -29,6 +42,8 @@ async function Content() {
           }
         />
       ) : (
+        <section aria-labelledby="sertifikat-terbit" className="flex flex-col gap-3">
+        <h2 id="sertifikat-terbit" className="text-lg font-bold">Sertifikat terbit</h2>
         <ul className="flex flex-col divide-y divide-border rounded-xl border border-border" /* taste-skill-ignore: daftar padat dashboard, border tipis sesuai CLAUDE.md */>
           {certs.map((c) => (
             <li key={c.number} className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
@@ -47,6 +62,7 @@ async function Content() {
             </li>
           ))}
         </ul>
+        </section>
       )}
     </>
   );

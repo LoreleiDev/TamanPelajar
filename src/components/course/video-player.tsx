@@ -57,8 +57,8 @@ export function VideoPlayer({
       target.kind === "lesson"
         ? await saveProgress({ lessonId: target.id, ...payload })
         : await saveVideoProgress({ videoId: target.id, ...payload });
-    if (result.ok && result.data.certificate) {
-      toast.success("Semua materi selesai. Sertifikatmu sudah terbit.");
+    if (result.ok && result.data.courseDone) {
+      toast.success("Semua materi selesai. Cek syarat sertifikat di panel kelas.");
     }
     if (result.ok && result.data.completed) router.refresh();
   }, [target.kind, target.id, router]);

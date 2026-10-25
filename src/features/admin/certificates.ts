@@ -10,7 +10,10 @@ export async function listCertificates() {
     select: {
       id: true,
       title: true,
-      course: { select: { id: true, title: true, deletedAt: true } },
+      minScore: true,
+      practicalInstructions: true,
+      practicalTemplate: { select: { id: true, publicId: true } },
+      course: { select: { id: true, title: true, deletedAt: true, _count: { select: { batches: true } } } },
       issued: {
         orderBy: { issuedAt: "desc" },
         take: 50,

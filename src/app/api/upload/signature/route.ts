@@ -24,6 +24,6 @@ export async function POST(request: Request) {
     ...signed,
     folder,
     type,
-    resourceType: parsed.data.kind === "pdf" ? "raw" : "image",
+    resourceType: parsed.data.kind === "image" ? "image" : "raw",
   });
 }

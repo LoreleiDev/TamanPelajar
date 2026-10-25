@@ -4,7 +4,7 @@ import { FileText, ImageUp, LoaderCircle, X } from "lucide-react";
 import { useId, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { IMAGE_FORMATS, MAX_IMAGE_BYTES, MAX_PDF_BYTES, uploadRejection, type MediaFolder } from "@/features/admin/media";
+import { DOCUMENT_FORMATS, IMAGE_FORMATS, MAX_IMAGE_BYTES, MAX_PDF_BYTES, uploadRejection, type MediaFolder } from "@/features/admin/media";
 import { simpanMedia } from "@/features/admin/media-actions";
 
 export interface MediaValue {
@@ -28,7 +28,7 @@ export function MediaUploader({
 }: {
   label: string;
   folder: MediaFolder;
-  kind: "image" | "pdf";
+  kind: "image" | "pdf" | "dokumen";
   value: MediaValue | null;
   onChange: (value: MediaValue | null) => void;
   hint?: string;
@@ -83,8 +83,12 @@ export function MediaUploader({
     }
   }
 
-  const accept = kind === "image" ? IMAGE_FORMATS.map((f) => `.${f}`).join(",") : ".pdf,application/pdf";
-  const limit = kind === "image" ? `JPG, PNG, WEBP, atau GIF, maks. ${MAX_IMAGE_BYTES / 1024 / 1024} MB` : `PDF, maks. ${MAX_PDF_BYTES / 1024 / 1024} MB`;
+  const accept =
+    kind === "image" ? IMAGE_FORMATS.map((f) => `.${f}`).join(",") : kind === "dokumen" ? DOCUMENT_FORMATS.map((f) => `.${f}`).join(",") : ".pdf,application/pdf";
+  const limit =
+    kind === "image"
+      ? `JPG, PNG, WEBP, atau GIF, maks. ${MAX_IMAGE_BYTES / 1024 / 1024} MB`
+      : `${kind === "dokumen" ? "PDF, DOCX, atau ZIP" : "PDF"}, maks. ${MAX_PDF_BYTES / 1024 / 1024} MB`;
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -100,7 +104,7 @@ export function MediaUploader({
             ) : (
               <FileText aria-hidden="true" className="size-6 text-primary" />
             )}
-            <span className="max-w-48 truncate text-sm">{value.name ?? (kind === "image" ? "Gambar tersimpan" : "PDF tersimpan")}</span>
+            <span className="max-w-48 truncate text-sm">{value.name ?? (kind === "image" ? "Gambar tersimpan" : kind === "dokumen" ? "File tersimpan" : "PDF tersimpan")}</span>
             <button
               type="button"
               onClick={() => onChange(null)}

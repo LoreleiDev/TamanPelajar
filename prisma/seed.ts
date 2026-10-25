@@ -610,7 +610,7 @@ async function main() {
   await complete(nadia, "tes-wawasan-kebangsaan", 8, 18);
   await complete(nadia, "tes-intelegensia-umum", 3, 9);
   await complete(fikri, "penalaran-umum", lessonsByCourse.get("penalaran-umum")!.length, 30);
-  await complete(fikri, "pengetahuan-kuantitatif", 5, 12);
+  await complete(fikri, "pengetahuan-kuantitatif", lessonsByCourse.get("pengetahuan-kuantitatif")!.length, 12);
   await complete(dimas, "penalaran-umum", 2, 4);
   await complete(ayu, "tes-intelegensia-umum", 6, 130);
 
@@ -626,9 +626,68 @@ async function main() {
     }
   }
 
+  // ─── Batch, syarat sertifikat, dan tugas praktik (revisi RMED) ───
+  // Setiap kelas punya batch yang berjalan dan batch berikutnya. Sertifikat butuh rata-rata
+  // kuis ≥ 80 dan tugas praktik yang disetujui admin.
+  const monthName = (d: Date) => new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(d);
+  const currentStart = daysAgo(45, 0);
+  const currentEnd = new Date(now.getTime() + 45 * DAY);
+  const nextStart = new Date(currentEnd.getTime() + DAY);
+  const nextEnd = new Date(nextStart.getTime() + 90 * DAY);
+  const currentBatch = new Map<string, string>();
+  for (const c of courses) {
+    const id = courseId.get(c.slug)!;
+    const [cur] = await Promise.all([
+      prisma.courseBatch.create({ data: { courseId: id, name: `Batch ${monthName(currentStart)}`, startsAt: currentStart, endsAt: currentEnd } }),
+      prisma.courseBatch.create({ data: { courseId: id, name: `Batch ${monthName(nextStart)}`, startsAt: nextStart, endsAt: nextEnd } }),
+    ]);
+    currentBatch.set(c.slug, cur.id);
+    await prisma.certificate.update({
+      where: { courseId: id },
+      data: {
+        minScore: 80,
+        practicalInstructions: `Kerjakan studi kasus ${c.title}: buat ringkasan konsep tiap bab dan selesaikan lima soal latihan buatanmu sendiri lengkap dengan pembahasannya. Simpan dalam satu folder Google Drive (dokumen atau foto tulisan tangan), lalu kirim link folder itu.`,
+      },
+    });
+  }
+
+  // Fikri sudah lulus Penalaran Umum di batch berjalan.
   const certificate = await prisma.certificate.findUniqueOrThrow({ where: { courseId: courseId.get("penalaran-umum")! } });
+  const fikriPu = await prisma.batchParticipant.create({
+    data: { batchId: currentBatch.get("penalaran-umum")!, userId: fikri.id, status: "LULUS", finalScore: 88 },
+  });
+  await prisma.practicalSubmission.create({
+    data: {
+      participantId: fikriPu.id,
+      driveUrl: "https://drive.google.com/drive/folders/contoh-tugas-penalaran-umum",
+      status: "DISETUJUI",
+      reviewNote: "Ringkasan rapi dan soal buatanmu bervariasi. Pertahankan.",
+      reviewedById: admin.id,
+      reviewedAt: daysAgo(14),
+      createdAt: daysAgo(16),
+    },
+  });
   await prisma.userCertificate.create({
-    data: { certificateId: certificate.id, userId: fikri.id, number: `TP-${now.getUTCFullYear()}-PU-0001`, issuedAt: daysAgo(14) },
+    data: { certificateId: certificate.id, userId: fikri.id, participantId: fikriPu.id, number: `TP-${now.getUTCFullYear()}-PU-0001`, issuedAt: daysAgo(14) },
+  });
+
+  // Fikri menyelesaikan Pengetahuan Kuantitatif dengan rata-rata kuis 85 dan menunggu penilaian tugas.
+  const pkQuizzes = await prisma.quiz.findMany({ where: { lesson: { section: { courseId: courseId.get("pengetahuan-kuantitatif")! } } }, select: { id: true } });
+  for (const [i, q] of pkQuizzes.entries()) {
+    await prisma.quizAttempt.create({
+      data: { quizId: q.id, userId: fikri.id, score: i % 2 === 0 ? 90 : 80, passed: true, answers: {}, submittedAt: daysAgo(3 + i, 20) },
+    });
+  }
+  const fikriPk = await prisma.batchParticipant.create({
+    data: { batchId: currentBatch.get("pengetahuan-kuantitatif")!, userId: fikri.id, status: "MENUNGGU_PENILAIAN", finalScore: 85 },
+  });
+  await prisma.practicalSubmission.create({
+    data: {
+      participantId: fikriPk.id,
+      driveUrl: "https://drive.google.com/drive/folders/contoh-tugas-pengetahuan-kuantitatif",
+      note: "Soal nomor 4 saya buat dua versi karena ragu dengan satuan yang dipakai.",
+      createdAt: daysAgo(1, 21),
+    },
   });
 
   // ─── Catatan, bookmark, diskusi ───

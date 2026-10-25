@@ -18,7 +18,8 @@ export async function simpanMedia(input: unknown): Promise<ActionResult<{ id: st
     const r = parsed.data;
     if (!verifyUploadResult(r)) return fail("Hasil upload tidak sah. Coba unggah ulang.");
     const resourceType = r.resource_type === "raw" ? "RAW" : r.resource_type === "video" ? "VIDEO" : "IMAGE";
-    const format = r.format || (r.public_id.toLowerCase().endsWith(".pdf") ? "pdf" : "");
+    // File raw tidak punya format dari Cloudinary; ambil dari ekstensi public_id (pdf, docx, zip).
+    const format = r.format || (/\.([a-z0-9]{2,5})$/.exec(r.public_id.toLowerCase())?.[1] ?? "");
     const media = await prisma.media.upsert({
       where: { publicId: r.public_id },
       create: {

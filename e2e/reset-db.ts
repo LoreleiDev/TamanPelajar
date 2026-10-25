@@ -93,6 +93,27 @@ async function resetDb() {
           },
         },
       });
+      // Peserta sertifikat (revisi RMED): berlangganan paket berisi Penalaran Umum, semua materi
+      // selesai, dan rata-rata kuis 90, sehingga form tugas praktik langsung terbuka.
+      const pu = await prisma.course.findUniqueOrThrow({
+        where: { slug: "penalaran-umum" },
+        select: { id: true, sections: { select: { lessons: { select: { id: true, quizId: true } } } }, products: { select: { productId: true }, take: 1 } },
+      });
+      const puLessons = pu.sections.flatMap((sec) => sec.lessons);
+      const sertif = await prisma.user.create({
+        data: {
+          email: `e2e-sertif-${project}@tamanpelajar.test`,
+          name: `Peserta Sertifikat ${project === "desktop" ? "Desktop" : "Mobile"}`,
+          passwordHash,
+          emailVerified: now,
+          profile: { create: { phone: "081266660000", educationLevel: "SMA", examTarget: "UTBK/SNBT", completedAt: now } },
+          enrollments: { create: { productId: pu.products[0].productId, startsAt: now, expiresAt: new Date(now.getTime() + 30 * 86_400_000) } },
+        },
+      });
+      await prisma.lessonProgress.createMany({ data: puLessons.map((l) => ({ userId: sertif.id, lessonId: l.id, completedAt: now })) });
+      await prisma.quizAttempt.createMany({
+        data: puLessons.flatMap((l) => (l.quizId ? [{ quizId: l.quizId, userId: sertif.id, score: 90, passed: true, answers: {}, submittedAt: now }] : [])),
+      });
       // Pertanyaan diskusi untuk dijawab admin (L.2.8), di materi bab gratis.
       const freeLesson = await prisma.lesson.findFirst({ where: { section: { isFree: true, course: { slug: "penalaran-umum" } } }, orderBy: { order: "asc" }, select: { id: true } });
       if (freeLesson) {

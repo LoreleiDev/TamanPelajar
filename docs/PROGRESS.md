@@ -324,6 +324,24 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 68/68; e2e 130/130 (4 tes baru: konfirmasi keluar, beli setelah masuk tanpa muat ulang, admin dialihkan dan tidak bisa membeli). Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px: navbar, statistik beranda, halaman masuk, popup keluar.
 
+### `fix/logout-tanpa-loader`
+- [x] **P.2.6** Popup keluar langsung tertutup setelah "Ya, keluar" ditekan, tanpa loader
+
+### `feat/C1-9-sertifikat-batch` (revisi RMED: sertifikat, batch, tugas praktik)
+- [x] **C.1.9, G.4.6** Sertifikat tidak lagi terbit otomatis. Syaratnya: semua materi selesai, rata-rata nilai terbaik setiap kuis kelas ≥ nilai minimal (diatur admin, bawaan 80), dan tugas praktik disetujui admin
+- [x] Batch per kelas (`CourseBatch`): siswa berlangganan otomatis masuk batch yang berjalan. Tugas praktik dikirim paling lambat tanggal selesai batch; yang belum disetujui saat batch berakhir dinyatakan belum lulus
+- [x] Ulang gratis: siswa yang gagal mendapat akses kelas itu gratis selama batch berikutnya (walau masa aktif paket habis); progres dan nilai kuis dimulai dari awal
+- [x] Tugas praktik: siswa mengunduh template (PDF/DOCX/ZIP, delivery authenticated, hanya peserta) dan mengirim link Google Drive/Docs dari dashboard Sertifikat; ringkasan status di sidebar ruang belajar
+- [x] **C.2.5, L.2.7** Menu admin Tugas Praktik (penanda jumlah menunggu): setujui (sertifikat terbit), minta revisi sekali sebelum batas batch, atau tolak; catatan wajib untuk revisi dan tolak. Siswa diberi tahu lewat notifikasi dan email (mode log), semua keputusan tercatat di audit log
+- [x] Admin: tab Batch di detail kelas (tambah, ubah, hapus batch tanpa peserta; tanggal tidak boleh tumpang tindih), pengaturan sertifikat (judul, nilai minimal, instruksi, template)
+- [x] Kelas tanpa batch: bagian sertifikat tidak ditampilkan ke siswa
+- [x] Seed: dua batch per kelas (berjalan dan berikutnya), contoh kiriman yang disetujui dan yang menunggu penilaian
+- [x] Tes unit aturan batch, syarat nilai, revisi, dan link Drive; e2e kirim tugas → revisi → setujui → sertifikat terbit, serta kelola batch dan pengaturan sertifikat
+
+**Catatan:** Playwright kini memaksa `PAYMENT_MODE=simulasi` untuk server tes, jadi e2e checkout tetap lulus walau `.env` memakai Midtrans.
+
+**Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 133/133 (9 tes khusus satu perangkat sengaja dilewati). Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px: dashboard sertifikat, sidebar ruang belajar, admin Tugas Praktik, Sertifikat, dan tab Batch; tanpa error console.
+
 ## Tahap 6 — Pengujian dan penyempurnaan
 
 Belum dimulai.

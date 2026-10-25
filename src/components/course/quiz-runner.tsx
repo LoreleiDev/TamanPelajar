@@ -53,7 +53,7 @@ export function QuizRunner({
           const r = await submitQuiz({ lessonId, answers });
           if (!r.ok) return void toast.error(r.error);
           setResult(r.data);
-          if (r.data.certificate) toast.success("Semua materi selesai. Sertifikatmu sudah terbit.");
+          if (r.data.courseDone) toast.success("Semua materi selesai. Cek syarat sertifikat di panel kelas.");
           router.refresh();
         });
       }}
