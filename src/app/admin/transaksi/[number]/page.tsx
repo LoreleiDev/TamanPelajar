@@ -72,7 +72,7 @@ async function Content({ params }: { params: PageProps<"/admin/transaksi/[number
           </DashboardSection>
 
           <DashboardSection title="Produk">
-            <div className="overflow-x-auto rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full min-w-120 text-left">
                 <caption className="sr-only">Produk dalam pesanan</caption>
                 <thead className="bg-secondary text-sm">

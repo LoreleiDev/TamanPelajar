@@ -61,7 +61,7 @@ export function Advantages() {
           >
             <h3 className="text-[1.5rem] leading-tight font-bold lg:text-[1.75rem]">{r.title}</h3>
             <p className="text-white/90">{r.body}</p>
-            <p className="text-sm text-white/80 md:text-[0.9375rem]">
+            <p className="text-sm text-white/90 md:text-[0.9375rem]">
               <span className="sr-only">Termasuk: </span>
               <span className="md:hidden">{r.terms.join(", ")}</span>
               <span className="hidden md:flex md:flex-col md:gap-1">

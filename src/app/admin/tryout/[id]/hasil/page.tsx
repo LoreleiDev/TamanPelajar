@@ -56,7 +56,7 @@ async function Content({ params }: { params: PageProps<"/admin/tryout/[id]/hasil
       {attempts.length === 0 ? (
         <EmptyState title="Belum ada peserta" description="Hasil muncul di sini setelah siswa mengerjakan tryout ini." />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
           <table className="w-full min-w-208 text-left">
             <caption className="sr-only">Hasil peserta {exam.title}</caption>
             <thead className="bg-secondary text-sm">

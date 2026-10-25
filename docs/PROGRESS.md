@@ -358,3 +358,14 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 - [x] e2e robots, sitemap, dan metadata/OG halaman publik utama
 
 **Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 139/139 (15 tes khusus satu perangkat sengaja dilewati).
+
+### `feat/Q1-aksesibilitas` (batch B)
+- [x] **Q.1.1** Pemindaian axe-core (WCAG 2.1 A/AA + best practice) ke 60+ halaman tamu, siswa, dan admin; semua temuan diperbaiki:
+  - **Q.1.4** Kontras: teks putih di latar hijau minimal 90% opasitas; token `success` #166534 dan `warning` #92400e; teks tab tidak aktif dan latar daftar tab
+  - **Q.1.6** Nama aksesibel memuat teks yang terlihat: tautan logo, tombol menu akun (nama dari teks, inisial avatar hanya visual)
+  - **Q.1.2** Grafik Recharts tidak lagi menerima fokus di dalam area `aria-hidden` (data tetap di tabel); 25 kotak tabel yang bisa digeser kini bisa difokus keyboard dan diberi label; form pencarian punya label unik
+  - **Q.1.2** Tautan "Lewati ke konten" juga di dashboard siswa dan panel admin
+- [x] e2e aksesibilitas (axe): 10 halaman publik di desktop dan mobile, 5 halaman siswa, 6 halaman admin
+
+**Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 161/161 (17 tes khusus satu perangkat sengaja dilewati). Pemeriksa desain 0 FAIL.
+

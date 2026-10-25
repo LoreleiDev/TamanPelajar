@@ -64,7 +64,7 @@ const legendText = (value: string) => <span style={{ color: C.ink }}>{value}</sp
 export function ScoreTrendChart({ data }: { data: { label: string; percent: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <LineChart data={data} margin={{ top: 16, right: 16, bottom: 0, left: 0 }}>
+      <LineChart accessibilityLayer={false} data={data} margin={{ top: 16, right: 16, bottom: 0, left: 0 }}>
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="label" {...axisProps} interval="preserveStartEnd" />
         <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} {...axisProps} unit="%" width={56} />
@@ -88,7 +88,7 @@ export function ScoreTrendChart({ data }: { data: { label: string; percent: numb
 export function TopicMasteryChart({ data }: { data: { topic: string; mastery: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={Math.max(160, data.length * 36 + 24)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barCategoryGap={6}>
+      <BarChart accessibilityLayer={false} data={data} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barCategoryGap={6}>
         <CartesianGrid stroke={C.grid} horizontal={false} />
         <XAxis type="number" domain={[0, 100]} ticks={[0, 50, 100]} {...axisProps} unit="%" />
         <YAxis type="category" dataKey="topic" {...axisProps} width={150} />
@@ -105,7 +105,7 @@ export function TopicMasteryChart({ data }: { data: { topic: string; mastery: nu
 export function StudyTimeChart({ data }: { data: { label: string; minutes: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={data} margin={{ top: 20, right: 8, bottom: 0, left: -12 }} barCategoryGap="28%">
+      <BarChart accessibilityLayer={false} data={data} margin={{ top: 20, right: 8, bottom: 0, left: -12 }} barCategoryGap="28%">
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="label" {...axisProps} />
         <YAxis {...axisProps} width={48} />
@@ -122,7 +122,7 @@ export function StudyTimeChart({ data }: { data: { label: string; minutes: numbe
 export function CompareChart({ data }: { data: { exam: string; mine: number; average: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} margin={{ top: 20, right: 8, bottom: 0, left: 0 }} barGap={2} barCategoryGap="30%">
+      <BarChart accessibilityLayer={false} data={data} margin={{ top: 20, right: 8, bottom: 0, left: 0 }} barGap={2} barCategoryGap="30%">
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="exam" {...axisProps} />
         <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} {...axisProps} unit="%" width={56} />
@@ -143,7 +143,7 @@ export function CompareChart({ data }: { data: { exam: string; mine: number; ave
 export function TopicRadarChart({ data }: { data: { topic: string; mastery: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <RadarChart data={data} outerRadius="72%" margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+      <RadarChart accessibilityLayer={false} data={data} outerRadius="72%" margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
         <PolarGrid stroke={C.grid} />
         <PolarAngleAxis dataKey="topic" tick={{ fill: C.ink, fontSize: 12 }} />
         {/* Tanpa label skala: menabrak nama topik; nilai ada di tooltip dan tabel data. */}
@@ -169,7 +169,7 @@ export function TopicCompareChart({ data }: { data: { topic: string; mine: numbe
   const label = (v: unknown) => (v === null || v === undefined ? "" : `${String(v).replace(".", ",")}%`);
   return (
     <ResponsiveContainer width="100%" height={Math.max(180, data.length * 56 + 48)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barGap={2} barCategoryGap={10}>
+      <BarChart accessibilityLayer={false} data={data} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barGap={2} barCategoryGap={10}>
         <CartesianGrid stroke={C.grid} horizontal={false} />
         <XAxis type="number" domain={[0, 100]} ticks={[0, 50, 100]} {...axisProps} unit="%" />
         <YAxis type="category" dataKey="topic" {...axisProps} width={150} />
@@ -198,7 +198,7 @@ export function MonthlyChart({ data, format, name }: { data: { label: string; va
   const fmt = (v: number) => (format === "rupiah" ? shortRupiah(v) : String(v));
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <BarChart data={data} margin={{ top: 22, right: 8, bottom: 0, left: 0 }} barCategoryGap="28%">
+      <BarChart accessibilityLayer={false} data={data} margin={{ top: 22, right: 8, bottom: 0, left: 0 }} barCategoryGap="28%">
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="label" {...axisProps} />
         <YAxis {...axisProps} width={format === "rupiah" ? 52 : 40} tickFormatter={(v) => fmt(Number(v))} allowDecimals={false} />

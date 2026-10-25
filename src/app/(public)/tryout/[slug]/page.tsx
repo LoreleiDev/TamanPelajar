@@ -162,7 +162,7 @@ export default async function TryoutDetailPage({ params }: PageProps<"/tryout/[s
             <h2 id="subtes-judul" className="text-heading">
               Subtes
             </h2>
-            <div className="overflow-x-auto rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full min-w-md text-left">
                 <caption className="sr-only">Daftar subtes {exam.title}</caption>
                 <thead className="bg-secondary text-sm">

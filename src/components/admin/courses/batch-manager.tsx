@@ -106,7 +106,7 @@ export function BatchManager({ courseId, batches, hasCertificate }: { courseId: 
       {batches.length === 0 ? (
         <EmptyState title="Belum ada batch" description="Buat batch pertama, mis. tiga bulan ke depan, agar siswa bisa mengejar sertifikat." />
       ) : (
-        <div className="relative overflow-x-auto rounded-xl border border-border">
+        <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
           <table className="w-full min-w-160 text-left">
             <caption className="sr-only">Batch kelas</caption>
             <thead className="bg-secondary text-sm">

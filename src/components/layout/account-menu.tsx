@@ -107,19 +107,24 @@ export function MobileAccountSlot({ account }: { account: AccountSummary | null 
 
 /** Foto dan nama pengguna (B.2.5) dengan menu akun. */
 export function AccountMenu({ account }: { account: AccountSummary }) {
+  const [firstName, ...rest] = account.name.split(" ");
+  const restName = rest.join(" ");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           className="flex items-center gap-2 rounded-full py-1 pr-1 pl-1 hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none xl:pr-3"
-          aria-label={`Menu akun ${account.name}`}
         >
-          <Avatar className="size-8">
+          {/* Nama tombol dari teks ("Menu akun" + nama lengkap), bukan aria-label, agar teks yang
+              terlihat (nama depan) termasuk dalam nama aksesibelnya. Inisial avatar hanya visual. */}
+          <Avatar className="size-8" aria-hidden="true">
             {account.image && <AvatarImage src={account.image} alt="" />}
             <AvatarFallback className="bg-primary text-sm font-bold text-white">{initials(account.name)}</AvatarFallback>
           </Avatar>
-          <span className="hidden max-w-32 truncate text-sm font-semibold xl:inline">{account.name.split(" ")[0]}</span>
+          <span className="sr-only">Menu akun </span>
+          <span className="sr-only max-w-32 truncate text-sm font-semibold xl:not-sr-only">{firstName}</span>
+          {restName && <span className="sr-only"> {restName}</span>}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">

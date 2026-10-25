@@ -28,7 +28,7 @@ async function Participants({ courseId }: { courseId: string }) {
   const { lessonTotal, rows } = await getCourseParticipants(courseId);
   if (rows.length === 0) return <EmptyState title="Belum ada peserta" description="Siswa muncul di sini setelah membeli paket yang memuat kelas ini atau membuka bab gratis." />;
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
       <table className="w-full min-w-176 text-left">
         <caption className="sr-only">Peserta kelas dan progresnya</caption>
         <thead className="bg-secondary text-sm">

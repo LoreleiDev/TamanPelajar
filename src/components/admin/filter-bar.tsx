@@ -31,7 +31,7 @@ export function FilterBar({
 }) {
   const active = Boolean(q) || selects.some((s) => s.value);
   return (
-    <Form action={action} role="search" className="flex flex-wrap items-end gap-3">
+    <Form action={action} role="search" aria-label={searchLabel} className="flex flex-wrap items-end gap-3">
       <div className="flex min-w-56 flex-1 flex-col gap-1.5">
         <label htmlFor="cari-admin" className="text-sm font-semibold">
           {searchLabel}

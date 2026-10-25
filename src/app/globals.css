@@ -40,11 +40,11 @@
   --ring: var(--brand-primary);
 
   /* Status: hijau "benar" sengaja berbeda dari primary dan selalu disertai ikon/teks */
-  --success: #15803d;
+  --success: #166534;
   --success-foreground: #ffffff;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
-  --warning: #b45309;
+  --warning: #92400e;
   --warning-foreground: #ffffff;
 
   --chart-1: var(--brand-primary);

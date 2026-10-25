@@ -20,7 +20,7 @@ async function Content() {
   const rows = await listAdminArticles();
   if (rows.length === 0) return <EmptyState title="Belum ada artikel" description="Tulis artikel, jadwal ujian, pengumuman, atau tips belajar untuk halaman Informasi." />;
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
       <table className="w-full min-w-160 text-left">
         <caption className="sr-only">Daftar artikel</caption>
         <thead className="bg-secondary text-sm">

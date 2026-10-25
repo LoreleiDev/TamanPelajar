@@ -119,7 +119,7 @@ async function Content({ params }: { params: PageProps<"/tryout/hasil/[attemptId
         <h2 id="subtes-judul" className="text-heading">
           Nilai per subtes
         </h2>
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
           <table className="w-full min-w-xl text-left">
             <caption className="sr-only">Nilai per subtes</caption>
             <thead className="bg-secondary text-sm">
@@ -181,7 +181,7 @@ async function Content({ params }: { params: PageProps<"/tryout/hasil/[attemptId
           <h2 id="kesulitan-judul" className="text-heading">
             Akurasi dan kecepatan
           </h2>
-          <div className="overflow-x-auto rounded-xl border border-border">
+          <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
             <table className="w-full text-left">
               <caption className="sr-only">Akurasi per tingkat kesulitan</caption>
               <thead className="bg-secondary text-sm">

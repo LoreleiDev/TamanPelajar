@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 /** Kolom pencarian besar halaman daftar (katalog, video). Form GET, jalan tanpa JavaScript. */
 export function SearchBar({ action, id, label, placeholder }: { action: string; id: string; label: string; placeholder: string }) {
   return (
-    <Form action={action} role="search" className="flex max-w-2xl gap-2">
+    <Form action={action} role="search" aria-label={label} className="flex max-w-2xl gap-2">
       <label htmlFor={id} className="sr-only">
         {label}
       </label>

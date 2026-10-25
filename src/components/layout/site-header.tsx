@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 /** Form pencarian GET ke katalog, jadi tetap berfungsi tanpa JavaScript (B.2.3). */
 function SearchForm({ id, className }: { id: string; className?: string }) {
   return (
-    <form action="/program" role="search" className={cn("relative", className)}>
+    <form action="/program" role="search" aria-label="Pencarian situs" className={cn("relative", className)}>
       <label htmlFor={id} className="sr-only">
         Cari program, kelas, atau tryout
       </label>
@@ -76,7 +76,7 @@ export function SiteHeader({ account, mobileAccount }: { account: ReactNode; mob
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background" /* taste-skill-ignore: border tipis brand */>
       <div className="page-container flex h-16 items-center gap-4">
-        <Link href="/" className="shrink-0 rounded-md" aria-label="Taman Pelajar, ke beranda">
+        <Link href="/" className="shrink-0 rounded-md" aria-label="Taman Pelajar Bimbingan belajar, ke beranda">
           <Logo />
         </Link>
 

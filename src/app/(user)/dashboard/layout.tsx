@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { HeaderWithAccount } from "@/components/layout/header-with-account";
+import { SkipLink } from "@/components/layout/skip-link";
 import { prisma } from "@/lib/prisma";
 import { requireUserPage } from "@/lib/rbac";
 
@@ -22,6 +23,7 @@ async function NavWithGuard() {
 export default function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
   return (
     <>
+      <SkipLink />
       <HeaderWithAccount />
       {/* Kolom dasar minmax(0,1fr): tanpa ini lebar grid mengikuti isi (tab menu, grafik) dan meluber. */}
       <div className="page-container grid flex-1 grid-cols-[minmax(0,1fr)] gap-6 py-6 pb-24 md:pb-10 lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:gap-10 lg:py-10">

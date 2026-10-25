@@ -21,7 +21,7 @@ const score = (n: number) => String(Math.round(n * 10) / 10).replace(".", ",");
 
 function Table({ caption, head, children }: { caption: string; head: string[]; children: React.ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border">
+    <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
       <table className="w-full min-w-136 text-left">
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-secondary text-sm">

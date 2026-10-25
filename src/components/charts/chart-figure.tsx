@@ -29,10 +29,11 @@ export function ChartFigure({
         (empty ?? <p className="rounded-xl bg-secondary px-4 py-8 text-center text-sm text-muted-foreground">Belum ada data.</p>)
       ) : (
         <>
+          {/* Grafik hanya visual (tanpa fokus keyboard); isinya tersedia sebagai tabel di bawah. */}
           <div aria-hidden="true">{children}</div>
           <details className="text-sm">
             <summary className="cursor-pointer text-muted-foreground hover:text-primary">Lihat tabel data</summary>
-            <div className="mt-2 overflow-x-auto">
+            <div className="mt-2 overflow-x-auto outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full text-left tabular-nums">
                 <caption className="sr-only">{title}</caption>
                 <thead>

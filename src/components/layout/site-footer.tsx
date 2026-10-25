@@ -112,7 +112,7 @@ export async function SiteFooter() {
               TAMAN PELAJAR
             </text>
           </svg>
-          <p className="text-sm text-white/75">
+          <p className="text-sm text-white/90">
             © {year} Taman Pelajar. Seluruh materi, soal, dan ilustrasi dibuat oleh tim Taman Pelajar.
           </p>
         </div>

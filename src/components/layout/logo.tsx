@@ -42,12 +42,12 @@ export function Logo({
           )}
         >
           <span className="font-extrabold">Taman</span> <span className="font-medium">Pelajar</span>
-        </span>
+        </span>{" "}
         <span
           className={cn(
             "font-semibold tracking-[0.2em] whitespace-nowrap uppercase",
             s.sub,
-            tone === "inverse" ? "text-white/80" : "text-muted-foreground",
+            tone === "inverse" ? "text-white/90" : "text-muted-foreground",
           )}
         >
           Bimbingan belajar

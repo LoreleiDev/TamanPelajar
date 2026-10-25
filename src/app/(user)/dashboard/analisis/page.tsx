@@ -77,7 +77,7 @@ async function Content() {
 
       {/* Akurasi dan kecepatan per tingkat kesulitan (J.2.3–J.2.5) */}
       <DashboardSection title="Akurasi per tingkat kesulitan">
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
           <table className="w-full min-w-md text-left tabular-nums">
             <caption className="sr-only">Akurasi per tingkat kesulitan</caption>
             <thead className="bg-secondary text-sm">

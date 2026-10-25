@@ -47,7 +47,7 @@ export function LiveSearch({ products }: { products: ProductSummary[] }) {
         <h2 id="cari-judul" className="text-heading max-w-[30ch] text-muted-foreground">
           Ketik ujian yang sedang kamu siapkan
         </h2>
-        <form action="/program" role="search" data-ui>
+        <form action="/program" role="search" aria-label="Cari paket belajar" data-ui>
           <label htmlFor="cari-beranda" className="sr-only">
             Cari paket belajar
           </label>

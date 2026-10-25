@@ -151,7 +151,7 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
             <h2 id="produk-judul" className="text-heading">
               Produk
             </h2>
-            <div className="overflow-x-auto rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full text-left">
                 <caption className="sr-only">Produk dalam pesanan</caption>
                 <thead className="bg-secondary text-sm">
