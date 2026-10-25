@@ -301,7 +301,7 @@ export async function getActivity(userId: string, take = 8): Promise<ActivityIte
       where: { userId, status: "SELESAI" },
       orderBy: { submittedAt: "desc" },
       take,
-      select: { submittedAt: true, exam: { select: { title: true } } },
+      select: { id: true, submittedAt: true, exam: { select: { title: true } } },
     }),
     prisma.order.findMany({
       where: { userId, status: "BERHASIL" },
@@ -317,7 +317,7 @@ export async function getActivity(userId: string, take = 8): Promise<ActivityIte
       text: `Menyelesaikan “${l.lesson.title}” di ${l.lesson.section.course.title}`,
       href: `/kelas/${l.lesson.section.course.slug}/${l.lesson.slug}`,
     })),
-    ...attempts.map((a) => ({ at: a.submittedAt!, text: `Mengumpulkan ${a.exam.title}`, href: "/dashboard/riwayat" })),
+    ...attempts.map((a) => ({ at: a.submittedAt!, text: `Mengumpulkan ${a.exam.title}`, href: `/tryout/hasil/${a.id}` })),
     ...orders.map((o) => ({ at: o.paidAt!, text: `Membeli ${o.items.map((i) => i.nameSnapshot).join(", ")}`, href: "/dashboard/transaksi" })),
     ...certs.map((c) => ({ at: c.issuedAt, text: `Menerima ${c.certificate.title}`, href: `/sertifikat/${c.number}` })),
   ];

@@ -186,7 +186,7 @@ export async function finalizeAttempt(attemptId: string, opts: { auto: boolean; 
         type: "TRYOUT",
         title: "Hasil tryout tersedia",
         body: `Nilai ${attempt.exam.title} sudah bisa dilihat${score.pending ? "; soal essay masih menunggu penilaian admin" : ""}.`,
-        href: "/dashboard/riwayat", // TODO batch B: /tryout/hasil/${attemptId}
+        href: `/tryout/hasil/${attemptId}`,
       },
     });
     return true;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { advanceTimeline, finishActiveSection, initialTimeline, orderForAttempt, seededShuffle, startBlock } from "./engine";
+import { advanceTimeline, finishActiveSection, initialTimeline, orderForAttempt, rankAmong, seededShuffle, startBlock } from "./engine";
 
 const at = (min: number) => new Date(Date.UTC(2026, 9, 25, 8, 0) + min * 60_000);
 
@@ -108,5 +108,14 @@ describe("syarat memulai tryout (I.1, I.2)", () => {
     expect(startBlock({ ...base, opensAt: at(10) })).toBe("BELUM_DIBUKA");
     expect(startBlock({ ...base, closesAt: at(0) })).toBe("SUDAH_DITUTUP");
     expect(startBlock({ ...base, attemptsUsed: 2 })).toBe("BATAS_PERCOBAAN");
+  });
+});
+
+describe("peringkat dan persentil (I.6.4–I.6.5)", () => {
+  it("peserta tunggal berada di peringkat 1, persentil 100", () => {
+    expect(rankAmong(30, [])).toEqual({ rank: 1, participants: 1, percentile: 100, average: 30 });
+  });
+  it("nilai sama tidak menurunkan peringkat; persentil = persen peserta di bawah", () => {
+    expect(rankAmong(40, [50, 40, 20, 10])).toEqual({ rank: 2, participants: 5, percentile: 50, average: 32 });
   });
 });

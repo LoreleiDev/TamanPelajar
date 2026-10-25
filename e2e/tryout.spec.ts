@@ -63,7 +63,7 @@ test.describe("tryout CBT (I, T.6–T.10)", () => {
     await expect(page.getByRole("button", { name: "Mulai Tryout" })).toHaveCount(0);
   });
 
-  test("mengerjakan, autosave, refresh, pindah subtes, dan mengumpulkan (T.6–T.10)", async ({ page, isMobile }, info) => {
+  test("mengerjakan, autosave, refresh, pindah subtes, dan mengumpulkan (T.6–T.10)", async ({ page, browser, isMobile }, info) => {
     test.slow();
     await masuk(page, `e2e-tryout-${info.project.name}@tamanpelajar.test`, "/dashboard");
     const attemptId = await mulai(page, "tryout-skd-paket-1");
@@ -110,12 +110,46 @@ test.describe("tryout CBT (I, T.6–T.10)", () => {
     const submit = page.getByRole("dialog", { name: "Kumpulkan tryout?" });
     await expect(submit).toContainText("4 soal belum dijawab");
     await submit.getByRole("button", { name: "Ya, kumpulkan" }).click();
-    await expect(page).toHaveURL(/\/dashboard\/riwayat$/);
-    await expect(page.getByRole("main").getByText(/percobaan ke-1/).first()).toBeVisible();
 
-    // Percobaan yang sudah dikumpulkan tidak bisa dibuka lagi.
+    // Hasil (I.6): nilai, peringkat, subtes, grafik, rekomendasi.
+    await expect(page).toHaveURL(new RegExp(`/tryout/hasil/${attemptId}$`));
+    const result = page.getByRole("main");
+    await expect(result.getByRole("heading", { level: 1, name: "Hasil Tryout SKD Paket 1" })).toBeVisible();
+    await expect(result.getByText("Peringkat", { exact: true })).toBeVisible();
+    await expect(result.getByRole("table", { name: "Nilai per subtes" })).toContainText("TWK");
+    await expect(result.getByRole("figure", { name: /^Nilai per topik/ })).toBeVisible();
+    await expect(result.getByRole("heading", { name: "Yang perlu dipelajari" })).toBeVisible();
+    await expect(result.getByRole("link", { name: "Ulangi tryout" })).toBeVisible();
+
+    // Pembahasan (I.7): status dengan teks, kunci jawaban, navigasi nomor.
+    await result.getByRole("link", { name: "Lihat pembahasan" }).click();
+    await expect(page).toHaveURL(new RegExp(`/tryout/pembahasan/${attemptId}$`));
+    await expect(result.getByRole("heading", { name: "Soal 1" })).toBeVisible();
+    await expect(result.getByText("Kunci jawaban").first()).toBeVisible();
+    await expect(result.getByRole("heading", { name: "Pembahasan", exact: true })).toBeVisible();
+    await result.getByRole("button", { name: "Soal berikutnya" }).click();
+    await expect(result.getByRole("heading", { name: "Soal 2" })).toBeVisible();
+    await expect(page).toHaveURL(/\?soal=2$/);
+    await result.getByRole("button", { name: /^Soal 10, / }).click();
+    await expect(result.getByRole("heading", { name: "Soal 10" })).toBeVisible();
+
+    // Percobaan yang sudah dikumpulkan tidak bisa dibuka lagi; riwayat menautkan hasil.
     await page.goto(`/ujian/${attemptId}`);
-    await expect(page).toHaveURL(/\/dashboard\/riwayat$/);
+    await expect(page).toHaveURL(new RegExp(`/tryout/hasil/${attemptId}$`));
+    await page.goto("/dashboard/riwayat");
+    await page.getByRole("main").getByText(/percobaan ke-1/).first().click();
+    await expect(page.getByRole("main").getByRole("link", { name: /^Lihat hasil lengkap/ }).first()).toHaveAttribute("href", /\/tryout\/hasil\//);
+
+    // Hasil milik peserta lain tidak bisa dibuka (P.1.9). Konteks baru: menghapus cookie bisa
+    // balapan dengan penyegaran sesi di latar.
+    const otherContext = await browser.newContext({ baseURL: "http://localhost:3000" });
+    const other = await otherContext.newPage();
+    await masuk(other, "user1@tamanpelajar.test", "/dashboard");
+    await other.goto(`/tryout/hasil/${attemptId}`);
+    await expect(other.getByRole("heading", { name: "Halaman ini tidak ditemukan" })).toBeVisible();
+    await other.goto(`/tryout/pembahasan/${attemptId}`);
+    await expect(other.getByRole("heading", { name: "Halaman ini tidak ditemukan" })).toBeVisible();
+    await otherContext.close();
   });
 
   test("server menolak jawaban setelah waktu habis dan mengumpulkan otomatis (I.4.6, I.4.9)", async ({ page }, info) => {
@@ -128,7 +162,7 @@ test.describe("tryout CBT (I, T.6–T.10)", () => {
 
     execSync(`pnpm exec tsx e2e/expire-attempt.ts ${attemptId}`);
     await main.locator("fieldset label").nth(1).click();
-    await expect(page).toHaveURL(/\/dashboard\/riwayat$/);
-    await expect(page.getByRole("main").getByText("Tryout TPA Paket 1").first()).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/tryout/hasil/${attemptId}$`));
+    await expect(page.getByRole("heading", { level: 1, name: "Hasil Tryout TPA Paket 1" })).toBeVisible();
   });
 });

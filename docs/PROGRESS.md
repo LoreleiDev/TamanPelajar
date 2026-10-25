@@ -168,9 +168,41 @@ Lima branch fitur dan dua branch perbaikan, masing-masing di-squash ke `main` se
 - Halaman daftar dan pengerjaan tryout dibangun di Tahap 3; balasan diskusi oleh admin (**L.2.8**) di Tahap 5
 - Di server dev kadang muncul peringatan hydration saat beban tinggi; tidak muncul di build produksi
 
-## Tahap 3 — Tryout CBT
+## Tahap 3 — Tryout CBT (25 Oktober 2026)
 
-Belum dimulai.
+Dua batch, masing-masing di-squash ke `main`. Sesuai arahan RMED, pengujian lengkap (fitur baru + regresi seluruh e2e) dijalankan sekali di akhir setiap batch, lalu push.
+
+### `feat/I-ujian-cbt` (batch A)
+- [x] **I.1** Daftar tryout: nama, kategori, jumlah soal, durasi, jadwal, percobaan, status, nilai tertinggi, tombol mulai/lanjutkan
+- [x] **I.2** Petunjuk: durasi, jumlah soal, tabel subtes, sistem penilaian, aturan, batas percobaan, checkbox persetujuan, "Mulai Tryout". Tamu melihat dialog masuk; tanpa paket ditawari paket yang mencakup tryout
+- [x] **I.3.1–I.3.4** Halaman `/ujian/[attemptId]` tanpa navbar utama: nama tryout, nomor soal, timer, keluar; soal di kiri, panel nomor di kanan (sheet bawah di mobile); opsi A–E sebagai kartu; ragu-ragu, sebelumnya, berikutnya, simpan jawaban; status nomor dibedakan warna dan ikon
+- [x] **I.4.1–I.4.4** Timer dari `deadlineAt` server (selisih jam perangkat dikoreksi), autosave debounce 1 detik dengan simpan ulang saat jaringan putus, soal aktif dan jawaban pulih setelah refresh
+- [x] **I.4.5–I.4.9** Peringatan 10/5/1 menit, auto-submit, konfirmasi dengan jumlah soal kosong dan ragu, submit idempoten (`updateMany` bersyarat dalam transaksi), server menolak jawaban setelah batas waktu (toleransi jaringan 2 detik) dan mengumpulkan percobaan kedaluwarsa saat diakses
+- [x] **I.4.10–I.4.12** Tombol layar penuh, deteksi pindah tab, log aktivitas (`ExamActivityLog`)
+- [x] **I.4.13–I.4.15** Acak soal dan opsi dari seed tersimpan; subtes berurutan dengan durasi sendiri, subtes berikutnya mulai saat subtes sebelumnya ditutup atau habis waktunya
+- [x] **I.5.1–I.5.6** Pilihan ganda tunggal/jamak, benar-salah, isian singkat, numerik (koma desimal), essay
+- [x] **J.1.1–J.1.6** Penilaian di server memakai `features/scoring`; kunci jawaban tidak pernah dikirim ke halaman ujian
+- [x] **P.1.4** Rate limit mulai, simpan jawaban, kumpulkan, dan log aktivitas
+
+### `feat/I6-hasil-pembahasan` (batch B)
+- [x] **I.6.1–I.6.11** Hasil: nilai akhir dan per subtes, benar/salah/kosong, waktu, peringkat dan persentil (nilai terbaik tiap peserta), rata-rata peserta, passing grade dan status, radar kemampuan, nilai per topik dibanding rata-rata, rekomendasi kelas dan video, tombol pembahasan dan ulangi tryout
+- [x] **I.7.1–I.7.8** Pembahasan: urutan sama seperti saat dikerjakan, jawaban siswa dan kunci, status dengan ikon dan teks, pembahasan, video pembahasan (embed YouTube/Vimeo), topik dan tingkat, sebelumnya/berikutnya, navigasi semua nomor (`?soal=n`)
+- [x] **J.2.1–J.2.8** Analisis per topik, akurasi dan kecepatan per tingkat kesulitan, perbandingan dengan rata-rata peserta, rekomendasi dari topik di bawah 70%
+- [x] **M.6.5** Pembahasan hanya terbuka bila `showDiscussion` dan `discussionOpensAt` mengizinkan; **P.1.9** hasil dan pembahasan hanya untuk pemilik percobaan (atau admin)
+- [x] Tautan riwayat, aktivitas dashboard, notifikasi, dan petunjuk mengarah ke halaman hasil
+
+**Pengujian (akhir tahap):**
+- `pnpm lint`, `pnpm typecheck`, `pnpm build` lulus; `pnpm test` 39/39 (tambahan: mesin ujian, jadwal subtes, syarat mulai, peringkat)
+- `pnpm test:e2e` 79/79 lulus dua kali berturut-turut (desktop + mobile), termasuk `e2e/tryout.spec.ts`: tamu, tanpa paket, alur lengkap mulai–autosave–refresh–subtes–kumpulkan–hasil–pembahasan, akses peserta lain ditolak, dan waktu habis
+- Kriteria yang sekarang tercakup: **T.6–T.11**
+- Akun `e2e-tryout-desktop/mobile@tamanpelajar.test` dibuat ulang oleh `e2e/reset-db.ts` dengan langganan semua paket tryout; global setup memanaskan rute berat di server dev sebelum tes paralel
+
+**Review visual:** screenshot 1440, 1024, 768, 375 px untuk daftar tryout, petunjuk, halaman ujian, hasil, dan pembahasan. Tidak ada error console dan tidak ada scroll horizontal. Perbaikan dari review: header ujian di mobile diringkas, tombol sebelumnya/berikutnya dipindah ke bar bawah di mobile, sheet daftar soal ditutup saat dialog konfirmasi dibuka, label skala radar dihapus karena menabrak nama topik, batang 0% diberi ukuran minimum, teks legenda grafik memakai warna tinta.
+
+**Catatan:**
+- Essay tercatat "menunggu penilaian"; penilaian essay oleh admin (**L.2.7**) dan preview tryout (**M.6.9**) di Tahap 5
+- Setelah `pnpm db:seed`, hapus `.next/dev` atau mulai ulang server dev: data `use cache` menyimpan ID lama
+- MariaDB XAMPP harus berjalan sebelum build dan e2e (build membaca data tryout untuk `generateStaticParams`)
 
 ## Tahap 4 — Keranjang, checkout, pembayaran
 

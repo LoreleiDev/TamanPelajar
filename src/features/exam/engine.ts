@@ -182,3 +182,13 @@ export const startBlockMessage: Record<StartBlock, string> = {
   SUDAH_DITUTUP: "Jadwal tryout ini sudah ditutup.",
   BATAS_PERCOBAAN: "Batas percobaan tryout ini sudah habis.",
 };
+
+/** Posisi nilai di antara nilai terbaik setiap peserta lain (I.6.4–I.6.5). Fungsi murni. */
+export function rankAmong(score: number, otherBests: number[]) {
+  const participants = otherBests.length + 1;
+  const rank = 1 + otherBests.filter((s) => s > score).length;
+  const below = otherBests.filter((s) => s < score).length;
+  const percentile = otherBests.length ? Math.round((below / otherBests.length) * 100) : 100;
+  const average = (otherBests.reduce((n, s) => n + s, 0) + score) / participants;
+  return { rank, participants, percentile, average };
+}

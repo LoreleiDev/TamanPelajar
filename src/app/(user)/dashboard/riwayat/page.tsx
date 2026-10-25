@@ -87,6 +87,10 @@ async function Content() {
                       ))}
                     </tbody>
                   </table>
+                  <Link href={`/tryout/hasil/${r.attemptId}`} className="self-start font-semibold text-primary hover:underline">
+                    Lihat hasil lengkap dan pembahasan
+                    <span className="sr-only"> {r.examTitle} percobaan ke-{r.attemptNo}</span>
+                  </Link>
                 </div>
               </details>
             </li>
@@ -97,7 +101,7 @@ async function Content() {
   );
 }
 
-// Riwayat Hasil (F.1, I.6.1–I.6.3). Halaman hasil dan pembahasan lengkap dibangun di Tahap 3.
+// Riwayat Hasil (F.1, I.6.1–I.6.3). Hasil lengkap dan pembahasan di /tryout/hasil/[attemptId].
 export default function Page() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>

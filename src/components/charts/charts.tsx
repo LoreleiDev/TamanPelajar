@@ -8,6 +8,11 @@ import {
   Legend,
   Line,
   LineChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -51,6 +56,9 @@ function TooltipBox({ active, payload, label, suffix }: TooltipContentProps & { 
     </div>
   );
 }
+
+/** Teks legenda memakai warna tinta, bukan warna seri (dataviz: identitas dibawa penanda). */
+const legendText = (value: string) => <span style={{ color: C.ink }}>{value}</span>;
 
 /** Perkembangan nilai (F.3.1, J.2.6): satu seri, persen dari nilai maksimum. */
 export function ScoreTrendChart({ data }: { data: { label: string; percent: number }[] }) {
@@ -119,12 +127,59 @@ export function CompareChart({ data }: { data: { exam: string; mine: number; ave
         <XAxis dataKey="exam" {...axisProps} />
         <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} {...axisProps} unit="%" width={56} />
         <Tooltip content={(p) => <TooltipBox {...p} suffix="%" />} cursor={{ fill: "rgb(63 112 66 / 0.06)" }} />
-        <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 13, color: C.ink }} />
+        <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 13 }} formatter={legendText} />
         <Bar dataKey="mine" name="Nilai terbaikmu" fill={C.primary} radius={[4, 4, 0, 0]} isAnimationActive={false}>
           <LabelList dataKey="mine" position="top" fill={C.ink} fontSize={12} formatter={(v) => `${String(v).replace(".", ",")}%`} />
         </Bar>
         <Bar dataKey="average" name="Rata-rata peserta" fill={C.leaf} radius={[4, 4, 0, 0]} isAnimationActive={false}>
           <LabelList dataKey="average" position="top" fill={C.ink} fontSize={12} formatter={(v) => `${String(v).replace(".", ",")}%`} />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+/** Radar kemampuan per topik (I.6.7): satu seri, persen penguasaan. Butuh minimal 3 topik. */
+export function TopicRadarChart({ data }: { data: { topic: string; mastery: number }[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <RadarChart data={data} outerRadius="72%" margin={{ top: 8, right: 24, bottom: 8, left: 24 }}>
+        <PolarGrid stroke={C.grid} />
+        <PolarAngleAxis dataKey="topic" tick={{ fill: C.ink, fontSize: 12 }} />
+        {/* Tanpa label skala: menabrak nama topik; nilai ada di tooltip dan tabel data. */}
+        <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
+        <Tooltip content={(p) => <TooltipBox {...p} suffix="%" />} />
+        <Radar
+          dataKey="mastery"
+          name="Penguasaan"
+          stroke={C.primary}
+          strokeWidth={2}
+          fill={C.primary}
+          fillOpacity={0.18}
+          dot={{ r: 4, fill: C.primary, stroke: "#fff", strokeWidth: 2 }}
+          isAnimationActive={false}
+        />
+      </RadarChart>
+    </ResponsiveContainer>
+  );
+}
+
+/** Nilai per topik dibanding rata-rata peserta (I.6.8, J.2.7): batang horizontal dua seri. */
+export function TopicCompareChart({ data }: { data: { topic: string; mine: number; average: number | null }[] }) {
+  const label = (v: unknown) => (v === null || v === undefined ? "" : `${String(v).replace(".", ",")}%`);
+  return (
+    <ResponsiveContainer width="100%" height={Math.max(180, data.length * 56 + 48)}>
+      <BarChart data={data} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barGap={2} barCategoryGap={10}>
+        <CartesianGrid stroke={C.grid} horizontal={false} />
+        <XAxis type="number" domain={[0, 100]} ticks={[0, 50, 100]} {...axisProps} unit="%" />
+        <YAxis type="category" dataKey="topic" {...axisProps} width={150} />
+        <Tooltip content={(p) => <TooltipBox {...p} suffix="%" />} cursor={{ fill: "rgb(63 112 66 / 0.06)" }} />
+        <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 13 }} formatter={legendText} />
+        <Bar dataKey="mine" name="Nilaimu" fill={C.primary} radius={[0, 4, 4, 0]} minPointSize={2} isAnimationActive={false}>
+          <LabelList dataKey="mine" position="right" fill={C.ink} fontSize={12} formatter={label} />
+        </Bar>
+        <Bar dataKey="average" name="Rata-rata peserta" fill={C.leaf} radius={[0, 4, 4, 0]} isAnimationActive={false}>
+          <LabelList dataKey="average" position="right" fill={C.ink} fontSize={12} formatter={label} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>

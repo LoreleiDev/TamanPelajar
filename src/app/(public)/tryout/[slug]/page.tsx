@@ -90,9 +90,9 @@ async function StartPanel({ exam }: { exam: ExamDetail }) {
         {summary}
         {st.lastFinishedAttemptId && (
           <Button asChild variant="outline" className="self-start">
-            <Link href="/dashboard/riwayat">
+            <Link href={`/tryout/hasil/${st.lastFinishedAttemptId}`}>
               <History aria-hidden="true" data-icon="inline-start" />
-              Lihat riwayat hasil
+              Lihat hasil terakhir
             </Link>
           </Button>
         )}

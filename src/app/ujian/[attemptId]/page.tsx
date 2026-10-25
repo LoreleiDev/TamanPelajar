@@ -9,16 +9,14 @@ import { requireUserPage } from "@/lib/rbac";
 
 export const metadata: Metadata = { title: "Mengerjakan tryout", robots: { index: false } };
 
-// TODO batch B: arahkan ke /tryout/hasil/[attemptId] setelah halaman hasil (I.6) ada.
-const resultHref = () => "/dashboard/riwayat";
 
 async function Content({ params }: { params: PageProps<"/ujian/[attemptId]">["params"] }) {
   const { attemptId } = await params;
   const user = await requireUserPage(`/ujian/${attemptId}`);
   const session = await getExamSession(attemptId, user.id);
   if (!session) notFound();
-  if (session.state === "selesai") redirect(resultHref());
-  return <ExamRunner session={session} resultHref={resultHref()} />;
+  if (session.state === "selesai") redirect(`/tryout/hasil/${attemptId}`);
+  return <ExamRunner session={session} resultHref={`/tryout/hasil/${attemptId}`} />;
 }
 
 function ExamSkeleton() {
