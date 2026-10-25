@@ -166,6 +166,41 @@
   }
 }
 
+/* Konten kaya hasil sanitasi (soal, opsi, pembahasan). */
+@utility rich-text {
+  & p + p,
+  & p + ul,
+  & p + ol,
+  & ul + p,
+  & ol + p {
+    margin-top: 0.75rem;
+  }
+  & ul {
+    list-style: disc;
+    margin-left: 1.25rem;
+  }
+  & ol {
+    list-style: decimal;
+    margin-left: 1.25rem;
+  }
+  & strong {
+    font-weight: 700;
+  }
+  & img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+  }
+  & table {
+    border-collapse: collapse;
+  }
+  & th,
+  & td {
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.5rem;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

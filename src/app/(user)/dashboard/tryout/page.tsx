@@ -30,7 +30,7 @@ async function Content() {
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[40rem] text-left">
+          <table className="w-full min-w-2xl text-left">
             <caption className="sr-only">Daftar tryout</caption>
             <thead className="bg-secondary text-sm">
               <tr>
@@ -41,6 +41,9 @@ async function Content() {
                 <th scope="col" className="px-4 py-3 text-right font-semibold">Percobaan</th>
                 <th scope="col" className="px-4 py-3 font-semibold">Status</th>
                 <th scope="col" className="px-4 py-3 text-right font-semibold">Nilai tertinggi</th>
+                <th scope="col" className="px-4 py-3 font-semibold">
+                  <span className="sr-only">Aksi</span>
+                </th>
               </tr>
             </thead>
             <tbody className="tabular-nums">
@@ -55,6 +58,12 @@ async function Content() {
                   </td>
                   <td className="px-4 py-3">{e.status}</td>
                   <td className="px-4 py-3 text-right">{e.bestPercent !== null ? `${num.format(e.bestPercent)}%` : "–"}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/tryout/${e.slug}`} className="font-semibold text-primary hover:underline">
+                      {e.status === "Sedang dikerjakan" ? "Lanjutkan" : "Kerjakan"}
+                      <span className="sr-only"> {e.title}</span>
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -65,7 +74,7 @@ async function Content() {
   );
 }
 
-// Tryout Saya (F.1, I.1). Pengerjaan tryout dibangun di Tahap 3.
+// Tryout Saya (F.1, I.1).
 export default function Page() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
