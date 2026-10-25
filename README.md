@@ -51,7 +51,7 @@ Isi data demo:
 | User | Isi |
 |---|---|
 | user1 | Paket SKD aktif, dua percobaan tryout, progres kelas TWK |
-| user2 | Paket UTBK aktif dan satu sertifikat |
+| user2 | Paket UTBK aktif, sertifikat Penalaran Umum, dan tugas praktik Pengetahuan Kuantitatif yang menunggu penilaian admin |
 | user3 | Tryout SKD |
 | user4 | Belum membeli; ada pesanan yang menunggu pembayaran |
 | user5 | Paket TPA yang masa aktifnya sudah berakhir |
@@ -78,6 +78,21 @@ Semua file (gambar, PDF materi, sertifikat) disimpan di Cloudinary.
 - Isi variabel `CLOUDINARY_*` dan `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` di `.env`.
 - Akun gratis Cloudinary memblokir pengiriman PDF dan ZIP secara bawaan. Aktifkan **Settings → Security → Allow delivery of PDF and ZIP files** agar PDF materi bisa diunduh.
 
+## Sertifikat dan tugas praktik
+
+- Setiap kelas bersertifikat punya **batch** (atur di Admin → Kelas → tab Batch). Siswa yang berlangganan otomatis masuk batch yang sedang berjalan. Kelas tanpa batch tidak menampilkan bagian sertifikat.
+- Syarat sertifikat: semua materi selesai, rata-rata nilai terbaik setiap kuis kelas mencapai nilai minimal (Admin → Sertifikat, bawaan 80), lalu tugas praktik berupa link Google Drive disetujui admin (Admin → Tugas Praktik).
+- Admin bisa menyetujui, meminta revisi sekali, atau menolak. Siswa yang gagal mengulang gratis di batch berikutnya dengan progres dari awal.
+- Template tugas (PDF, DOCX, atau ZIP) diunggah ke Cloudinary dan hanya bisa diunduh peserta batch.
+
+## Email
+
+`MAIL_MODE="log"` (bawaan) mencetak email ke log server dan menampilkan tautan verifikasi/reset di halaman, cukup untuk demo. Email hasil tugas praktik juga dicetak ke log. Pengiriman sungguhan (SMTP atau penyedia email) belum disambungkan.
+
+## Login Google (opsional)
+
+Isi `AUTH_GOOGLE_ID` dan `AUTH_GOOGLE_SECRET` dari Google Cloud Console (OAuth client "Web application") dengan redirect URI `<NEXT_PUBLIC_APP_URL>/api/auth/callback/google`. Tombol "Masuk dengan Google" hanya tampil bila keduanya terisi.
+
 ## Pembayaran
 
 - Bawaan `PAYMENT_MODE="simulasi"`: semua metode (VA, QRIS, e-wallet, transfer) disimulasikan. Di halaman transaksi ada tombol **Bayar sekarang (simulasi)** dan **Gagalkan pembayaran**; tidak ada uang yang ditarik.
@@ -96,3 +111,10 @@ Semua file (gambar, PDF materi, sertifikat) disimpan di Cloudinary.
    pnpm prisma migrate deploy
    ```
    Build Vercel membaca database saat prerender, jadi `DATABASE_URL` harus bisa diakses dari Vercel.
+4. Atur `NEXT_PUBLIC_APP_URL` ke domain produksi agar `sitemap.xml`, `robots.txt`, URL kanonis, dan Open Graph memakai domain yang benar.
+
+## Masalah umum
+
+- **Tidak bisa masuk di satu browser setelah seed ulang.** Seed membuat ulang semua akun, jadi cookie sesi lama tidak berlaku. Aplikasi otomatis menghapusnya dan menampilkan pesan "Sesimu sudah tidak berlaku"; cukup masuk lagi.
+- **Data katalog tidak berubah setelah seed ulang.** Restart server agar cache halaman publik dimuat ulang.
+- **E2E dan mode pembayaran.** Playwright selalu menjalankan server tes dengan `PAYMENT_MODE=simulasi`, walau `.env` memakai Midtrans. Pastikan port 3000 kosong sebelum `pnpm test:e2e`.

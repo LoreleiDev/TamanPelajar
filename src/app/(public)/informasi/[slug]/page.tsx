@@ -24,7 +24,14 @@ export async function generateMetadata({ params }: PageProps<"/informasi/[slug]"
     title: a.title,
     description: a.excerpt,
     alternates: { canonical: `/informasi/${a.slug}` },
-    openGraph: { title: a.title, description: a.excerpt, type: "article", publishedTime: a.publishedAt.toISOString(), ...(a.coverUrl && { images: [a.coverUrl] }) },
+    openGraph: {
+      title: a.title,
+      description: a.excerpt,
+      type: "article",
+      locale: "id_ID",
+      publishedTime: a.publishedAt.toISOString(),
+      images: [a.coverUrl ?? { url: "/logo-taman-pelajar.jpeg", width: 746, height: 746, alt: "Taman Pelajar" }],
+    },
   };
 }
 

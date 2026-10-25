@@ -32,7 +32,13 @@ export async function generateMetadata({ params }: PageProps<"/paket/[slug]">): 
     title: product.name,
     description: product.summary,
     alternates: { canonical: `/paket/${product.slug}` },
-    openGraph: { title: product.name, description: product.summary, type: "website" },
+    openGraph: {
+      title: product.name,
+      description: product.summary,
+      type: "website",
+      locale: "id_ID",
+      images: [product.thumbnailUrl ?? { url: "/logo-taman-pelajar.jpeg", width: 746, height: 746, alt: "Taman Pelajar" }],
+    },
   };
 }
 

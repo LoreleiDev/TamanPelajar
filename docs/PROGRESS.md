@@ -348,6 +348,13 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 133/133.
 
-## Tahap 6 — Pengujian dan penyempurnaan
+## Tahap 6 — Pengujian dan penyempurnaan (25 Oktober 2026)
 
-Belum dimulai.
+### `feat/Q2-seo-sitemap-readme` (batch A)
+- [x] **Q.2.3** `sitemap.xml`: halaman publik statis dan semua paket, kelas, video, tryout, serta artikel yang terbit
+- [x] **Q.2.4** `robots.txt`: menutup panel admin, dashboard, ujian, keranjang, checkout, transaksi, invoice, API, dan style guide
+- [x] **Q.2.1–Q.2.2** Audit metadata: semua halaman punya judul dan deskripsi; Open Graph detail paket dan artikel kini memuat gambar (thumbnail/sampul, cadangan logo) dan locale `id_ID`
+- [x] **R.17–R.18** README: sertifikat dan tugas praktik, email mode log, login Google, URL produksi untuk SEO, masalah umum
+- [x] e2e robots, sitemap, dan metadata/OG halaman publik utama
+
+**Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 139/139 (15 tes khusus satu perangkat sengaja dilewati).
