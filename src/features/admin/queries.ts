@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
+import { countUnansweredDiscussions } from "./discussions";
 import { countPendingEssays } from "./grading";
 import { adminOnly } from "./guard";
 import { fillMonths, lastMonths, percent } from "./stats";
@@ -8,11 +9,12 @@ import { fillMonths, lastMonths, percent } from "./stats";
 
 export async function getAdminBadges() {
   await adminOnly();
-  const [transaksi, penilaian] = await Promise.all([
+  const [transaksi, penilaian, diskusi] = await Promise.all([
     prisma.order.count({ where: { status: "MENUNGGU", expiresAt: { gt: new Date() }, deletedAt: null } }),
     countPendingEssays(),
+    countUnansweredDiscussions(),
   ]);
-  return { transaksi, penilaian };
+  return { transaksi, penilaian, diskusi };
 }
 
 const num = (v: unknown) => Number(v ?? 0);

@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  Award,
+  BarChart3,
+  GalleryHorizontal,
+  MessagesSquare,
+  MessageSquareQuote,
+  Newspaper,
+  Settings,
   Banknote,
   BookOpen,
   FolderTree,
@@ -38,7 +45,10 @@ interface Item {
 const groups: { title: string; items: Item[] }[] = [
   {
     title: "Ringkasan",
-    items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }],
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/laporan", label: "Laporan", icon: BarChart3 },
+    ],
   },
   {
     title: "Pengguna dan penjualan",
@@ -58,6 +68,17 @@ const groups: { title: string; items: Item[] }[] = [
       { href: "/admin/tryout", label: "Tryout", icon: ClipboardList },
       { href: "/admin/bank-soal", label: "Bank Soal", icon: FileQuestion },
       { href: "/admin/penilaian", label: "Penilaian", icon: ClipboardCheck, badge: "penilaian" },
+      { href: "/admin/diskusi", label: "Diskusi", icon: MessagesSquare, badge: "diskusi" },
+      { href: "/admin/sertifikat", label: "Sertifikat", icon: Award },
+    ],
+  },
+  {
+    title: "Situs",
+    items: [
+      { href: "/admin/informasi", label: "Informasi", icon: Newspaper },
+      { href: "/admin/banner", label: "Banner", icon: GalleryHorizontal },
+      { href: "/admin/testimoni", label: "Testimoni", icon: MessageSquareQuote },
+      { href: "/admin/pengaturan", label: "Pengaturan", icon: Settings },
     ],
   },
   {

@@ -242,6 +242,8 @@ Dua batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, buil
 
 ## Tahap 5 — Panel administrator (25 Oktober 2026)
 
+Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, build, dan seluruh e2e lulus berulang. Kriteria **T.12** (admin menginput materi dan soal) dan **T.13** (admin mengelola pengguna, produk, kelas, soal, tryout, transaksi) kini tercakup e2e.
+
 ### `feat/M-admin-dasar-soal-tryout` (batch A)
 - [x] **M.1** Layout `/admin` dengan sidebar berkelompok (Ringkasan, Pengguna dan penjualan, Konten belajar, Sistem); di layar kecil menjadi lembar menu. Menu ditambahkan bersama halamannya, jadi tidak ada tautan mati. Penanda jumlah untuk transaksi menunggu dan essay belum dinilai
 - [x] **M.2.1–M.2.8** Dashboard admin: total dan siswa baru, transaksi dan pendapatan, program terlaris, tryout terpopuler, tingkat penyelesaian kelas, aktivitas terbaru, grafik pendapatan bulanan dan pengguna baru (WIB, enam bulan, tabel data bisa dibuka)
@@ -285,8 +287,28 @@ Dua batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, buil
 
 **Pengujian:** lint, typecheck, build lulus; unit 66/66; e2e 117/117 dua kali berturut-turut. Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px untuk semua halaman batch ini.
 
-### Belum (batch berikutnya)
-- Diskusi, informasi/artikel (termasuk halaman publik D.4), banner, testimoni, sertifikat, laporan, pengaturan
+### `feat/C2-konten-situs-laporan` (batch B2)
+- [x] **L.2.8** Diskusi: daftar pertanyaan siswa dengan filter belum/sudah dijawab, balasan admin bertanda khusus, notifikasi ke penanya dengan tautan ke materi, hapus diskusi atau balasan (moderasi); penanda jumlah belum dijawab di menu
+- [x] **C.2.8, D.4.1–D.4.2** Informasi: admin menulis artikel (kategori, ringkasan, sampul, isi HTML tersanitasi, status; tanggal terbit otomatis). Halaman publik `/informasi` (filter kategori, tulisan terbaru besar + daftar ringkas) dan `/informasi/[slug]` (penulis, tanggal, kategori, sampul, isi, artikel terkait), JSON-LD Article (**Q.2.6**), slug tak dikenal 404 asli
+- [x] **C.2.8** Banner: gambar wajib, tautan internal/https, urutan, aktif, jadwal tayang; tampil di beranda di bawah menu cepat (maksimal tiga, tidak tampil bila kosong)
+- [x] **M.1 Testimoni** Tambah, ubah, sembunyikan, hapus, urutan; langsung dipakai beranda
+- [x] **M.1 Sertifikat** Sertifikat per kelas, judul yang tercetak bisa diubah, daftar penerima dengan nomor yang bisa diverifikasi
+- [x] **M.2, L.2.9 Laporan** Rentang tanggal WIB: pendapatan, pesanan per status, penjualan per paket, siswa baru, tryout selesai; unduh CSV transaksi, pengguna, nilai per tryout, progres per kelas
+- [x] **M.1 Pengaturan** FAQ beranda (tambah, ubah urutan, hapus) dan kontak layanan yang dipakai halaman Hubungi kami
+- [x] Gaya isi artikel dan materi bacaan (`rich-text`): judul bagian, kutipan, tautan, jarak antarblok
+- [x] Menu admin lengkap 16 butir M.1 ditambah Penilaian, Diskusi, dan Audit log; tautan entitas di audit log
+- [x] Tes unit rentang laporan WIB; e2e diskusi, artikel publik, testimoni, validasi banner, pengaturan kontak, laporan CSV
+
+**Bug yang ditemukan dan diperbaiki:**
+- Fungsi rentang laporan berada satu berkas dengan query Prisma sehingga tes unitnya gagal dimuat tanpa database; dipisah menjadi fungsi murni (`report-range.ts`)
+- Daftar dalam isi artikel dan bacaan tidak punya gaya judul bagian, tautan, dan kutipan
+
+**Pengujian:** lint, typecheck, build lulus; unit 68/68; e2e 126/126 (8 tes khusus satu perangkat sengaja dilewati di perangkat lain) dua kali berturut-turut. Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px untuk halaman admin batch ini serta `/informasi`, detail artikel, dan `/kontak`.
+
+**Catatan Tahap 5:**
+- Upload banner, sampul, thumbnail paket, gambar soal, dan PDF memakai Cloudinary sungguhan; e2e hanya menguji validasinya agar tes tidak bergantung pada jaringan
+- Penilaian tugas (L.2.7 "tugas") belum punya model pengumpulan; materi Tugas berisi instruksi, sedangkan essay dinilai di menu Penilaian
+- Sitemap dan robots (Q.2.3–Q.2.4) dikerjakan di Tahap 6
 
 ## Tahap 6 — Pengujian dan penyempurnaan
 

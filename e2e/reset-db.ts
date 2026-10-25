@@ -32,6 +32,13 @@ async function resetDb() {
     await prisma.course.deleteMany({ where: { slug: { startsWith: "kelas-uji-admin-" } } });
     await prisma.video.deleteMany({ where: { slug: { startsWith: "video-uji-admin-" } } });
     await prisma.courseCategory.deleteMany({ where: { slug: { startsWith: "program-uji-admin-" } } });
+    await prisma.article.deleteMany({ where: { slug: { startsWith: "artikel-uji-admin-" } } });
+    await prisma.testimonial.deleteMany({ where: { name: { startsWith: "Uji Admin" } } });
+    await prisma.setting.upsert({
+      where: { key: "kontak" },
+      create: { key: "kontak", value: { email: "halo@tamanpelajar.com", jamLayanan: "Senin–Jumat, 09.00–17.00 WIB" } },
+      update: { value: { email: "halo@tamanpelajar.com", jamLayanan: "Senin–Jumat, 09.00–17.00 WIB" } },
+    });
     await prisma.user.updateMany({
       where: { email: { endsWith: "@tamanpelajar.test" } },
       data: { failedLogins: 0, lockedUntil: null },
@@ -86,6 +93,13 @@ async function resetDb() {
           },
         },
       });
+      // Pertanyaan diskusi untuk dijawab admin (L.2.8), di materi bab gratis.
+      const freeLesson = await prisma.lesson.findFirst({ where: { section: { isFree: true, course: { slug: "penalaran-umum" } } }, orderBy: { order: "asc" }, select: { id: true } });
+      if (freeLesson) {
+        await prisma.discussion.create({
+          data: { lesson: { connect: { id: freeLesson.id } }, user: { connect: { email: `e2e-sasaran-${project}@tamanpelajar.test` } }, body: `Pertanyaan uji diskusi ${project}: apakah kontraposisi selalu setara?` },
+        });
+      }
       // Percobaan selesai dengan essay belum dinilai, untuk antrean penilaian (L.2.7).
       const essay = await prisma.examQuestion.findFirst({
         where: { question: { type: "ESSAY" }, exam: { deletedAt: null } },

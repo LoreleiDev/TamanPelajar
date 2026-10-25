@@ -20,10 +20,19 @@ const filterSchema = z.object({
 });
 
 /** Tautan ke halaman entitas yang punya halaman detail admin. */
+const entityPaths: Record<string, string> = {
+  User: "/admin/pengguna/",
+  Voucher: "/admin/voucher/",
+  Course: "/admin/kelas/",
+  Product: "/admin/produk/",
+  Exam: "/admin/tryout/",
+  Question: "/admin/bank-soal/",
+  Video: "/admin/video/",
+  Article: "/admin/informasi/",
+};
+
 function entityHref(entity: string, id: string) {
-  if (entity === "User") return `/admin/pengguna/${id}`;
-  if (entity === "Voucher") return `/admin/voucher/${id}`;
-  return null;
+  return entityPaths[entity] && id !== "-" ? `${entityPaths[entity]}${id}` : null;
 }
 
 const json = (v: unknown) => JSON.stringify(v, null, 2);

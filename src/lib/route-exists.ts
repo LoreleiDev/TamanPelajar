@@ -27,6 +27,10 @@ const matchers: Matcher[] = [
     exists: async ([, slug]) => Boolean(await prisma.exam.findFirst({ where: { slug, ...published }, select: { id: true } })),
   },
   {
+    pattern: /^\/informasi\/([^/]+)$/,
+    exists: async ([, slug]) => Boolean(await prisma.article.findFirst({ where: { slug, status: "TERBIT", publishedAt: { not: null } }, select: { id: true } })),
+  },
+  {
     pattern: /^\/sertifikat\/([^/]+)$/,
     exists: async ([, number]) => Boolean(await prisma.userCertificate.findUnique({ where: { number }, select: { id: true } })),
   },

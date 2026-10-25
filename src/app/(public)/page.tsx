@@ -3,6 +3,7 @@ import type { WebSite } from "schema-dts";
 
 import { JsonLd } from "@/components/shared/json-ld";
 import { Advantages } from "@/features/catalog/components/home/advantages";
+import { BannerStrip } from "@/features/catalog/components/home/banner-strip";
 import { ClosingCta } from "@/features/catalog/components/home/closing-cta";
 import { Hero } from "@/features/catalog/components/home/hero";
 import { HomeFaq } from "@/features/catalog/components/home/home-faq";
@@ -14,6 +15,7 @@ import { StatsLedger } from "@/features/catalog/components/home/stats-ledger";
 import { TestimonialLetters } from "@/features/catalog/components/home/testimonial-letters";
 import {
   getPlatformStats,
+  listActiveBanners,
   listAllProductsForSearch,
   listCategories,
   listFeaturedProducts,
@@ -27,13 +29,14 @@ export const metadata: Metadata = {
 
 // Beranda (D.1).
 export default async function HomePage() {
-  const [stats, categories, featured, allProducts, testimonials, faq] = await Promise.all([
+  const [stats, categories, featured, allProducts, testimonials, faq, banners] = await Promise.all([
     getPlatformStats(),
     listCategories(),
     listFeaturedProducts(3),
     listAllProductsForSearch(),
     listTestimonials(),
     listHomeFaq(),
+    listActiveBanners(),
   ]);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -57,6 +60,7 @@ export default async function HomePage() {
       />
       <Hero stats={stats} />
       <QuickMenu />
+      <BannerStrip banners={banners} />
       <ProgramLineup categories={categories} />
       <LiveSearch products={allProducts} />
       <Recommended products={featured} />

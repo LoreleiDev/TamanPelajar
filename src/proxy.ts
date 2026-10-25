@@ -62,5 +62,6 @@ export const config = {
     "/kelas/:slug/:materi",
     "/tryout/:slug",
     "/sertifikat/:nomor",
+    "/informasi/:slug",
   ],
 };

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { contact } from "@/components/layout/nav-items";
 import { InfoPage } from "@/components/shared/info-page";
+import { getContactInfo } from "@/features/catalog/queries";
 
 export const metadata: Metadata = {
   title: "Kontak",
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 
 const link = "font-semibold text-primary underline underline-offset-4";
 
-export default function KontakPage() {
+export default async function KontakPage() {
+  // Email dan jam layanan diatur admin di menu Pengaturan.
+  const info = await getContactInfo();
   return (
     <InfoPage
       title="Hubungi kami"
@@ -21,8 +24,8 @@ export default function KontakPage() {
           title: "Email",
           body: (
             <p>
-              <a href={`mailto:${contact.email}`} className={link}>
-                {contact.email}
+              <a href={`mailto:${info.email}`} className={link}>
+                {info.email}
               </a>{" "}
               untuk pertanyaan akun, pembayaran, materi, dan kerja sama.
             </p>
@@ -57,7 +60,7 @@ export default function KontakPage() {
         {
           id: "jam",
           title: "Jam layanan",
-          body: <p>Senin sampai Jumat, pukul 09.00–17.00 WIB. Pesan di luar jam itu dibalas pada hari kerja berikutnya.</p>,
+          body: <p>{info.jamLayanan}. Pesan di luar jam itu dibalas pada hari kerja berikutnya.</p>,
         },
       ]}
     />

@@ -140,3 +140,87 @@ test.describe("panel admin: konten (L, M.4)", () => {
     await expect(page).toHaveURL(/\/admin\/produk$/);
   });
 });
+
+test.describe("panel admin: situs dan laporan (C.2.8, L.2.8, M.1, M.2)", () => {
+  test("menjawab diskusi siswa (L.2.8)", async ({ page }, info) => {
+    const base = info.project.name.replace("konten-", "");
+    await masukAdmin(page, "/admin/diskusi?status=belum");
+    const item = page.getByRole("article").filter({ hasText: `Pertanyaan uji diskusi ${base}` });
+    await expect(item).toBeVisible();
+    await expect(item.getByText("Belum dijawab")).toBeVisible();
+    await item.getByLabel("Balasan admin").fill("Ya, kontraposisi selalu setara dengan pernyataan asalnya.");
+    await item.getByRole("button", { name: "Kirim balasan" }).click();
+    await expect(page.getByText("Balasan terkirim. Siswa mendapat notifikasi.")).toBeVisible();
+    await page.goto("/admin/diskusi?status=sudah");
+    await expect(page.getByRole("article").filter({ hasText: `Pertanyaan uji diskusi ${base}` }).getByText("Sudah dijawab")).toBeVisible();
+  });
+
+  test("terbitkan artikel dan buka di halaman Informasi (D.4, C.2.8)", async ({ page }, info) => {
+    const slug = `artikel-uji-admin-${info.project.name}`;
+    await masukAdmin(page, "/admin/informasi/baru");
+    await page.getByLabel("Judul").fill(`Artikel Uji Admin ${info.project.name}`);
+    await page.getByLabel("Slug URL").fill(slug);
+    await page.getByLabel("Kategori").selectOption("PENGUMUMAN");
+    await page.getByLabel("Ringkasan").fill("Pengumuman uji otomatis untuk memastikan artikel tampil.");
+    await page.getByRole("textbox", { name: "Isi" }).fill("<h2>Jadwal</h2><p>Tryout akbar dibuka akhir bulan untuk semua pelanggan.</p>");
+    await page.getByLabel("Status").selectOption("TERBIT");
+    await page.getByRole("button", { name: "Buat artikel" }).click();
+    await expect(page.getByText("Artikel dibuat.")).toBeVisible();
+    await expect(page).not.toHaveURL(/\/baru$/);
+
+    await page.goto(`/informasi/${slug}`);
+    await expect(page.getByRole("heading", { level: 1, name: `Artikel Uji Admin ${info.project.name}` })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Jadwal" })).toBeVisible();
+    await page.goto("/informasi?kategori=pengumuman");
+    await expect(page.getByRole("link", { name: `Artikel Uji Admin ${info.project.name}` })).toBeVisible();
+    const missing = await page.request.get("/informasi/artikel-yang-tidak-ada");
+    expect(missing.status()).toBe(404);
+  });
+
+  test("testimoni dan banner (M.1, C.2.8)", async ({ page }, info) => {
+    await masukAdmin(page, "/admin/testimoni");
+    await page.getByRole("button", { name: "Tambah testimoni" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Nama").fill(`Uji Admin ${info.project.name}`);
+    await dialog.getByLabel("Program").fill("SKD CPNS");
+    await dialog.getByLabel("Kalimat pembuka").fill("Latihan rutin membantu saya.");
+    await dialog.getByLabel("Isi testimoni").fill("Saya mengerjakan tryout setiap akhir pekan dan membaca pembahasannya.");
+    await dialog.getByLabel("Tampilkan di beranda").uncheck();
+    await dialog.getByRole("button", { name: "Simpan testimoni" }).click();
+    const item = page.getByRole("listitem").filter({ hasText: `Uji Admin ${info.project.name}` });
+    await expect(item.getByText("Disembunyikan")).toBeVisible();
+    await item.getByRole("button", { name: "Hapus" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus" }).click();
+    await expect(page.getByRole("listitem").filter({ hasText: `Uji Admin ${info.project.name}` })).toHaveCount(0);
+
+    // Banner tanpa gambar ditolak.
+    await page.goto("/admin/banner");
+    await page.getByRole("button", { name: "Tambah banner" }).click();
+    await page.getByRole("dialog").getByLabel("Judul").fill("Banner uji");
+    await page.getByRole("dialog").getByRole("button", { name: "Simpan banner" }).click();
+    await expect(page.getByRole("dialog").getByText("Unggah gambar banner")).toBeVisible();
+  });
+
+  test("pengaturan kontak tampil di halaman Hubungi kami (M.1)", async ({ page }, info) => {
+    test.skip(info.project.name !== "konten-desktop", "Pengaturan bersama; cukup satu project.");
+    await masukAdmin(page, "/admin/pengaturan");
+    await page.getByLabel("Jam layanan").fill("Senin–Sabtu, 08.00–20.00 WIB");
+    await page.getByRole("button", { name: "Simpan kontak" }).click();
+    await expect(page.getByText("Kontak disimpan.")).toBeVisible();
+    await page.goto("/kontak");
+    await expect(page.getByText("Senin–Sabtu, 08.00–20.00 WIB")).toBeVisible();
+  });
+
+  test("laporan dan unduhan CSV (M.2, L.2.9)", async ({ page }) => {
+    await masukAdmin(page, "/admin/laporan");
+    await expect(page.getByRole("heading", { name: "Penjualan per paket" })).toBeVisible();
+    const res = await page.request.get("/api/export/transaksi?dari=2026-01-01&sampai=2026-12-31");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("text/csv");
+    expect(await res.text()).toContain("nomor,dibuat_wib");
+    const pengguna = await page.request.get("/api/export/pengguna");
+    expect(await pengguna.text()).toContain("admin@tamanpelajar.test");
+    await page.goto("/admin/sertifikat");
+    await expect(page.getByRole("heading", { level: 1, name: "Sertifikat" })).toBeVisible();
+  });
+});

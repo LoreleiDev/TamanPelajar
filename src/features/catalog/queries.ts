@@ -277,3 +277,27 @@ export async function listHomeFaq(): Promise<FaqItem[]> {
   const row = await prisma.setting.findUnique({ where: { key: "beranda.faq" } });
   return (row?.value as unknown as FaqItem[] | undefined) ?? [];
 }
+
+/** Banner aktif beranda (C.2.8). Jadwal tayang dievaluasi saat cache dibuat (maksimal per jam). */
+export async function listActiveBanners(): Promise<{ id: string; title: string; href: string | null; imageUrl: string }[]> {
+  "use cache";
+  cacheTag("katalog");
+  cacheLife("hours");
+  const now = new Date();
+  const rows = await prisma.banner.findMany({
+    where: { isActive: true, AND: [{ OR: [{ startsAt: null }, { startsAt: { lte: now } }] }, { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }] },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    take: 3,
+    select: { id: true, title: true, href: true, image: { select: { publicId: true } } },
+  });
+  return rows.map(({ image, ...b }) => ({ ...b, imageUrl: imageUrl(image.publicId, 1200) }));
+}
+
+/** Kontak layanan dari Pengaturan admin; bawaan dari baris kontak brand. */
+export async function getContactInfo(): Promise<{ email: string; jamLayanan: string }> {
+  "use cache";
+  cached();
+  const row = await prisma.setting.findUnique({ where: { key: "kontak" } });
+  const v = (row?.value ?? {}) as { email?: string; jamLayanan?: string };
+  return { email: v.email ?? "halo@tamanpelajar.com", jamLayanan: v.jamLayanan ?? "Senin–Jumat, 09.00–17.00 WIB" };
+}
