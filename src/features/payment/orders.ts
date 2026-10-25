@@ -204,6 +204,9 @@ export async function applyPaymentStatus(orderId: string, status: Status, opts: 
       const claimed = await tx.order.updateMany({ where: { id: orderId, status: "BERHASIL" }, data: { status: "DIKEMBALIKAN" } });
       if (claimed.count === 0) return false;
       await tx.enrollment.updateMany({ where: { orderId }, data: { status: "DIBATALKAN" } });
+      // Penjualan yang dikembalikan tidak dihitung sebagai program terlaris (M.2.3).
+      const items = await tx.orderItem.findMany({ where: { orderId }, select: { productId: true } });
+      for (const i of items) await tx.product.updateMany({ where: { id: i.productId, salesCount: { gt: 0 } }, data: { salesCount: { decrement: 1 } } });
       await tx.payment.updateMany({ where: { orderId, status: "BERHASIL" }, data: { status: "DIKEMBALIKAN" } });
       return true;
     });
@@ -219,7 +222,8 @@ export async function applyPaymentStatus(orderId: string, status: Status, opts: 
 }
 
 /** Tandai pesanan yang lewat batas bayar sebagai kedaluwarsa (dipanggil saat halaman dibuka). */
-export async function expireDueOrders(userId: string) {
-  const due = await prisma.order.findMany({ where: { userId, status: "MENUNGGU", expiresAt: { lte: new Date() } }, select: { id: true } });
+export async function expireDueOrders(userId?: string) {
+  // Tanpa userId (panel admin): semua pesanan yang lewat batas bayar.
+  const due = await prisma.order.findMany({ where: { ...(userId && { userId }), status: "MENUNGGU", expiresAt: { lte: new Date() } }, select: { id: true } });
   for (const o of due) await applyPaymentStatus(o.id, "KEDALUWARSA");
 }

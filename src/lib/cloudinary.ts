@@ -35,6 +35,23 @@ export function signedDownloadUrl(
   });
 }
 
+/** Tanda tangani parameter upload langsung dari browser (signed upload). */
+export function signUploadParams(params: Record<string, string>) {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const c = client();
+  const signature = c.utils.api_sign_request({ ...params, timestamp }, process.env.CLOUDINARY_API_SECRET!);
+  return { signature, timestamp, apiKey: process.env.CLOUDINARY_API_KEY!, cloudName: process.env.CLOUDINARY_CLOUD_NAME! };
+}
+
+/**
+ * Pastikan hasil upload yang dilaporkan browser memang dari Cloudinary: signature respons
+ * dihitung dari public_id dan version dengan API secret.
+ */
+export function verifyUploadResult(result: { public_id: string; version: number; signature: string }) {
+  const expected = client().utils.api_sign_request({ public_id: result.public_id, version: result.version }, process.env.CLOUDINARY_API_SECRET!);
+  return expected === result.signature;
+}
+
 /** URL gambar publik dengan transformasi otomatis f_auto,q_auto. */
 export function imageUrl(publicId: string, width: number) {
   const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? process.env.CLOUDINARY_CLOUD_NAME;

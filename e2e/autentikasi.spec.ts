@@ -97,7 +97,7 @@ test.describe("autentikasi (E, C.4–C.5)", () => {
     await admin.goto("/masuk");
     await masuk(admin, "admin@tamanpelajar.test");
     await expect(admin).toHaveURL(/\/admin$/);
-    await expect(admin.getByRole("heading", { name: "Panel admin" })).toBeVisible();
+    await expect(admin.getByRole("heading", { name: "Dashboard admin" })).toBeVisible();
     await adminContext.close();
   });
 

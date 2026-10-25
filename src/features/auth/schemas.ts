@@ -90,6 +90,9 @@ export const lengkapiProfilSchema = z.object({
   city: z.string().trim().max(80, "Nama kota terlalu panjang").optional(),
 });
 
+/** Aturan email dan WhatsApp dipakai ulang form admin. */
+export { email as emailRule, phone as phoneRule };
+
 export type DaftarInput = z.input<typeof daftarSchema>;
 export type MasukInput = z.input<typeof masukSchema>;
 export type LupaPasswordInput = z.input<typeof lupaPasswordSchema>;

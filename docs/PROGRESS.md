@@ -240,9 +240,31 @@ Dua batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, buil
 - Mode Midtrans belum diuji ke sandbox asli karena kunci belum diisi; isi `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, `PAYMENT_MODE=midtrans`, lalu daftarkan URL notifikasi `https://<domain>/api/webhooks/midtrans` di dashboard Midtrans
 - `/transaksi` (tanpa nomor) tetap dialihkan ke `/dashboard/transaksi` sebagai daftar pesanan
 
-## Tahap 5 — Panel administrator
+## Tahap 5 — Panel administrator (25 Oktober 2026)
 
-Belum dimulai.
+### `feat/M-admin-dasar-soal-tryout` (batch A)
+- [x] **M.1** Layout `/admin` dengan sidebar berkelompok (Ringkasan, Pengguna dan penjualan, Konten belajar, Sistem); di layar kecil menjadi lembar menu. Menu ditambahkan bersama halamannya, jadi tidak ada tautan mati. Penanda jumlah untuk transaksi menunggu dan essay belum dinilai
+- [x] **M.2.1–M.2.8** Dashboard admin: total dan siswa baru, transaksi dan pendapatan, program terlaris, tryout terpopuler, tingkat penyelesaian kelas, aktivitas terbaru, grafik pendapatan bulanan dan pengguna baru (WIB, enam bulan, tabel data bisa dibuka)
+- [x] **M.3, C.2.1** Pengguna: cari dan filter, tambah (siswa/admin), ubah nama/email/role, nonaktifkan/aktifkan (akun nonaktif langsung tertolak), kirim tautan reset password dan buka kunci login, riwayat program, progres kelas, tryout, dan transaksi. Admin tidak bisa menurunkan role atau menonaktifkan akunnya sendiri
+- [x] **C.2.6** Transaksi: cari dan filter status, detail pembayaran, verifikasi manual (mengaktifkan paket lewat `activateOrder` yang sama dengan webhook), batalkan (kuota voucher kembali), tandai dana dikembalikan (akses dari pesanan dibatalkan, hitungan terjual dikurangi), riwayat tindakan admin
+- [x] **C.2.7** Voucher: buat/ubah (persen dengan potongan maksimal, nominal, minimum belanja, kuota, batas per pengguna, masa berlaku WIB), aktif/nonaktif, hapus bila belum pernah dipakai, daftar pemakaian
+- [x] **M.5.1–M.5.8, L.2.5** Bank soal: enam jenis soal dengan aturan kunci per jenis, opsi bergradasi (TKP), gambar soal (upload Cloudinary bertanda tangan), pembahasan dan video pembahasan; impor CSV/XLSX dua langkah (periksa lalu impor, nomor baris bermasalah ditunjukkan), ekspor CSV/XLSX dengan kolom yang sama (bisa diimpor ulang) dan template; pratinjau, duplikasi, cari dan filter, hapus dan terbit massal. Soal yang dipakai tryout tidak bisa dihapus; ID opsi dipertahankan saat diubah agar jawaban lama tetap utuh
+- [x] **M.6.1–M.6.9, C.2.4** Tryout: pengaturan lengkap (jadwal, percobaan, acak soal/opsi, pembahasan dan waktu bukanya, skor benar/salah, passing grade, status), subtes dengan durasi dan bobot sendiri, pilih soal dari bank soal, urutan seret-dan-lepas (juga dengan keyboard), bobot khusus per soal, pratinjau dengan kunci dan skor maksimum, duplikat, hapus. Struktur terkunci begitu ada percobaan
+- [x] **C.2.5, L.2.9** Hasil peserta per tryout (nilai per subtes, B/S/K, waktu, kelulusan) dan unduh nilai CSV
+- [x] **L.2.7** Penilaian essay: antrean jawaban, batas nilai sesuai bobot, nilai akhir/subtes/kelulusan/analisis topik dihitung ulang (`rescoreAttempt`), notifikasi ke siswa
+- [x] **P.1.10** Audit log semua tindakan admin (siapa, apa, kapan, IP, sebelum/sesudah) dengan filter
+- [x] Upload Cloudinary: `/api/upload/signature` memeriksa tipe dan ukuran (gambar 5 MB, PDF 20 MB) sebelum membuat signature; hasil upload diverifikasi signature-nya sebelum dicatat di `Media`
+- [x] Tes unit: statistik bulanan WIB, input tanggal WIB, CSV (urai, ekspor-impor bolak-balik, validasi per jenis), aturan upload; e2e `admin.spec.ts` (10 alur, desktop + mobile)
+
+**Bug yang ditemukan dan diperbaiki:**
+- Form admin mengirim nilai hasil transformasi Zod (Date, angka) ke server yang memvalidasi ulang string mentah; kini yang dikirim nilai mentah form
+- Pengembalian dana tidak mengurangi hitungan terjual sehingga program terlaris membengkak
+- Tes video kadang membaca salinan konten yang masih di-stream (div tersembunyi); tes kini menunggu jaringan tenang
+
+**Pengujian:** lint, typecheck, build lulus; unit 64/64; e2e 109/109 dua kali berturut-turut (desktop + mobile). Pemeriksa desain: 0 FAIL (panel admin diperiksa dengan mode `--app` karena layar padat fungsional). Review visual 1440 dan 375 px untuk semua halaman admin: tanpa error console dan scroll horizontal.
+
+### Belum (batch berikutnya)
+- Program, kelas (bab/materi seret-dan-lepas, PDF, bab gratis), video, paket produk, peserta kelas, diskusi, informasi, banner, testimoni, sertifikat, laporan, pengaturan
 
 ## Tahap 6 — Pengujian dan penyempurnaan
 

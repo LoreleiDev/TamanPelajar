@@ -68,26 +68,9 @@ export async function saveTimeline(attemptId: string, timeline: Timeline) {
   );
 }
 
-/**
- * Kumpulkan dan nilai satu percobaan. Idempoten: status diubah dari BERLANGSUNG ke SELESAI
- * dengan updateMany bersyarat di dalam transaksi, sehingga pengiriman ganda (tombol ditekan
- * dua kali, auto-submit bersamaan dengan submit manual) hanya menilai sekali (I.4.9).
- */
-export async function finalizeAttempt(attemptId: string, opts: { auto: boolean; now?: Date }) {
-  const now = opts.now ?? new Date();
-  const attempt = await loadAttempt(attemptId);
-  if (!attempt) return { finalized: false } as const;
-  if (attempt.status !== "BERLANGSUNG") return { finalized: false } as const;
-
-  const submittedAt = now > attempt.deadlineAt ? attempt.deadlineAt : now;
-  const timeline = timelineOf(attempt, submittedAt);
-  const closedSections = timeline.sections.map((s) => ({
-    ...s,
-    startedAt: s.startedAt ?? (timeline.mode === "berurutan" ? submittedAt : null),
-    deadlineAt: s.deadlineAt ?? (timeline.mode === "berurutan" ? submittedAt : null),
-    submittedAt: s.submittedAt ?? submittedAt,
-  }));
-
+/** Nilai satu percobaan dari jawaban tersimpan (J.1); essay yang sudah dinilai ikut dihitung. */
+async function computeScore(attempt: AttemptCore) {
+  const attemptId = attempt.id;
   const [examQuestions, answers] = await Promise.all([
     prisma.examQuestion.findMany({
       where: { examId: attempt.examId },
@@ -141,6 +124,31 @@ export async function finalizeAttempt(attemptId: string, opts: { auto: boolean; 
     passingGrade: attempt.exam.passingGrade,
     sections: attempt.exam.sections.map((s) => ({ id: s.id, weight: s.weight, passingGrade: s.passingGrade })),
   });
+
+  return score;
+}
+
+/**
+ * Kumpulkan dan nilai satu percobaan. Idempoten: status diubah dari BERLANGSUNG ke SELESAI
+ * dengan updateMany bersyarat di dalam transaksi, sehingga pengiriman ganda (tombol ditekan
+ * dua kali, auto-submit bersamaan dengan submit manual) hanya menilai sekali (I.4.9).
+ */
+export async function finalizeAttempt(attemptId: string, opts: { auto: boolean; now?: Date }) {
+  const now = opts.now ?? new Date();
+  const attempt = await loadAttempt(attemptId);
+  if (!attempt) return { finalized: false } as const;
+  if (attempt.status !== "BERLANGSUNG") return { finalized: false } as const;
+
+  const submittedAt = now > attempt.deadlineAt ? attempt.deadlineAt : now;
+  const timeline = timelineOf(attempt, submittedAt);
+  const closedSections = timeline.sections.map((s) => ({
+    ...s,
+    startedAt: s.startedAt ?? (timeline.mode === "berurutan" ? submittedAt : null),
+    deadlineAt: s.deadlineAt ?? (timeline.mode === "berurutan" ? submittedAt : null),
+    submittedAt: s.submittedAt ?? submittedAt,
+  }));
+
+  const score = await computeScore(attempt);
 
   const finalized = await prisma.$transaction(async (tx) => {
     const claimed = await tx.examAttempt.updateMany({
@@ -207,4 +215,31 @@ export async function syncAttempt(attempt: AttemptCore, now = new Date()) {
   }
   await saveTimeline(attempt.id, timeline);
   return { attempt, timeline, finished: false } as const;
+}
+
+/**
+ * Hitung ulang nilai percobaan yang sudah selesai, mis. setelah essay dinilai admin (L.2.7).
+ * Hasil, skor per subtes, dan analisis topik diganti dengan perhitungan baru.
+ */
+export async function rescoreAttempt(attemptId: string) {
+  const attempt = await loadAttempt(attemptId);
+  if (!attempt || attempt.status === "BERLANGSUNG") return false;
+  const score = await computeScore(attempt);
+  await prisma.$transaction(async (tx) => {
+    for (const r of score.questions) {
+      const isCorrect = r.status === "BENAR" ? true : r.status === "SALAH" ? false : null;
+      const scoreValue = r.status === "MENUNGGU_PENILAIAN" ? null : r.score;
+      await tx.examAnswer.updateMany({ where: { attemptId, questionId: r.questionId }, data: { isCorrect, score: scoreValue } });
+    }
+    const result = await tx.examResult.update({
+      where: { attemptId },
+      data: { totalScore: score.totalScore, maxScore: score.maxScore, correct: score.correct, wrong: score.wrong, empty: score.empty, passed: score.passed },
+      select: { id: true },
+    });
+    await tx.examResultSection.deleteMany({ where: { resultId: result.id } });
+    await tx.examResultSection.createMany({ data: score.sections.map((s) => ({ ...s, resultId: result.id })) });
+    await tx.topicAnalysis.deleteMany({ where: { resultId: result.id } });
+    await tx.topicAnalysis.createMany({ data: score.topics.map((t) => ({ ...t, resultId: result.id })) });
+  });
+  return { pending: score.pending, totalScore: score.totalScore, maxScore: score.maxScore };
 }

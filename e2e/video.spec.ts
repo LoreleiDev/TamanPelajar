@@ -10,9 +10,10 @@ async function masuk(page: Page, email: string) {
 
 test.describe("video belajar (H)", () => {
   test("tamu melihat pustaka dan filter, tetapi harus masuk untuk menonton (C.5)", async ({ page }) => {
-    await page.goto("/video");
+    // networkidle: tunggu salinan konten yang di-stream (div hidden) selesai ditukar.
+    await page.goto("/video", { waitUntil: "networkidle" });
     await expect(page.getByRole("heading", { name: /^\d+ video$/ })).toHaveText("48 video");
-    await page.getByLabel("Mata pelajaran").selectOption("Penalaran Umum");
+    await page.getByRole("form", { name: "Filter video" }).getByLabel("Mata pelajaran").selectOption("Penalaran Umum");
     await expect(page).toHaveURL(/mapel=Penalaran\+Umum/);
     await expect(page.getByRole("heading", { name: /^\d+ video$/ })).toHaveText("9 video");
 

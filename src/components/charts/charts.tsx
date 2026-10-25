@@ -185,3 +185,45 @@ export function TopicCompareChart({ data }: { data: { topic: string; mine: numbe
     </ResponsiveContainer>
   );
 }
+
+// Tanpa spasi: Recharts memecah teks bertspasi menjadi dua baris.
+const shortRupiah = (v: number) =>
+  v >= 1_000_000 ? `${String(Math.round(v / 100_000) / 10).replace(".", ",")}jt` : v >= 1000 ? `${Math.round(v / 1000)}rb` : String(v);
+
+/**
+ * Seri bulanan satu warna untuk dashboard admin: pendapatan (M.2.7) atau pengguna baru
+ * (M.2.8). Satu seri, jadi tanpa legenda; judul kartu yang menamainya.
+ */
+export function MonthlyChart({ data, format, name }: { data: { label: string; value: number }[]; format: "rupiah" | "jumlah"; name: string }) {
+  const fmt = (v: number) => (format === "rupiah" ? shortRupiah(v) : String(v));
+  return (
+    <ResponsiveContainer width="100%" height={240}>
+      <BarChart data={data} margin={{ top: 22, right: 8, bottom: 0, left: 0 }} barCategoryGap="28%">
+        <CartesianGrid stroke={C.grid} vertical={false} />
+        <XAxis dataKey="label" {...axisProps} />
+        <YAxis {...axisProps} width={format === "rupiah" ? 52 : 40} tickFormatter={(v) => fmt(Number(v))} allowDecimals={false} />
+        <Tooltip
+          cursor={{ fill: "rgb(63 112 66 / 0.06)" }}
+          content={({ active, payload, label }) =>
+            active && payload?.length ? (
+              <div className="rounded-lg border border-border bg-background px-3 py-2 text-sm shadow-soft">
+                <p className="font-semibold">{label}</p>
+                <p className="tabular-nums">
+                  <span className="text-muted-foreground">{name} </span>
+                  <span className="font-semibold">
+                    {format === "rupiah"
+                      ? new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(payload[0].value))
+                      : String(payload[0].value)}
+                  </span>
+                </p>
+              </div>
+            ) : null
+          }
+        />
+        <Bar dataKey="value" name={name} fill={C.primary} radius={[4, 4, 0, 0]} minPointSize={2} isAnimationActive={false}>
+          <LabelList dataKey="value" position="top" fill={C.ink} fontSize={12} formatter={(v) => (Number(v) > 0 ? fmt(Number(v)) : "")} />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}

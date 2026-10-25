@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
+import { cache } from "react";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -11,7 +12,8 @@ export type Role = "ADMIN" | "USER";
 
 export class AuthorizationError extends Error {}
 
-export async function currentUser() {
+/** Sekali per request: panel admin memanggilnya di layout, halaman, dan setiap query. */
+export const currentUser = cache(async () => {
   // auth() memakai crypto sebelum membaca cookie; tandai dinamis lebih dulu (cacheComponents).
   await connection();
   const session = await auth();
@@ -22,7 +24,7 @@ export async function currentUser() {
   });
   if (!user || !user.isActive || user.deletedAt) return null;
   return user;
-}
+});
 
 /** Untuk halaman: alihkan tamu ke halaman masuk dengan callbackUrl. */
 export async function requireUserPage(callbackUrl: string) {
