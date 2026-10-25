@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { SproutDivider } from "@/components/shared/ornaments";
+import { PageHeader } from "@/components/shared/page-header";
 
 export interface InfoSection {
   id: string;
@@ -24,14 +24,9 @@ export function InfoPage({
   sections: InfoSection[];
 }) {
   return (
-    <main className="page-container flex flex-col gap-10 py-12 md:py-16">
-      <header className="flex max-w-3xl flex-col gap-4">
-        <h1 className="text-title text-primary">{title}</h1>
-        <p className="text-lead">{intro}</p>
-        {updatedAt && <p className="text-sm text-muted-foreground">Terakhir diperbarui {updatedAt}</p>}
-      </header>
-      <SproutDivider />
-      <div className="grid gap-10 lg:grid-cols-[16rem_1fr]">
+    <main className="flex flex-col">
+      <PageHeader title={title} description={intro} meta={updatedAt && <span>Terakhir diperbarui {updatedAt}</span>} />
+      <div className="page-container grid gap-10 py-10 md:py-12 lg:grid-cols-[16rem_1fr]">
         <nav aria-label="Daftar isi" className="lg:sticky lg:top-24 lg:self-start">
           <h2 className="mb-3 text-sm font-bold">Daftar isi</h2>
           <ol className="flex flex-col gap-2 text-sm">

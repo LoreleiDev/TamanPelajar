@@ -204,9 +204,41 @@ Dua batch, masing-masing di-squash ke `main`. Sesuai arahan RMED, pengujian leng
 - Setelah `pnpm db:seed`, hapus `.next/dev` atau mulai ulang server dev: data `use cache` menyimpan ID lama
 - MariaDB XAMPP harus berjalan sebelum build dan e2e (build membaca data tryout untuk `generateStaticParams`)
 
-## Tahap 4 — Keranjang, checkout, pembayaran
+## Tahap 4 — Keranjang, checkout, pembayaran (25 Oktober 2026)
 
-Belum dimulai.
+Dua batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, build, dan seluruh e2e lulus dua kali berturut-turut. Atas permintaan RMED, batch ini juga diisi perburuan bug dan perbaikan konsistensi desain.
+
+### `feat/K-keranjang-checkout`
+- [x] **K.1** Alur pilih paket → keranjang → voucher → periksa pesanan → metode → bayar → verifikasi → aktivasi. Tombol Beli sekarang memasukkan paket ke keranjang (tamu melihat dialog masuk); navbar punya ikon keranjang dengan jumlah
+- [x] **K.2.1–K.2.5** Virtual account (BCA, BNI, BRI, Mandiri, Permata), QRIS, e-wallet, transfer bank, dan mode simulasi (`PAYMENT_MODE=simulasi`, bawaan)
+- [x] **K.3** Detail transaksi `/transaksi/[nomor]`: nomor, produk, harga, diskon, total, metode, batas bayar, status, tombol bayar, invoice, batalkan pesanan
+- [x] **K.4** Invoice `/invoice/[nomor]` yang bisa dicetak atau disimpan sebagai PDF
+- [x] **K.5, A.4** `PaymentProvider` di `lib/payment.ts` (simulasi dan Midtrans Snap). Webhook `/api/webhooks/midtrans` memverifikasi signature SHA512 dan nominal. `activateOrder()` idempoten dan hanya dari status BERHASIL; langganan aktif diperpanjang dari tanggal berakhirnya
+- [x] Voucher: persen dengan potongan maksimal, nominal, minimum belanja, kuota, batas per pengguna, masa berlaku. Kuota dikembalikan bila pesanan gagal, kedaluwarsa, atau dibatalkan. Pesanan lewat 24 jam ditandai kedaluwarsa otomatis
+- [x] Tes unit harga, voucher, nomor pesanan, perpanjangan masa aktif, signature dan status Midtrans; e2e `checkout.spec.ts` (beli dengan voucher, bayar simulasi, bab 3 terbuka, invoice, batalkan, gagalkan, akses pengguna lain ditolak, webhook tanpa signature ditolak)
+
+**Bug yang ditemukan dan diperbaiki:**
+- Checkout dari dua tab bersamaan bisa membuat dua pesanan; kuota voucher bisa terlampaui oleh checkout bersamaan (snapshot InnoDB REPEATABLE READ diambil sebelum kunci). Baris keranjang dan voucher kini dikunci `FOR UPDATE` sebelum pembacaan pertama. Diuji langsung ke database dengan skrip race: 1 pesanan dari 2 checkout, 1 pemakaian dari kuota 1, 1 aktivasi dari 3 klaim bersamaan
+- Perpanjangan masa aktif bisa hilang bila dua pesanan produk sama dibayar bersamaan; enrollment kini dibaca dengan kunci baris
+- Slug yang tidak ada di `/paket`, `/tryout`, `/video`, `/kelas`, `/sertifikat` mengembalikan 200 (soft 404) di build produksi karena halaman sudah mulai streaming. Proxy kini memeriksa keberadaan slug lebih dulu (`lib/route-exists.ts`) dan membalas 404 asli
+- Teks yang diketik di form masuk/daftar/profil sebelum hydration selesai dihapus oleh React Hook Form; input kini nonaktif (`fieldset disabled`) sampai hydration
+- Teks di kolom pencarian navbar hilang saat data akun selesai di-stream karena seluruh header di-render ulang; kini hanya slot akun yang di-suspend
+- e2e: server dev dan server lama yang tertinggal di Windows memakai data `use cache` basi setelah seed ulang. e2e kini memakai build produksi (`next start`, 3 menit untuk 89 tes) dan tidak memakai ulang server yang sudah berjalan
+
+### `fix/desain-konsistensi`
+- [x] **B.1** `PageHeader` bersama: pita "bedeng taman" selebar layar dengan tepi bawah bergelombang seperti garis tanah, eyebrow bertunas, pola titik sebagai aksen. Dipakai katalog, kelas, video, tryout, petunjuk, hasil, pembahasan, detail paket, keranjang, checkout, transaksi, dan halaman teks
+- [x] `Breadcrumb` tunggal (sebelumnya tiga gaya pemisah), `SearchBar` untuk katalog dan video, `SummaryPanel` untuk panel samping (panel beli, keranjang, checkout, transaksi), `StatusBadge`/`PassStatus` untuk semua label status (hasil, riwayat, transaksi)
+- [x] Sampul video memakai bahasa visual sampul paket: bidang warna brand per mata pelajaran, singkatan besar, tunas samar (sebelumnya kotak abu dengan ikon play)
+- [x] Penanda langkah checkout di eyebrow: "Langkah 1 dari 3" sampai "Langkah 3 dari 3"
+- Bug dari review: judul halaman mengecil karena penggabung kelas `cn()` membuang `text-title`; tabel produk transaksi terpotong di 375 px; catatan nomor demo tampil tanpa nomor
+
+**Pengujian (akhir tahap):** lint, typecheck, build lulus; unit 47/47; e2e 89/89 dua kali berturut-turut (desktop + mobile). Pemeriksa desain `lint.mjs`: 0 FAIL. Kriteria yang tercakup: **T.2**, **T.3**, **T.18** (bagian berlangganan), bersama T.1 dan T.4–T.11 dari tahap sebelumnya.
+
+**Review visual:** screenshot 1440, 1024, 768, 375 px untuk katalog, kelas, video, detail paket, petunjuk tryout, halaman teks, keranjang, checkout, transaksi, dashboard transaksi, dan invoice; tidak ada error console dan tidak ada scroll horizontal.
+
+**Catatan:**
+- Mode Midtrans belum diuji ke sandbox asli karena kunci belum diisi; isi `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, `PAYMENT_MODE=midtrans`, lalu daftarkan URL notifikasi `https://<domain>/api/webhooks/midtrans` di dashboard Midtrans
+- `/transaksi` (tanpa nomor) tetap dialihkan ke `/dashboard/transaksi` sebagai daftar pesanan
 
 ## Tahap 5 — Panel administrator
 

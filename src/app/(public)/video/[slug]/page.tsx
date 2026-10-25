@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { LoginToWatch } from "@/components/course/login-to-watch";
+import { Breadcrumb } from "@/components/shared/page-header";
 import { NoteEditor } from "@/components/course/note-editor";
 import { SubscribeDialog } from "@/components/course/subscribe-dialog";
 import { VideoPlayer } from "@/components/course/video-player";
@@ -40,13 +41,7 @@ async function VideoContent({ params }: { params: PageProps<"/video/[slug]">["pa
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-14">
       <article className="flex min-w-0 flex-col gap-6">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-          <Link href="/video" className="hover:text-primary">
-            Video belajar
-          </Link>
-          <span aria-hidden="true"> / </span>
-          {v.subject}
-        </nav>
+        <Breadcrumb items={[{ label: "Video belajar", href: "/video" }, { label: v.subject }]} />
         <h1 className="text-heading">{v.title}</h1>
         <p className="-mt-3 text-sm text-muted-foreground tabular-nums">
           {v.category}, tingkat {DIFFICULTY_LABELS[v.difficulty].toLowerCase()}, durasi {formatClock(v.durationSec)}

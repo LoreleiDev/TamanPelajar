@@ -1,4 +1,3 @@
-import { CircleCheck, CircleX } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -6,25 +5,13 @@ import { Suspense } from "react";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
+import { PassStatus } from "@/components/shared/status-badge";
 import { getResults } from "@/features/dashboard/queries";
 import { formatClock, formatTanggalJam } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
 
 export const metadata: Metadata = { title: "Riwayat hasil", robots: { index: false } };
 const num = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 });
-
-function PassBadge({ passed }: { passed: boolean | null }) {
-  if (passed === null) return <span className="text-muted-foreground">Tanpa ambang batas</span>;
-  return passed ? (
-    <span className="inline-flex items-center gap-1 font-semibold text-success">
-      <CircleCheck className="size-4" aria-hidden="true" /> Lulus
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 font-semibold text-destructive">
-      <CircleX className="size-4" aria-hidden="true" /> Belum lulus
-    </span>
-  );
-}
 
 async function Content() {
   const user = await requireUserPage("/dashboard/riwayat");
@@ -57,7 +44,7 @@ async function Content() {
                     {num.format(r.score)}
                     <span className="text-sm font-normal text-muted-foreground">/{num.format(r.maxScore)}</span>
                   </span>
-                  <PassBadge passed={r.passed} />
+                  <PassStatus passed={r.passed} />
                 </summary>
                 <div className="flex flex-col gap-3 px-4 pb-4">
                   <p className="text-sm tabular-nums">
@@ -81,7 +68,7 @@ async function Content() {
                             {num.format(s.score)}/{num.format(s.maxScore)}
                           </td>
                           <td className="py-1 pl-4">
-                            <PassBadge passed={s.passed} />
+                            <PassStatus passed={s.passed} />
                           </td>
                         </tr>
                       ))}

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { CurriculumNav } from "@/components/course/curriculum-nav";
+import { Breadcrumb } from "@/components/shared/page-header";
 import { DiscussionThread } from "@/components/course/discussion-thread";
 import { LessonActions } from "@/components/course/lesson-actions";
 import { NoteEditor } from "@/components/course/note-editor";
@@ -102,13 +103,7 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
       </aside>
 
       <article className="order-1 flex min-w-0 flex-col gap-6 lg:order-2">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-          <Link href={`/kelas/${slug}`} className="hover:text-primary">
-            {outline.title}
-          </Link>
-          <span aria-hidden="true"> / </span>
-          {lesson.sectionTitle}
-        </nav>
+        <Breadcrumb items={[{ label: "Kelas online", href: "/kelas" }, { label: outline.title, href: `/kelas/${slug}` }, { label: lesson.sectionTitle }]} />
         <h1 className="text-heading">{lesson.title}</h1>
 
         {lesson.access !== "terbuka" || !content ? (

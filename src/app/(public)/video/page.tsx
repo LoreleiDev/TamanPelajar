@@ -1,6 +1,4 @@
-import { Search } from "lucide-react";
 import type { Metadata } from "next";
-import Form from "next/form";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -8,6 +6,8 @@ import { VideoCard } from "@/components/course/video-card";
 import { VideoFilters } from "@/components/course/video-filters";
 import { DataPagination } from "@/components/shared/data-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
+import { SearchBar } from "@/components/shared/search-bar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { searchVideos } from "@/features/video/queries";
@@ -72,37 +72,19 @@ function LibrarySkeleton() {
 // Pustaka video (H.1).
 export default function VideoPage({ searchParams }: PageProps<"/video">) {
   return (
-    <main className="page-container flex flex-col gap-8 py-12 md:py-16">
-      <header className="flex flex-col gap-5">
-        <div className="flex max-w-3xl flex-col gap-3">
-          <h1 className="text-title text-primary">Video belajar</h1>
-          <p className="text-lead">
-            Video per topik dari semua kelas. Video di bab 1 dan 2 bisa ditonton gratis setelah masuk; sisanya terbuka lewat
-            paket.
-          </p>
-        </div>
-        <Form action="/video" role="search" className="flex max-w-2xl gap-2">
-          <label htmlFor="cari-video" className="sr-only">
-            Cari video
-          </label>
-          <div className="relative flex-1">
-            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              id="cari-video"
-              name="q"
-              type="search"
-              placeholder="Contoh: deret angka, silogisme, pancasila"
-              className="h-12 w-full rounded-xl border border-input bg-background pr-3 pl-11 text-base outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            />
-          </div>
-          <Button type="submit" size="lg">
-            Cari
-          </Button>
-        </Form>
-      </header>
+    <main className="flex flex-col">
+      <PageHeader
+        eyebrow="Pustaka video"
+        title="Video belajar"
+        description="Video per topik dari semua kelas. Video di bab 1 dan 2 bisa ditonton gratis setelah masuk; sisanya terbuka lewat paket."
+      >
+        <SearchBar action="/video" id="cari-video" label="Cari video" placeholder="Contoh: deret angka, silogisme, pancasila" />
+      </PageHeader>
+      <div className="page-container flex flex-col gap-8 py-10 md:py-12">
       <Suspense fallback={<LibrarySkeleton />}>
         <Library searchParams={searchParams} />
       </Suspense>
+      </div>
     </main>
   );
 }

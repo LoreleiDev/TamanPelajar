@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SummaryPanel } from "@/components/shared/page-header";
 import { buatPesanan, cekVoucher } from "@/features/payment/actions";
 import { formatRupiah } from "@/lib/format";
 import type { PaymentMethodCode, VaBank } from "@/lib/midtrans";
@@ -167,10 +168,7 @@ export function CheckoutForm({
         </section>
       </div>
 
-      <aside aria-labelledby="total-judul" className="flex flex-col gap-4 self-start rounded-xl bg-secondary p-5 lg:sticky lg:top-24">
-        <h2 id="total-judul" className="text-lg font-bold">
-          Total pembayaran
-        </h2>
+      <SummaryPanel title="Total pembayaran" titleId="total-judul">
         <dl className="flex flex-col gap-2 tabular-nums">
           <div className="flex justify-between gap-4">
             <dt>Subtotal</dt>
@@ -217,7 +215,7 @@ export function CheckoutForm({
         </Button>
         {!method && <p className="text-sm text-muted-foreground">Pilih metode pembayaran untuk melanjutkan.</p>}
         <p className="text-sm text-muted-foreground">Batas pembayaran 24 jam. Paket aktif otomatis setelah pembayaran terverifikasi.</p>
-      </aside>
+      </SummaryPanel>
     </div>
   );
 }

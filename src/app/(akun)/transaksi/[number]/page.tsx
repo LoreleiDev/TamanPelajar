@@ -7,6 +7,9 @@ import { Suspense, type ReactNode } from "react";
 import { PaymentActions } from "@/components/checkout/payment-actions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { statusTone } from "@/features/payment/labels";
+import { PageHeader, SummaryPanel } from "@/components/shared/page-header";
 import { effectivePrice } from "@/features/payment/pricing";
 import { getOrderDetail, type OrderDetail } from "@/features/payment/queries";
 import { formatRupiah, formatTanggal, formatTanggalJam } from "@/lib/format";
@@ -17,11 +20,11 @@ import { requireUserPage } from "@/lib/rbac";
 export const metadata: Metadata = { title: "Detail transaksi", robots: { index: false } };
 
 const statusView = {
-  MENUNGGU: { icon: Clock, text: "Menunggu pembayaran", tone: "border-warning bg-warning/10 text-warning" },
-  BERHASIL: { icon: CircleCheck, text: "Pembayaran berhasil", tone: "border-success bg-success/10 text-success" },
-  GAGAL: { icon: CircleX, text: "Pembayaran gagal atau dibatalkan", tone: "border-destructive bg-destructive/8 text-destructive" },
-  KEDALUWARSA: { icon: CircleAlert, text: "Batas pembayaran lewat", tone: "border-border bg-secondary text-muted-foreground" },
-  DIKEMBALIKAN: { icon: CircleAlert, text: "Dana dikembalikan", tone: "border-border bg-secondary text-muted-foreground" },
+  MENUNGGU: { icon: Clock, text: "Menunggu pembayaran" },
+  BERHASIL: { icon: CircleCheck, text: "Pembayaran berhasil" },
+  GAGAL: { icon: CircleX, text: "Pembayaran gagal atau dibatalkan" },
+  KEDALUWARSA: { icon: CircleAlert, text: "Batas pembayaran lewat" },
+  DIKEMBALIKAN: { icon: CircleAlert, text: "Dana dikembalikan" },
 } as const;
 
 function Instructions({ o }: { o: OrderDetail }) {
@@ -64,7 +67,7 @@ function Instructions({ o }: { o: OrderDetail }) {
         Bayar tepat <strong>{formatRupiah(o.total)}</strong> sebelum <strong>{formatTanggalJam(o.expiresAt)}</strong>. Status diperbarui
         otomatis setelah pembayaran terverifikasi.
       </p>
-      {demo && <p className="rounded-lg bg-secondary px-4 py-3 text-sm">Mode demo: nomor di atas hanya contoh dan tidak bisa dipakai membayar.</p>}
+      {demo && p.vaNumber && <p className="rounded-lg bg-secondary px-4 py-3 text-sm">Mode demo: nomor di atas hanya contoh dan tidak bisa dipakai membayar.</p>}
       <PaymentActions number={o.number} provider={p.provider} redirectUrl={raw.redirectUrl ?? null} />
     </section>
   );
@@ -88,20 +91,20 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
 
   return (
     <>
-      <header className="flex flex-col gap-3">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-          <Link href="/dashboard/transaksi" className="hover:text-primary">
-            Transaksi
-          </Link>
-          <span aria-hidden="true"> / </span>
-          {o.number}
-        </nav>
-        <h1 className="text-title break-all text-primary">Pesanan {o.number}</h1>
-        <p className={`flex items-center gap-2 self-start rounded-lg border-2 px-3 py-1.5 font-bold ${view.tone}`} role="status">
-          <view.icon aria-hidden="true" className="size-5" />
+      <PageHeader
+        breadcrumb={[{ label: "Transaksi", href: "/dashboard/transaksi" }, { label: o.number }]}
+        eyebrow={o.status === "MENUNGGU" ? "Langkah 3 dari 3: bayar" : "Detail transaksi"}
+        title={
+          <>
+            Pesanan <span className="text-[clamp(1.75rem,7vw,3rem)] whitespace-nowrap tabular-nums">{o.number}</span>
+          </>
+        }
+      >
+        <StatusBadge tone={statusTone[o.status]} variant="box" icon={view.icon} role="status">
           {view.text}
-        </p>
-      </header>
+        </StatusBadge>
+      </PageHeader>
+      <div className="page-container py-10 md:py-12">
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
         <div className="flex min-w-0 flex-col gap-8">
@@ -149,12 +152,12 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
               Produk
             </h2>
             <div className="overflow-x-auto rounded-xl border border-border">
-              <table className="w-full min-w-md text-left">
+              <table className="w-full text-left">
                 <caption className="sr-only">Produk dalam pesanan</caption>
                 <thead className="bg-secondary text-sm">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-semibold">Paket</th>
-                    <th scope="col" className="px-4 py-3 text-right font-semibold">Harga</th>
+                    <th scope="col" className="hidden px-4 py-3 text-right font-semibold sm:table-cell">Harga</th>
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Dibayar</th>
                   </tr>
                 </thead>
@@ -165,8 +168,11 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
                         {i.nameSnapshot}
                         <span className="block text-sm font-normal text-muted-foreground">Masa aktif {i.activeDays} hari</span>
                       </th>
-                      <td className="px-4 py-3 text-right">{formatRupiah(i.price)}</td>
-                      <td className="px-4 py-3 text-right">{formatRupiah(effectivePrice(i))}</td>
+                      <td className="hidden px-4 py-3 text-right sm:table-cell">{formatRupiah(i.price)}</td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        {effectivePrice(i) < i.price && <s className="block text-sm text-muted-foreground sm:hidden">{formatRupiah(i.price)}</s>}
+                        {formatRupiah(effectivePrice(i))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -175,10 +181,7 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
           </section>
         </div>
 
-        <aside aria-labelledby="rincian-judul" className="flex flex-col gap-4 self-start rounded-xl bg-secondary p-5 lg:sticky lg:top-24">
-          <h2 id="rincian-judul" className="text-lg font-bold">
-            Rincian pembayaran
-          </h2>
+        <SummaryPanel title="Rincian pembayaran" titleId="rincian-judul">
           <dl className="flex flex-col gap-2 text-sm tabular-nums">
             {rows.map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4">
@@ -197,7 +200,8 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
               Lihat invoice
             </Link>
           </Button>
-        </aside>
+        </SummaryPanel>
+      </div>
       </div>
     </>
   );
@@ -207,10 +211,10 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
 // tombol bayar, dan invoice.
 export default function TransaksiDetailPage({ params }: PageProps<"/transaksi/[number]">) {
   return (
-    <main className="page-container flex flex-col gap-8 py-10 md:py-14">
+    <main className="flex flex-col">
       <Suspense
         fallback={
-          <div className="flex flex-col gap-4" aria-busy="true" aria-label="Memuat transaksi">
+          <div className="page-container flex flex-col gap-4 py-10" aria-busy="true" aria-label="Memuat transaksi">
             <Skeleton className="h-12 w-2/3" />
             <Skeleton className="h-64 w-full rounded-xl" />
           </div>

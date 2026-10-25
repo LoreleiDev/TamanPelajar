@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,6 +9,7 @@ import { GrowthProgress } from "@/components/shared/growth-progress";
 import { JsonLd } from "@/components/shared/json-ld";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { getCourseOutline, getLearnerState, listCourseSlugs, type CourseOutline } from "@/features/course/queries";
 import { formatStudyTime, formatTanggal } from "@/lib/format";
 import { currentUser } from "@/lib/rbac";
@@ -97,7 +97,7 @@ export default async function KelasDetailPage({ params }: PageProps<"/kelas/[slu
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   return (
-    <main className="page-container flex flex-col gap-10 py-10 md:py-14">
+    <main className="flex flex-col">
       <JsonLd<Course>
         data={{
           "@context": "https://schema.org",
@@ -109,27 +109,19 @@ export default async function KelasDetailPage({ params }: PageProps<"/kelas/[slu
           provider: { "@type": "Organization", name: "Taman Pelajar", url: appUrl },
         }}
       />
-      <header className="flex max-w-3xl flex-col gap-4">
-        <nav aria-label="Breadcrumb">
-          <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-            <li>
-              <Link href="/kelas" className="hover:text-primary">
-                Kelas online
-              </Link>
-            </li>
-            <li aria-hidden="true">
-              <ChevronRight className="size-3.5" />
-            </li>
-            <li>{outline.category.name}</li>
-          </ol>
-        </nav>
-        <h1 className="text-title text-primary">{outline.title}</h1>
-        <p className="text-lead">{outline.description}</p>
-        <p className="text-sm text-muted-foreground tabular-nums">
-          {outline.sections.length} bab, {lessonCount} materi, video {formatStudyTime(outline.estimatedMinutes * 60)}, tingkat{" "}
-          {levelLabels[outline.level]}.
-        </p>
-      </header>
+      <PageHeader
+        breadcrumb={[{ label: "Kelas online", href: "/kelas" }, { label: outline.category.name }]}
+        title={outline.title}
+        description={outline.description}
+        meta={
+          <span className="tabular-nums">
+            {outline.sections.length} bab, {lessonCount} materi, video {formatStudyTime(outline.estimatedMinutes * 60)}, tingkat{" "}
+            {levelLabels[outline.level]}
+          </span>
+        }
+      />
+
+      <div className="page-container flex flex-col gap-10 py-10 md:py-12">
 
       <section aria-labelledby="kurikulum-judul" className="flex flex-col gap-5">
         <h2 id="kurikulum-judul" className="text-heading">
@@ -139,6 +131,7 @@ export default async function KelasDetailPage({ params }: PageProps<"/kelas/[slu
           <CourseState outline={outline} />
         </Suspense>
       </section>
+      </div>
     </main>
   );
 }

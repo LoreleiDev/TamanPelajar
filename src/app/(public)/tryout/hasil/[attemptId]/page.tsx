@@ -1,4 +1,4 @@
-import { BookOpen, CircleCheck, CircleX, History, ListChecks, RotateCcw } from "lucide-react";
+import { BookOpen, CircleCheck, History, ListChecks, RotateCcw } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -8,6 +8,8 @@ import { ChartFigure } from "@/components/charts/chart-figure";
 import { TopicCompareChart, TopicRadarChart } from "@/components/charts/charts";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/shared/page-header";
+import { PassStatus } from "@/components/shared/status-badge";
 import { getAttemptResult, type AttemptResult } from "@/features/exam/results";
 import { formatClock, formatTanggalJam } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
@@ -16,17 +18,6 @@ export const metadata: Metadata = { title: "Hasil tryout", robots: { index: fals
 
 const num = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 });
 const difficultyLabel = { MUDAH: "Mudah", SEDANG: "Sedang", SULIT: "Sulit" } as const;
-
-function Pass({ passed, className }: { passed: boolean | null; className?: string }) {
-  if (passed === null) return <span className="text-muted-foreground">Tanpa ambang batas</span>;
-  const Icon = passed ? CircleCheck : CircleX;
-  return (
-    <span className={`inline-flex items-center gap-1.5 font-semibold ${passed ? "text-success" : "text-destructive"} ${className ?? ""}`}>
-      <Icon aria-hidden="true" className="size-[1em]" />
-      {passed ? "Lulus" : "Belum lulus"}
-    </span>
-  );
-}
 
 function Actions({ r }: { r: AttemptResult }) {
   return (
@@ -72,22 +63,17 @@ async function Content({ params }: { params: PageProps<"/tryout/hasil/[attemptId
   const radar = r.topics.length >= 3;
   return (
     <>
-      <header className="flex flex-col gap-2">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-          <Link href="/tryout" className="hover:text-primary">
-            Tryout
-          </Link>
-          <span aria-hidden="true"> / </span>
-          <Link href={`/tryout/${r.exam.slug}`} className="hover:text-primary">
-            {r.exam.title}
-          </Link>
-        </nav>
-        <h1 className="text-title text-primary">Hasil {r.exam.title}</h1>
-        <p className="text-muted-foreground tabular-nums">
-          Percobaan ke-{r.attemptNo}
-          {r.attemptsUsed !== null && ` dari ${r.exam.maxAttempts}`}, dikumpulkan {formatTanggalJam(r.submittedAt)}
-        </p>
-      </header>
+      <PageHeader
+        breadcrumb={[{ label: "Tryout", href: "/tryout" }, { label: r.exam.title, href: `/tryout/${r.exam.slug}` }, { label: "Hasil" }]}
+        title={`Hasil ${r.exam.title}`}
+        meta={
+          <span className="tabular-nums">
+            Percobaan ke-{r.attemptNo}
+            {r.attemptsUsed !== null && ` dari ${r.exam.maxAttempts}`}, dikumpulkan {formatTanggalJam(r.submittedAt)}
+          </span>
+        }
+      />
+      <div className="page-container flex flex-col gap-10 py-10 md:py-12">
 
       {/* Ringkasan nilai (I.6.1–I.6.6) */}
       <section aria-labelledby="ringkasan-judul" className="grid gap-6 rounded-xl bg-secondary p-5 md:grid-cols-[auto_minmax(0,1fr)] md:gap-10 md:p-7">
@@ -103,7 +89,7 @@ async function Content({ params }: { params: PageProps<"/tryout/hasil/[attemptId
           <p className="text-lg tabular-nums">
             {num.format(t.percent)}% · nilai lulus {num.format(r.exam.passingGrade)}
           </p>
-          <Pass passed={t.passed} className="text-xl" />
+          <PassStatus passed={t.passed} className="text-xl" />
         </div>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4 self-center sm:grid-cols-3">
           {[
@@ -159,7 +145,7 @@ async function Content({ params }: { params: PageProps<"/tryout/hasil/[attemptId
                   </td>
                   <td className="px-4 py-3 text-right">{s.passingGrade !== null ? num.format(s.passingGrade) : "–"}</td>
                   <td className="px-4 py-3">
-                    <Pass passed={s.passed} />
+                    <PassStatus passed={s.passed} />
                   </td>
                 </tr>
               ))}
@@ -258,13 +244,14 @@ async function Content({ params }: { params: PageProps<"/tryout/hasil/[attemptId
           )}
         </section>
       </div>
+      </div>
     </>
   );
 }
 
 function ResultSkeleton() {
   return (
-    <div className="flex flex-col gap-8" aria-busy="true" aria-label="Memuat hasil">
+    <div className="page-container flex flex-col gap-8 py-10" aria-busy="true" aria-label="Memuat hasil">
       <Skeleton className="h-10 w-2/3" />
       <Skeleton className="h-48 w-full rounded-xl" />
       <Skeleton className="h-40 w-full rounded-xl" />
@@ -275,7 +262,7 @@ function ResultSkeleton() {
 // Halaman hasil tryout (I.6, J.2). Hanya pemilik percobaan dan admin.
 export default function HasilPage({ params }: PageProps<"/tryout/hasil/[attemptId]">) {
   return (
-    <main className="page-container flex flex-col gap-10 py-10 md:py-14">
+    <main className="flex flex-col">
       <Suspense fallback={<ResultSkeleton />}>
         <Content params={params} />
       </Suspense>

@@ -5,28 +5,15 @@ import { Suspense } from "react";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { getOrders } from "@/features/dashboard/queries";
 import { expireDueOrders } from "@/features/payment/orders";
+import { statusLabel, statusTone } from "@/features/payment/labels";
 import { formatRupiah, formatTanggalJam } from "@/lib/format";
+import { METHOD_LABELS } from "@/lib/payment";
 import { requireUserPage } from "@/lib/rbac";
 
 export const metadata: Metadata = { title: "Transaksi", robots: { index: false } };
-
-const statusLabel = {
-  MENUNGGU: { text: "Menunggu pembayaran", cls: "text-warning" },
-  BERHASIL: { text: "Berhasil", cls: "text-success" },
-  GAGAL: { text: "Gagal", cls: "text-destructive" },
-  KEDALUWARSA: { text: "Kedaluwarsa", cls: "text-muted-foreground" },
-  DIKEMBALIKAN: { text: "Dikembalikan", cls: "text-muted-foreground" },
-} as const;
-
-const methodLabel = {
-  VIRTUAL_ACCOUNT: "Virtual account",
-  QRIS: "QRIS",
-  E_WALLET: "E-wallet",
-  TRANSFER_BANK: "Transfer bank",
-  SIMULASI: "Simulasi",
-} as const;
 
 async function Content() {
   const user = await requireUserPage("/dashboard/transaksi");
@@ -72,9 +59,9 @@ async function Content() {
                     {formatRupiah(o.total)}
                     {o.discount > 0 && <span className="block text-sm text-muted-foreground">hemat {formatRupiah(o.discount)}</span>}
                   </td>
-                  <td className="px-4 py-3">{o.payments[0] ? methodLabel[o.payments[0].method] : "–"}</td>
-                  <td className={`px-4 py-3 font-semibold ${statusLabel[o.status].cls}`}>
-                    {statusLabel[o.status].text}
+                  <td className="px-4 py-3">{o.payments[0] ? METHOD_LABELS[o.payments[0].method] : "–"}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge tone={statusTone[o.status]}>{statusLabel[o.status]}</StatusBadge>
                     {o.status === "MENUNGGU" && (
                       <span className="block text-sm font-normal text-muted-foreground">Batas {formatTanggalJam(o.expiresAt)}</span>
                     )}

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { listCourses } from "@/features/course/queries";
 import { formatStudyTime } from "@/lib/format";
 
@@ -18,14 +19,13 @@ const levelLabels = { MUDAH: "Dasar", SEDANG: "Menengah", SULIT: "Lanjutan" } as
 export default async function KelasPage() {
   const courses = await listCourses();
   return (
-    <main className="page-container flex flex-col gap-10 py-12 md:py-16">
-      <header className="flex max-w-3xl flex-col gap-3">
-        <h1 className="text-title text-primary">Kelas online</h1>
-        <p className="text-lead">
-          Materi berurutan per bab dengan video, ringkasan, dan kuis. Bab 1 dan 2 setiap kelas terbuka gratis setelah kamu
-          masuk; bab berikutnya terbuka lewat paket.
-        </p>
-      </header>
+    <main className="flex flex-col">
+      <PageHeader
+        eyebrow="Belajar runtut"
+        title="Kelas online"
+        description="Materi berurutan per bab dengan video, ringkasan, dan kuis. Bab 1 dan 2 setiap kelas terbuka gratis setelah kamu masuk; bab berikutnya terbuka lewat paket."
+      />
+      <div className="page-container flex flex-col gap-10 py-10 md:py-12">
       {courses.length === 0 ? (
         <EmptyState
           title="Belum ada kelas yang terbit"
@@ -75,6 +75,7 @@ export default async function KelasPage() {
           ))}
         </ul>
       )}
+      </div>
     </main>
   );
 }

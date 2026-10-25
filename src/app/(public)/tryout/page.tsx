@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { listExams, getUserExamStates, type ExamListItem, type UserExamState } from "@/features/exam/queries";
 import { formatTanggalJam } from "@/lib/format";
@@ -110,14 +111,13 @@ async function ExamRowsWithState({ exams }: { exams: ExamListItem[] }) {
 export default async function TryoutPage() {
   const exams = await listExams();
   return (
-    <main className="page-container flex flex-col gap-10 py-12 md:py-16">
-      <header className="flex max-w-3xl flex-col gap-3">
-        <h1 className="text-title text-primary">Tryout CBT</h1>
-        <p className="text-lead">
-          Simulasi ujian berbasis komputer dengan waktu per subtes. Jawaban tersimpan otomatis, nilai keluar begitu kamu
-          mengumpulkan, dan setiap soal dilengkapi pembahasan.
-        </p>
-      </header>
+    <main className="flex flex-col">
+      <PageHeader
+        eyebrow="Ujian berbasis komputer"
+        title="Tryout CBT"
+        description="Simulasi ujian dengan waktu per subtes. Jawaban tersimpan otomatis, nilai keluar begitu kamu mengumpulkan, dan setiap soal dilengkapi pembahasan."
+      />
+      <div className="page-container flex flex-col gap-10 py-10 md:py-12">
       {exams.length === 0 ? (
         <EmptyState
           title="Belum ada tryout yang terbit"
@@ -133,6 +133,7 @@ export default async function TryoutPage() {
           <ExamRowsWithState exams={exams} />
         </Suspense>
       )}
+      </div>
     </main>
   );
 }

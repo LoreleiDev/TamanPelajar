@@ -1,6 +1,5 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import type { Course } from "schema-dts";
@@ -8,6 +7,7 @@ import type { Course } from "schema-dts";
 import { CheckList } from "@/components/shared/check-list";
 import { JsonLd } from "@/components/shared/json-ld";
 import { ProductCard } from "@/components/shared/product-card";
+import { PageHeader } from "@/components/shared/page-header";
 import { ProductCover } from "@/components/shared/product-cover";
 import { Rating } from "@/components/shared/rating";
 import { PurchasePanel } from "@/features/catalog/components/detail/purchase-panel";
@@ -100,45 +100,24 @@ export default async function PaketPage({ params }: PageProps<"/paket/[slug]">) 
       />
 
       {/* Banner dan nama paket (D.3.1) */}
-      <header className="bg-secondary">
-        <div className="page-container grid gap-8 py-10 md:py-14 lg:grid-cols-[1fr_22rem] lg:gap-12">
-          <div className="flex flex-col gap-5">
-            <nav aria-label="Breadcrumb">
-              <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/" className="hover:text-primary">
-                    Beranda
-                  </Link>
-                </li>
-                <li aria-hidden="true">
-                  <ChevronRight className="size-3.5" />
-                </li>
-                <li>
-                  <Link href="/program" className="hover:text-primary">
-                    Katalog
-                  </Link>
-                </li>
-                <li aria-hidden="true">
-                  <ChevronRight className="size-3.5" />
-                </li>
-                <li>
-                  <Link href={`/program?kategori=${product.category.slug}`} className="hover:text-primary">
-                    {product.category.name}
-                  </Link>
-                </li>
-              </ol>
-            </nav>
-            <h1 className="text-title max-w-[22ch] text-primary">{product.name}</h1>
-            <p className="text-lead max-w-[56ch]">{product.summary}</p>
-            <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-              <span className="font-semibold">{programTypeLabels[product.programType]}</span>
-              <span>Jenjang {educationLevelLabels[product.educationLevel]}</span>
-              <Rating value={product.ratingAvg} count={product.ratingCount} />
-            </p>
-          </div>
-          <ProductCover product={product} className="hidden rounded-2xl lg:flex lg:self-end" sizes="(min-width: 1024px) 22rem, 100vw" />
-        </div>
-      </header>
+      <PageHeader
+        breadcrumb={[
+          { label: "Beranda", href: "/" },
+          { label: "Katalog", href: "/program" },
+          { label: product.category.name, href: `/program?kategori=${product.category.slug}` },
+        ]}
+        eyebrow={programTypeLabels[product.programType]}
+        title={product.name}
+        titleClassName="max-w-[22ch]"
+        description={product.summary}
+        meta={
+          <>
+            <span>Jenjang {educationLevelLabels[product.educationLevel]}</span>
+            <Rating value={product.ratingAvg} count={product.ratingCount} />
+          </>
+        }
+        aside={<ProductCover product={product} className="rounded-xl" sizes="(min-width: 1024px) 22rem, 100vw" />}
+      />
 
       <div className="page-container grid gap-12 py-10 md:py-14 lg:grid-cols-[1fr_22rem] lg:gap-12">
         <aside aria-label="Pembelian" className="lg:order-2">

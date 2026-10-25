@@ -8,6 +8,7 @@ import { StartExamForm } from "@/components/exam/start-exam-form";
 import { PriceTag } from "@/components/shared/price-tag";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { startBlockMessage } from "@/features/exam/engine";
 import { getExamDetail, getUserExamStates, listExamSlugs, type ExamDetail } from "@/features/exam/queries";
 import { formatTanggalJam } from "@/lib/format";
@@ -126,22 +127,16 @@ export default async function TryoutDetailPage({ params }: PageProps<"/tryout/[s
   ].filter((r): r is string => Boolean(r));
 
   return (
-    <main className="page-container flex flex-col gap-10 py-10 md:py-14">
-      <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-        <Link href="/tryout" className="hover:text-primary">
-          Tryout
-        </Link>
-        <span aria-hidden="true"> / </span>
-        {exam.category.name}
-      </nav>
+    <main className="flex flex-col">
+      <PageHeader
+        breadcrumb={[{ label: "Tryout", href: "/tryout" }, { label: exam.category.name }]}
+        eyebrow="Petunjuk tryout"
+        title={exam.title}
+        description={exam.description}
+      />
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] xl:gap-14">
+      <div className="page-container grid gap-10 py-10 md:py-12 lg:grid-cols-[minmax(0,1fr)_22rem] xl:gap-14">
         <article className="flex min-w-0 flex-col gap-8">
-          <header className="flex flex-col gap-3">
-            <p className="text-sm font-semibold text-primary">Petunjuk tryout</p>
-            <h1 className="text-title text-primary">{exam.title}</h1>
-            <p className="text-lead max-w-[65ch]">{exam.description}</p>
-          </header>
 
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
             {[

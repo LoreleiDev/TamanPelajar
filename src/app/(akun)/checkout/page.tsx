@@ -5,6 +5,7 @@ import { Suspense } from "react";
 
 import { CheckoutForm } from "@/components/checkout/checkout-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { getCart } from "@/features/cart/queries";
 import { formatRupiah } from "@/lib/format";
 import { VA_BANKS } from "@/lib/midtrans";
@@ -56,8 +57,9 @@ async function Content() {
 // Checkout (K.1–K.2): periksa pesanan, voucher, metode, bayar.
 export default function CheckoutPage() {
   return (
-    <main className="page-container flex flex-col gap-8 py-10 md:py-14">
-      <h1 className="text-title text-primary">Checkout</h1>
+    <main className="flex flex-col">
+      <PageHeader eyebrow="Langkah 2 dari 3: voucher dan metode" title="Checkout" />
+      <div className="page-container flex flex-col gap-8 py-10 md:py-12">
       <Suspense
         fallback={
           <div className="flex flex-col gap-4" aria-busy="true" aria-label="Memuat checkout">
@@ -68,6 +70,7 @@ export default function CheckoutPage() {
       >
         <Content />
       </Suspense>
+      </div>
     </main>
   );
 }

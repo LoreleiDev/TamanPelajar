@@ -17,7 +17,7 @@ export function PurchasePanel({ product }: { product: ProductDetail }) {
   ].filter((x): x is { icon: typeof FileText; text: string } => Boolean(x));
 
   return (
-    <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-5 md:p-6">
+    <div className="flex flex-col gap-5 rounded-xl bg-secondary p-5 md:p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-sm font-bold text-muted-foreground">Harga paket</h2>
         <PriceTag price={product.price} promoPrice={product.promoPrice} size="lg" />

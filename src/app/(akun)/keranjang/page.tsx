@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PriceTag } from "@/components/shared/price-tag";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader, SummaryPanel } from "@/components/shared/page-header";
 import { getCart } from "@/features/cart/queries";
 import { formatRupiah, formatTanggal } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
@@ -62,10 +63,7 @@ async function Content() {
           </li>
         ))}
       </ul>
-      <aside aria-labelledby="ringkasan-judul" className="flex flex-col gap-4 self-start rounded-xl bg-secondary p-5 lg:sticky lg:top-24">
-        <h2 id="ringkasan-judul" className="text-lg font-bold">
-          Ringkasan
-        </h2>
+      <SummaryPanel title="Ringkasan" titleId="ringkasan-judul">
         <dl className="flex justify-between gap-4 tabular-nums">
           <dt>Subtotal ({cart.items.filter((i) => i.available).length} paket)</dt>
           <dd className="font-bold">{formatRupiah(cart.subtotal)}</dd>
@@ -83,7 +81,7 @@ async function Content() {
             </Link>
           </Button>
         )}
-      </aside>
+      </SummaryPanel>
     </div>
   );
 }
@@ -91,8 +89,9 @@ async function Content() {
 // Keranjang (K.1).
 export default function KeranjangPage() {
   return (
-    <main className="page-container flex flex-col gap-8 py-10 md:py-14">
-      <h1 className="text-title text-primary">Keranjang</h1>
+    <main className="flex flex-col">
+      <PageHeader eyebrow="Langkah 1 dari 3: periksa paket" title="Keranjang" />
+      <div className="page-container flex flex-col gap-8 py-10 md:py-12">
       <Suspense
         fallback={
           <div className="flex flex-col gap-3" aria-busy="true" aria-label="Memuat keranjang">
@@ -103,6 +102,7 @@ export default function KeranjangPage() {
       >
         <Content />
       </Suspense>
+      </div>
     </main>
   );
 }

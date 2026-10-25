@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { ReviewViewer } from "@/components/exam/review-viewer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { getReview } from "@/features/exam/results";
 import { formatTanggalJam } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
@@ -33,6 +34,7 @@ async function Content({
 
   if (review.kind === "tertutup") {
     return (
+      <div className="page-container py-10 md:py-12">
       <div className="flex flex-col gap-4 rounded-xl bg-secondary p-6">
         <h1 className="flex items-center gap-2 text-heading">
           <Lock aria-hidden="true" className="size-6 text-primary" />
@@ -45,20 +47,23 @@ async function Content({
         </p>
         {back}
       </div>
+      </div>
     );
   }
 
   const soal = Number((await searchParams).soal);
   return (
     <>
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-primary">Pembahasan</p>
-          <h1 className="text-title text-primary">{review.exam.title}</h1>
-        </div>
+      <PageHeader
+        breadcrumb={[{ label: "Tryout", href: "/tryout" }, { label: "Hasil", href: `/tryout/hasil/${attemptId}` }, { label: "Pembahasan" }]}
+        eyebrow="Pembahasan"
+        title={review.exam.title}
+      >
         {back}
-      </header>
-      <ReviewViewer review={review} initialNumber={Number.isInteger(soal) && soal > 0 ? soal : 1} />
+      </PageHeader>
+      <div className="page-container py-10 md:py-12">
+        <ReviewViewer review={review} initialNumber={Number.isInteger(soal) && soal > 0 ? soal : 1} />
+      </div>
     </>
   );
 }
@@ -66,10 +71,10 @@ async function Content({
 // Halaman pembahasan (I.7): hanya setelah percobaan selesai dan pembahasan dibuka.
 export default function PembahasanPage({ params, searchParams }: PageProps<"/tryout/pembahasan/[attemptId]">) {
   return (
-    <main className="page-container flex flex-col gap-8 py-10 md:py-14">
+    <main className="flex flex-col">
       <Suspense
         fallback={
-          <div className="flex flex-col gap-6" aria-busy="true" aria-label="Memuat pembahasan">
+          <div className="page-container flex flex-col gap-6 py-10" aria-busy="true" aria-label="Memuat pembahasan">
             <Skeleton className="h-10 w-1/2" />
             <Skeleton className="h-64 w-full rounded-xl" />
           </div>

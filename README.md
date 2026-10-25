@@ -64,8 +64,8 @@ Isi data demo:
 | `pnpm build` | Build produksi. Membutuhkan database karena halaman publik di-prerender dari data |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
-| `pnpm test` | Tes unit Vitest (penilaian, filter katalog) |
-| `pnpm test:e2e` | Tes Playwright. Unduh browser sekali dengan `pnpm exec playwright install chromium` |
+| `pnpm test` | Tes unit Vitest (penilaian, mesin ujian, voucher, Midtrans, akses) |
+| `pnpm test:e2e` | Tes Playwright terhadap build produksi (build + `next start` otomatis). Jalankan `pnpm prisma db seed` dulu dan pastikan port 3000 kosong. `E2E_DEV=1` memakai server dev. Unduh browser sekali dengan `pnpm exec playwright install chromium` |
 | `pnpm prisma migrate dev` | Membuat dan menerapkan migration |
 | `pnpm prisma db seed` | Mengisi data demo (termasuk PDF ringkasan materi ke Cloudinary bila dikonfigurasi) |
 | `pnpm seed:video` | Membuat dan mengunggah video contoh orisinal per kelas ke Cloudinary (sekali saja, butuh Chromium Playwright) |
@@ -77,6 +77,12 @@ Semua file (gambar, PDF materi, sertifikat) disimpan di Cloudinary.
 
 - Isi variabel `CLOUDINARY_*` dan `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` di `.env`.
 - Akun gratis Cloudinary memblokir pengiriman PDF dan ZIP secara bawaan. Aktifkan **Settings → Security → Allow delivery of PDF and ZIP files** agar PDF materi bisa diunduh.
+
+## Pembayaran
+
+- Bawaan `PAYMENT_MODE="simulasi"`: semua metode (VA, QRIS, e-wallet, transfer) disimulasikan. Di halaman transaksi ada tombol **Bayar sekarang (simulasi)** dan **Gagalkan pembayaran**; tidak ada uang yang ditarik.
+- Voucher demo: `HEMAT10` (10%, maks. Rp50.000) dan `BELAJAR25` (Rp25.000, minimal Rp200.000), masing-masing sekali per akun.
+- Midtrans: isi `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, `MIDTRANS_IS_PRODUCTION`, lalu `PAYMENT_MODE="midtrans"`. Daftarkan URL notifikasi `https://<domain>/api/webhooks/midtrans` di dashboard Midtrans. Webhook memverifikasi signature SHA512 dan nominal sebelum mengaktifkan paket.
 
 ## Deploy ke Vercel
 
