@@ -1,20 +1,14 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { Slot } from "radix-ui";
+import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { confirmAlert } from "@/lib/alert";
 
-/** Konfirmasi sebelum aksi berisiko (P.2.6). Tombol konfirmasi menyebut aksinya. */
+/**
+ * Konfirmasi sebelum aksi berisiko (P.2.6) lewat SweetAlert bertema brand (lib/alert.ts).
+ * Tombol konfirmasi menyebut aksinya; popup menampilkan loader sampai onConfirm selesai.
+ */
 export function ConfirmDialog({
   trigger,
   title,
@@ -30,35 +24,12 @@ export function ConfirmDialog({
   destructive?: boolean;
   onConfirm: () => void | Promise<void>;
 }) {
-  const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="gap-5 p-6 sm:max-w-md">
-        <DialogHeader className="text-left">
-          <DialogTitle className="text-lg font-bold">{title}</DialogTitle>
-          <DialogDescription className="text-base">{description}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="gap-2">
-          <DialogClose asChild>
-            <Button variant="outline">Batal</Button>
-          </DialogClose>
-          <Button
-            variant={destructive ? "destructive" : "default"}
-            disabled={pending}
-            onClick={() =>
-              startTransition(async () => {
-                await onConfirm();
-                setOpen(false);
-              })
-            }
-          >
-            {pending ? "Memproses…" : confirmLabel}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Slot.Root
+      aria-haspopup="dialog"
+      onClick={() => void confirmAlert({ title, text: description, confirmLabel, destructive, onConfirm })}
+    >
+      {trigger}
+    </Slot.Root>
   );
 }

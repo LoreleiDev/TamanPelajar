@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { SessionProvider, useSession } from "next-auth/react";
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { getSession, SessionProvider, useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { createContext, Suspense, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { SproutMark } from "@/components/shared/ornaments";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ import {
 
 type RequireLogin = (reason: string, onAuthenticated?: () => void) => void;
 
-const LoginContext = createContext<{ isAuthenticated: boolean; requireLogin: RequireLogin } | null>(null);
+const LoginContext = createContext<{ isAuthenticated: boolean; isAdmin: boolean; requireLogin: RequireLogin } | null>(null);
 
 export function LoginRequiredProvider({ children }: { children: ReactNode }) {
   return (
@@ -33,7 +34,10 @@ export function LoginRequiredProvider({ children }: { children: ReactNode }) {
 
 function LoginRequiredInner({ children }: { children: ReactNode }) {
   // Status sesi dibaca di client (/api/auth/session) agar halaman publik tetap statis.
-  const isAuthenticated = useSession().status === "authenticated";
+  const { data, status, update } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const isAdmin = data?.user?.role === "ADMIN";
+  const router = useRouter();
   const [reason, setReason] = useState<string | null>(null);
   const [callbackUrl, setCallbackUrl] = useState("/");
 
@@ -44,17 +48,33 @@ function LoginRequiredInner({ children }: { children: ReactNode }) {
         return;
       }
       // Dibaca saat diklik agar tidak perlu useSearchParams (yang menuntut Suspense).
-      setCallbackUrl(window.location.pathname + window.location.search);
-      setReason(why);
+      const here = window.location.pathname + window.location.search;
+      // Sesi di client bisa tertinggal (mis. baru masuk di tab lain): cek ulang sebelum
+      // menampilkan dialog masuk.
+      void getSession().then((fresh) => {
+        if (fresh?.user) {
+          void update();
+          // Tanpa aksi lanjutan, halaman dirender ulang agar tampil sebagai pengguna yang masuk.
+          if (onAuthenticated) onAuthenticated();
+          else router.refresh();
+          return;
+        }
+        setCallbackUrl(here);
+        setReason(why);
+      });
     },
-    [isAuthenticated],
+    [isAuthenticated, update, router],
   );
 
-  const value = useMemo(() => ({ isAuthenticated, requireLogin }), [isAuthenticated, requireLogin]);
+  const value = useMemo(() => ({ isAuthenticated, isAdmin, requireLogin }), [isAuthenticated, isAdmin, requireLogin]);
   const query = `?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   return (
     <LoginContext.Provider value={value}>
+      {/* usePathname butuh Suspense di rute dinamis (cacheComponents). */}
+      <Suspense fallback={null}>
+        <SessionSync />
+      </Suspense>
       {children}
       <Dialog open={reason !== null} onOpenChange={(open) => !open && setReason(null)}>
         <DialogContent className="gap-5 p-6 sm:max-w-md">
@@ -65,18 +85,33 @@ function LoginRequiredInner({ children }: { children: ReactNode }) {
               {reason} Setelah masuk, Anda kembali ke halaman ini.
             </DialogDescription>
           </DialogHeader>
+          {/* Provider ada di root layout: tutup dialog saat pindah ke halaman masuk/daftar. */}
           <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-start">
             <Button asChild size="lg">
-              <Link href={`/masuk${query}`}>Masuk</Link>
+              <Link href={`/masuk${query}`} onClick={() => setReason(null)}>Masuk</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href={`/daftar${query}`}>Daftar akun baru</Link>
+              <Link href={`/daftar${query}`} onClick={() => setReason(null)}>Daftar akun baru</Link>
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </LoginContext.Provider>
   );
+}
+
+/**
+ * Masuk dan keluar berjalan lewat server action lalu navigasi client, sehingga
+ * SessionProvider tidak tahu sesinya berubah. Muat ulang sesi setiap pindah halaman.
+ */
+function SessionSync() {
+  const pathname = usePathname();
+  const { update } = useSession();
+  useEffect(() => {
+    void update();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- update berganti tiap kali sesi dimuat
+  }, [pathname]);
+  return null;
 }
 
 export function useRequireLogin() {

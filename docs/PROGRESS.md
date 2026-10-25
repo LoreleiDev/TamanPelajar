@@ -310,6 +310,20 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 - Penilaian tugas (L.2.7 "tugas") belum punya model pengumpulan; materi Tugas berisi instruksi, sedangkan essay dinilai di menu Penilaian
 - Sitemap dan robots (Q.2.3–Q.2.4) dikerjakan di Tahap 6
 
+### `fix/revisi-admin-ui-sesi` (revisi RMED setelah Tahap 5)
+- [x] **C.2, C.3** Admin hanya memakai panel admin: `/dashboard`, `/keranjang`, `/checkout`, dan `/transaksi` dialihkan ke `/admin` (detail transaksi ke `/admin/transaksi/[nomor]`); menu akun, menu mobile, dan bottom nav admin hanya berisi panel admin
+- [x] **C.2** Admin tidak bisa membeli: tombol beli diganti tautan "Kelola paket", dan server action keranjang serta checkout menolak akun admin
+- [x] **P.2.6** Konfirmasi memakai SweetAlert2 bertema brand (`lib/alert.ts`, gaya `.tp-swal` di `globals.css`): keluar akun dan semua `ConfirmDialog` (hapus, nonaktifkan, verifikasi, batalkan pesanan)
+- [x] **D.1.6** Statistik beranda: grid 2×2, angka rata kiri di atas keterangan dengan garis buku besar
+- [x] **B.1, B.2.1** Logo: wordmark satu baris ("TAMAN" tebal, "PELAJAR" lebih ringan) dengan keterangan "Bimbingan belajar"; halaman masuk dan daftar memakai tombol Kembali, logo tidak lagi menjadi tautan
+
+**Bug yang ditemukan dan diperbaiki:**
+- Pengguna yang baru masuk tetap melihat dialog "Masuk dulu" saat membeli sampai halaman dimuat ulang. Penyebab: masuk lewat server action lalu navigasi client, sehingga `SessionProvider` tidak tahu sesi berubah. Sesi kini dimuat ulang setiap pindah halaman dan dicek ulang sebelum dialog tampil
+- Dialog "Masuk dulu" tetap terbuka di atas form masuk setelah tautan Masuk/Daftar diklik (provider ada di root layout); kini ditutup saat tautan dipilih
+- Popup yang dibuka dari menu dropdown mengembalikan `aria-hidden` milik Radix ke header sehingga header hilang dari pembaca layar; popup kini menunggu menu tertutup
+
+**Pengujian:** lint, typecheck, build lulus; unit 68/68; e2e 130/130 (4 tes baru: konfirmasi keluar, beli setelah masuk tanpa muat ulang, admin dialihkan dan tidak bisa membeli). Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px: navbar, statistik beranda, halaman masuk, popup keluar.
+
 ## Tahap 6 — Pengujian dan penyempurnaan
 
 Belum dimulai.

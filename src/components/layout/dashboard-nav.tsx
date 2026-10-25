@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { keluar } from "@/features/auth/actions";
+import { LogoutButton } from "@/components/layout/logout-button";
 import { cn } from "@/lib/utils";
 
 // Menu sidebar dashboard siswa (F.1).
@@ -65,15 +65,15 @@ export function DashboardNav({ unread }: { unread: number }) {
           );
         })}
         <li className="shrink-0 lg:mt-2">
-          <form action={keluar}>
+          <LogoutButton>
             <button
-              type="submit"
+              type="button"
               className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[0.9375rem] font-semibold whitespace-nowrap text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
               <LogOut aria-hidden="true" className="size-4.5" />
               Keluar
             </button>
-          </form>
+          </LogoutButton>
         </li>
       </ul>
     </nav>

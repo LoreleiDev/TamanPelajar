@@ -11,7 +11,10 @@ const MAX_ITEMS = 10;
 
 async function session() {
   try {
-    return { user: await requireRole() } as const;
+    const user = await requireRole();
+    // Admin mengelola paket lewat panel admin dan tidak membeli (revisi RMED).
+    if (user.role === "ADMIN") return { error: fail("Akun administrator tidak dapat membeli paket.") } as const;
+    return { user } as const;
   } catch (e) {
     if (e instanceof AuthorizationError) return { error: fail(e.message) } as const;
     throw e;

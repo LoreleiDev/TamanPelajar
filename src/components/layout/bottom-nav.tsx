@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, ClipboardList, House, Receipt, UserRound, type LucideIcon } from "lucide-react";
+import { BookOpen, ClipboardList, House, Receipt, ShieldCheck, UserRound, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,11 +19,14 @@ const items: Item[] = [
   { href: "/dashboard/profil", label: "Profil", icon: UserRound, needsLogin: "Profil dan progres belajar tersimpan di akun Anda." },
 ];
 
+// Admin tidak punya dashboard siswa atau transaksi pribadi; ganti dengan pintasan panel admin.
+const adminItems: Item[] = [...items.slice(0, 3), { href: "/admin", label: "Admin", icon: ShieldCheck }];
+
 const itemClass = "flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[0.8125rem] font-semibold";
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { isAuthenticated, requireLogin } = useRequireLogin();
+  const { isAuthenticated, isAdmin, requireLogin } = useRequireLogin();
 
   return (
     <nav
@@ -31,7 +34,7 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden" // taste-skill-ignore: border tipis brand (CLAUDE.md)
     >
       <ul className="flex px-2">
-        {items.map(({ href, label, icon: Icon, needsLogin }) => {
+        {(isAdmin ? adminItems : items).map(({ href, label, icon: Icon, needsLogin }) => {
           const active = isActivePath(pathname, href);
           const inner = (
             <>

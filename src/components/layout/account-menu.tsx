@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { keluar } from "@/features/auth/actions";
+import { LogoutButton } from "@/components/layout/logout-button";
 
 export interface AccountSummary {
   name: string;
@@ -93,7 +93,7 @@ export function DesktopAccount({ account }: { account: AccountSummary | null }) 
   return (
     <div className="hidden items-center gap-1 sm:flex">
       {account.role === "USER" && <CartLink count={account.cartCount} />}
-      <NotificationBell unread={account.unread} />
+      {account.role === "USER" && <NotificationBell unread={account.unread} />}
       <AccountMenu account={account} />
     </div>
   );
@@ -128,36 +128,38 @@ export function AccountMenu({ account }: { account: AccountSummary }) {
           <span className="truncate text-sm font-normal text-muted-foreground">{account.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {account.role === "ADMIN" && (
+        {/* Admin hanya memakai panel admin; dashboard, profil, dan transaksi siswa tidak berlaku. */}
+        {account.role === "ADMIN" ? (
           <DropdownMenuItem asChild>
             <Link href="/admin">
               <ShieldCheck /> Panel admin
             </Link>
           </DropdownMenuItem>
+        ) : (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard">
+                <LayoutDashboard /> Dashboard
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/profil">
+                <UserRound /> Profil
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/transaksi">
+                <Receipt /> Transaksi
+              </Link>
+            </DropdownMenuItem>
+          </>
         )}
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard">
-            <LayoutDashboard /> Dashboard
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard/profil">
-            <UserRound /> Profil
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/transaksi">
-            <Receipt /> Transaksi
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <form action={keluar}>
-          <DropdownMenuItem asChild>
-            <button type="submit" className="w-full">
-              <LogOut /> Keluar
-            </button>
+        <LogoutButton>
+          <DropdownMenuItem>
+            <LogOut /> Keluar
           </DropdownMenuItem>
-        </form>
+        </LogoutButton>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -194,30 +196,39 @@ export function MobileAccount({ account, onNavigate }: { account: AccountSummary
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <Button asChild size="sm" variant="outline" className="bg-background">
-          <Link href={account.role === "ADMIN" ? "/admin" : "/dashboard"} onClick={onNavigate}>
-            {account.role === "ADMIN" ? "Panel admin" : "Dashboard"}
-          </Link>
-        </Button>
-        <Button asChild size="sm" variant="outline" className="bg-background">
-          <Link href="/dashboard/notifikasi" onClick={onNavigate}>
-            Notifikasi{account.unread > 0 ? ` (${account.unread})` : ""}
-          </Link>
-        </Button>
-        {account.role === "USER" && (
+        {account.role === "ADMIN" ? (
           <Button asChild size="sm" variant="outline" className="col-span-2 bg-background">
-            <Link href="/keranjang" onClick={onNavigate}>
-              <ShoppingCart data-icon="inline-start" />
-              Keranjang{account.cartCount > 0 ? ` (${account.cartCount})` : ""}
+            <Link href="/admin" onClick={onNavigate}>
+              <ShieldCheck data-icon="inline-start" />
+              Panel admin
             </Link>
           </Button>
+        ) : (
+          <>
+            <Button asChild size="sm" variant="outline" className="bg-background">
+              <Link href="/dashboard" onClick={onNavigate}>
+                Dashboard
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="bg-background">
+              <Link href="/dashboard/notifikasi" onClick={onNavigate}>
+                Notifikasi{account.unread > 0 ? ` (${account.unread})` : ""}
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="col-span-2 bg-background">
+              <Link href="/keranjang" onClick={onNavigate}>
+                <ShoppingCart data-icon="inline-start" />
+                Keranjang{account.cartCount > 0 ? ` (${account.cartCount})` : ""}
+              </Link>
+            </Button>
+          </>
         )}
       </div>
-      <form action={keluar}>
-        <Button type="submit" variant="ghost" size="sm" className="w-full">
+      <LogoutButton>
+        <Button type="button" variant="ghost" size="sm" className="w-full">
           <LogOut data-icon="inline-start" /> Keluar
         </Button>
-      </form>
+      </LogoutButton>
     </div>
   );
 }

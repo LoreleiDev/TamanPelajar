@@ -77,9 +77,18 @@ test.describe("autentikasi (E, C.4–C.5)", () => {
     await page.goto("/masuk");
     await masuk(page, "user1@tamanpelajar.test");
     await expect(page).toHaveURL(/\/dashboard$/);
-    await expect(page.getByRole("link", { name: "Notifikasi, 1 belum dibaca" })).toBeVisible();
+    // Jumlahnya bisa bertambah oleh tes admin yang berjalan paralel (balasan diskusi, penilaian).
+    await expect(page.getByRole("link", { name: /^Notifikasi, \d+ belum dibaca$/ })).toBeVisible();
     await page.getByRole("button", { name: "Menu akun Nadia Rahmawati" }).click();
     await page.getByRole("menuitem", { name: "Keluar" }).click();
+    // Konfirmasi SweetAlert sebelum keluar; Batal membiarkan sesi tetap aktif.
+    const confirm = page.getByRole("dialog", { name: "Keluar dari akun?" });
+    await confirm.getByRole("button", { name: "Batal" }).click();
+    await expect(confirm).toBeHidden();
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await page.getByRole("button", { name: "Menu akun Nadia Rahmawati" }).click();
+    await page.getByRole("menuitem", { name: "Keluar" }).click();
+    await confirm.getByRole("button", { name: "Ya, keluar" }).click();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole("link", { name: "Masuk" }).first()).toBeVisible();
   });
@@ -99,6 +108,33 @@ test.describe("autentikasi (E, C.4–C.5)", () => {
     await expect(admin).toHaveURL(/\/admin$/);
     await expect(admin.getByRole("heading", { name: "Dashboard admin" })).toBeVisible();
     await adminContext.close();
+  });
+
+  test("masuk dari dialog lalu langsung bisa membeli tanpa muat ulang halaman", async ({ page }) => {
+    await page.goto("/paket/tryout-skd-cpns", { waitUntil: "networkidle" });
+    const buy = () => page.getByRole("complementary", { name: "Pembelian" }).getByRole("button", { name: /^Beli sekarang/ });
+    await buy().click();
+    await page.getByRole("dialog", { name: "Masuk dulu untuk melanjutkan" }).getByRole("link", { name: "Masuk" }).click();
+    await expect(page).toHaveURL(/\/masuk\?callbackUrl=/);
+    await masuk(page, "user2@tamanpelajar.test");
+    await expect(page).toHaveURL(/\/paket\/tryout-skd-cpns$/);
+    await buy().click();
+    await expect(page).toHaveURL(/\/keranjang$/);
+    await expect(page.getByRole("dialog", { name: "Masuk dulu untuk melanjutkan" })).toBeHidden();
+  });
+
+  test("admin tidak punya dashboard siswa dan tidak bisa membeli paket", async ({ page }) => {
+    await page.goto("/masuk");
+    await masuk(page, "admin@tamanpelajar.test");
+    await expect(page).toHaveURL(/\/admin$/);
+    for (const path of ["/dashboard", "/dashboard/profil", "/keranjang", "/checkout"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/admin$/);
+    }
+    await page.goto("/paket/tryout-skd-cpns", { waitUntil: "networkidle" });
+    const panel = page.getByRole("complementary", { name: "Pembelian" });
+    await expect(panel.getByRole("link", { name: /^Kelola paket/ })).toHaveAttribute("href", "/admin/produk");
+    await expect(panel.getByRole("button", { name: /^Beli sekarang/ })).toHaveCount(0);
   });
 
   test("lupa password: tautan demo membuka form password baru", async ({ page }) => {

@@ -15,23 +15,25 @@ export function StatsLedger({ stats }: { stats: PlatformStats }) {
   ];
 
   return (
-    <section aria-labelledby="statistik-judul" className="page-container grid gap-12 py-20 md:py-28 lg:grid-cols-12">
-      <div className="flex flex-col justify-center gap-4 lg:col-span-6 xl:col-span-5">
+    <section aria-labelledby="statistik-judul" className="page-container grid items-center gap-12 py-20 md:py-28 lg:grid-cols-12">
+      <div className="flex flex-col gap-4 lg:col-span-5">
         <h2 id="statistik-judul" className="text-title">
           <span className="block text-muted-foreground">Taman ini</span>
           <span className="block">baru mulai tumbuh</span>
         </h2>
         <p className="text-lead max-w-[38ch]">
-          Angka di samping dihitung langsung dari data platform. Kami menampilkannya apa adanya.
+          Angka-angka ini dihitung langsung dari data platform. Kami menampilkannya apa adanya.
         </p>
       </div>
-      <dl className="flex flex-col gap-5 lg:col-span-6 lg:col-start-7 xl:col-span-6 xl:col-start-7">
+      {/* Grid 2×2: angka rata kiri di atas keterangannya, dipisah garis tipis seperti buku besar. */}
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-10 lg:col-span-6 lg:col-start-7">
         {rows.map((r) => (
-          <div key={r.caption} className="grid grid-cols-[minmax(0,5.5rem)_1fr] items-baseline gap-x-5 md:grid-cols-[8rem_1fr]">
-            <dd className="text-right text-[clamp(3.5rem,2rem+5vw,6.5rem)] leading-none font-extrabold tracking-tight text-primary tabular-nums">
+          // dt sebelum dd (urutan HTML yang benar); flex-col-reverse menaruh angka di atas.
+          <div key={r.caption} className="flex flex-col-reverse justify-end gap-3 border-t border-border pt-5" /* taste-skill-ignore: garis buku besar, border tipis brand */>
+            <dt className="max-w-[22ch] text-base text-muted-foreground md:text-lg">{r.caption}</dt>
+            <dd className="text-[clamp(3rem,1.75rem+4vw,5.5rem)] leading-none font-extrabold tracking-tight text-primary tabular-nums">
               {number.format(r.value)}
             </dd>
-            <dt className="text-base md:text-lg">{r.caption}</dt>
           </div>
         ))}
       </dl>

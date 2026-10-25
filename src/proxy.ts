@@ -10,6 +10,7 @@ const { auth } = NextAuth(authConfig);
 
 const protectedPrefixes = ["/dashboard", "/admin", "/ujian", "/keranjang", "/checkout", "/transaksi", "/invoice", "/lengkapi-profil"];
 const guestOnly = ["/masuk", "/daftar"];
+const adminBlocked = ["/dashboard", "/keranjang", "/checkout", "/transaksi"];
 
 export default auth(async (req) => {
   // Hanya navigasi yang dialihkan. Request POST (server action) dibiarkan lewat: redirect
@@ -39,6 +40,14 @@ export default auth(async (req) => {
   }
   if ((pathname === "/admin" || pathname.startsWith("/admin/")) && user.role !== "ADMIN") {
     return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+  // Admin hanya memakai panel admin: tidak ada dashboard siswa, keranjang, atau checkout.
+  if (user.role === "ADMIN") {
+    const orderMatch = pathname.match(/^\/transaksi\/([^/]+)$/);
+    if (orderMatch) return NextResponse.redirect(new URL(`/admin/transaksi/${orderMatch[1]}`, req.url));
+    if (adminBlocked.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
   }
   return NextResponse.next();
 });

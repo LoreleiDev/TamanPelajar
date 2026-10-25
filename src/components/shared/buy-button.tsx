@@ -1,6 +1,7 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { Settings2, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
@@ -12,7 +13,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * "Beli sekarang" (K.1): masukkan paket ke keranjang lalu buka keranjang. Tamu melihat
- * dialog masuk (C.5.3); server tetap memeriksa sesi dan status paket.
+ * dialog masuk (C.5.3); server tetap memeriksa sesi dan status paket. Admin tidak membeli
+ * paket, jadi tombolnya diganti tautan ke pengelolaan paket di panel admin.
  */
 export function BuyButton({
   productSlug,
@@ -28,8 +30,19 @@ export function BuyButton({
   className?: string;
 }) {
   const router = useRouter();
-  const { requireLogin } = useRequireLogin();
+  const { isAdmin, requireLogin } = useRequireLogin();
   const [pending, startTransition] = useTransition();
+  if (isAdmin) {
+    return (
+      <Button asChild size={size} variant="outline" className={cn(className)}>
+        <Link href="/admin/produk">
+          <Settings2 aria-hidden="true" data-icon="inline-start" />
+          Kelola paket
+          <span className="sr-only"> {productName}</span>
+        </Link>
+      </Button>
+    );
+  }
   return (
     <Button
       size={size}
