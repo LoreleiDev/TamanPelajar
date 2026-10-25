@@ -22,7 +22,12 @@ const errorMessages: Record<string, string> = {
 async function MasukContent({ searchParams }: { searchParams: PageProps<"/masuk">["searchParams"] }) {
   const sp = await searchParams;
   const callbackUrl = safeCallbackUrl(sp.callbackUrl, "");
-  const error = typeof sp.error === "string" ? (errorMessages[sp.error] ?? "Gagal masuk. Coba lagi.") : undefined;
+  const error =
+    typeof sp.error === "string"
+      ? (errorMessages[sp.error] ?? "Gagal masuk. Coba lagi.")
+      : sp.sesi === "berakhir"
+        ? "Sesimu sudah tidak berlaku. Masuk lagi untuk melanjutkan."
+        : undefined;
   const daftarHref = callbackUrl ? `/daftar?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/daftar";
 
   return (

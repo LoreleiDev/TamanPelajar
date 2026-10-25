@@ -47,9 +47,26 @@ test.describe("panel admin (M)", () => {
     await expect(page.getByText("Data pengguna disimpan.")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1, name: `Sasaran Admin ${info.project.name} Diubah` })).toBeVisible();
 
+    // Sesi yang sudah masuk sebelum akun dinonaktifkan (cookie jadi basi).
+    const staleCtx = await browser.newContext({ baseURL: "http://localhost:3000" });
+    const stale = await staleCtx.newPage();
+    await stale.goto("/masuk?callbackUrl=%2Fdashboard");
+    await stale.getByLabel("Email").fill(sasaran(info.project.name));
+    await stale.getByLabel("Password", { exact: true }).fill("Demo12345!");
+    await stale.getByRole("button", { name: "Masuk", exact: true }).click();
+    await expect(stale).toHaveURL(/\/dashboard$/);
+
     await page.getByRole("button", { name: "Nonaktifkan akun" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Nonaktifkan" }).click();
     await expect(page.getByText("Akun nonaktif", { exact: true })).toBeVisible();
+
+    // Cookie basi dihapus: tidak ada loop /masuk ⇄ /dashboard, halaman masuk tampil dengan pesan.
+    await stale.goto("/dashboard");
+    await expect(stale).toHaveURL(/\/masuk\?callbackUrl=%2Fdashboard&sesi=berakhir$/);
+    await expect(stale.getByRole("alert").filter({ hasText: "Sesimu sudah tidak berlaku" })).toBeVisible();
+    await stale.goto("/masuk");
+    await expect(stale.getByRole("heading", { level: 1, name: "Masuk" })).toBeVisible();
+    await staleCtx.close();
 
     // Akun nonaktif tidak bisa masuk.
     const ctx = await browser.newContext({ baseURL: "http://localhost:3000" });

@@ -342,6 +342,12 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 133/133 (9 tes khusus satu perangkat sengaja dilewati). Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px: dashboard sertifikat, sidebar ruang belajar, admin Tugas Praktik, Sertifikat, dan tab Batch; tanpa error console.
 
+### `fix/sesi-basi-redirect-loop`
+- [x] **P.1.1, P.1.7** Cookie sesi yang basi (akun dihapus, dinonaktifkan, atau database di-seed ulang) membuat loop /masuk ⇄ /dashboard sehingga form masuk tidak bisa dipakai di browser itu. Kini halaman terlindungi mengalihkan ke `/api/sesi/reset`, yang menghapus cookie sesi lalu membuka halaman masuk dengan pesan "Sesimu sudah tidak berlaku"
+- [x] e2e: sesi yang masuk sebelum akun dinonaktifkan diarahkan ke halaman masuk tanpa loop
+
+**Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 133/133.
+
 ## Tahap 6 — Pengujian dan penyempurnaan
 
 Belum dimulai.

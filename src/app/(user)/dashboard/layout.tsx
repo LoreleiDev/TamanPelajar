@@ -5,12 +5,11 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { HeaderWithAccount } from "@/components/layout/header-with-account";
 import { prisma } from "@/lib/prisma";
-import { currentUser } from "@/lib/rbac";
+import { requireUserPage } from "@/lib/rbac";
 
 /** Menu dengan jumlah notifikasi; juga mengarahkan profil yang belum lengkap (E.1.6). */
 async function NavWithGuard() {
-  const user = await currentUser();
-  if (!user) redirect("/masuk?callbackUrl=%2Fdashboard");
+  const user = await requireUserPage("/dashboard");
   const [profile, unread] = await Promise.all([
     prisma.profile.findUnique({ where: { userId: user.id }, select: { completedAt: true } }),
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),

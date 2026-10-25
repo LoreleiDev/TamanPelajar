@@ -26,10 +26,18 @@ export const currentUser = cache(async () => {
   return user;
 });
 
-/** Untuk halaman: alihkan tamu ke halaman masuk dengan callbackUrl. */
+/**
+ * Untuk halaman: alihkan tamu ke halaman masuk dengan callbackUrl. Bila cookie sesi ada tetapi
+ * akunnya sudah tidak ada atau nonaktif, hapus cookie itu lebih dulu agar tidak terjadi loop
+ * pengalihan antara /masuk dan halaman ini.
+ */
 export async function requireUserPage(callbackUrl: string) {
   const user = await currentUser();
-  if (!user) redirect(`/masuk?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+  if (!user) {
+    const stale = Boolean((await auth())?.user?.id);
+    const target = encodeURIComponent(callbackUrl);
+    redirect(stale ? `/api/sesi/reset?callbackUrl=${target}` : `/masuk?callbackUrl=${target}`);
+  }
   return user;
 }
 
