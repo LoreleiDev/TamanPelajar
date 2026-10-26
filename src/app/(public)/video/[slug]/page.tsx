@@ -39,7 +39,7 @@ async function VideoContent({ params }: { params: PageProps<"/video/[slug]">["pa
   if (!v) notFound();
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-14">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-14">
       <article className="flex min-w-0 flex-col gap-6">
         <Breadcrumb items={[{ label: "Video belajar", href: "/video" }, { label: v.subject }]} />
         <h1 className="text-heading">{v.title}</h1>

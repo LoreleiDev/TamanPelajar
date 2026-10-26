@@ -33,7 +33,7 @@ async function Content() {
   }
   const blocked = cart.items.some((i) => !i.available);
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
       <ul className="flex flex-col gap-3" aria-label="Isi keranjang">
         {cart.items.map((i) => (
           <li key={i.productId} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-start sm:justify-between">

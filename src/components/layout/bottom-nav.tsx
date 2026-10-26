@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 
 import { isActivePath } from "@/components/layout/nav-items";
 import { useRequireLogin } from "@/components/shared/require-login";
+import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string; icon: LucideIcon; needsLogin?: string };
@@ -26,7 +27,12 @@ const itemClass = "flex min-h-14 flex-1 flex-col items-center justify-center gap
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { isAuthenticated, isAdmin, requireLogin } = useRequireLogin();
+  const session = useRequireLogin();
+  // Status sesi hanya ada di client; pakai setelah hydration agar tidak terjadi mismatch.
+  const hydrated = useHydrated();
+  const isAuthenticated = hydrated && session.isAuthenticated;
+  const isAdmin = hydrated && session.isAdmin;
+  const { requireLogin } = session;
 
   return (
     <nav

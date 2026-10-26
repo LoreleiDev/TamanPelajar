@@ -21,7 +21,7 @@ const score = (n: number) => String(Math.round(n * 10) / 10).replace(".", ",");
 
 function Table({ caption, head, children }: { caption: string; head: string[]; children: React.ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+    <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
       <table className="w-full min-w-136 text-left">
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-secondary text-sm">
@@ -77,7 +77,7 @@ async function Content({ params }: { params: PageProps<"/admin/pengguna/[id]">["
         )}
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <DashboardSection title="Data diri">
           <dl className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] gap-x-4 gap-y-2 text-[0.9375rem]">
             {info.map(([k, v]) => (

@@ -39,7 +39,7 @@ function MainNavLinks({ pathname, onNavigate, mobile = false }: { pathname: stri
             mobile
               ? cn("block rounded-lg px-3 py-3 text-base font-semibold", active ? "bg-accent text-primary" : "text-foreground hover:bg-secondary")
               : cn(
-                  "rounded-md px-2.5 py-2 text-[0.9375rem] font-semibold transition-colors duration-150 hover:text-primary",
+                  "rounded-md px-2 py-2 text-sm font-semibold whitespace-nowrap transition-colors duration-150 hover:text-primary xl:px-2.5 xl:text-[0.9375rem]",
                   active ? "text-primary" : "text-foreground",
                 )
           }
@@ -80,7 +80,7 @@ export function SiteHeader({ account, mobileAccount }: { account: ReactNode; mob
           <Logo />
         </Link>
 
-        <nav aria-label="Menu utama" className="ml-2 hidden lg:block">
+        <nav aria-label="Menu utama" className="hidden lg:block xl:ml-2">
           <ul className="flex items-center gap-1">
             <NavLinks />
           </ul>

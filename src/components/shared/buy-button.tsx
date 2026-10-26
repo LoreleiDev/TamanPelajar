@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRequireLogin } from "@/components/shared/require-login";
 import { Button } from "@/components/ui/button";
 import { tambahKeKeranjang } from "@/features/cart/actions";
+import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/utils";
 
 /**
@@ -30,7 +31,9 @@ export function BuyButton({
   className?: string;
 }) {
   const router = useRouter();
-  const { isAdmin, requireLogin } = useRequireLogin();
+  const { isAdmin: adminSession, requireLogin } = useRequireLogin();
+  // Sesi hanya ada di client; tampilkan versi admin setelah hydration agar tidak mismatch.
+  const isAdmin = useHydrated() && adminSession;
   const [pending, startTransition] = useTransition();
   if (isAdmin) {
     return (

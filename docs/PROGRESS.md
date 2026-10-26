@@ -369,3 +369,13 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 161/161 (17 tes khusus satu perangkat sengaja dilewati). Pemeriksa desain 0 FAIL.
 
+### `fix/B4-responsif-tautan` (batch C)
+- [x] **B.4, T.14** Audit otomatis 65 halaman (tamu, siswa, admin, termasuk halaman detail) di 1440, 1024, 768, dan 375 px: tanpa scroll horizontal. Perbaikan: kotak tabel diberi `relative` (sel `sr-only` tidak keluar kotak), grid responsif diberi kolom `minmax(0,1fr)` di layar kecil (`/admin/laporan` melebar 498 px), menu navbar tamu satu baris di 1024 px
+- [x] **T.15** Tanpa error console. Perbaikan: hydration mismatch React #418 di navigasi bawah dan tombol beli (status sesi hanya ada di client) dengan hook `useHydrated`
+- [x] **T.16** 265 tautan internal dari semua halaman yang diaudit dicek: tidak ada yang 404 atau error
+- [x] Tab aktif memakai border, bukan shadow (aturan desain)
+
+**Catatan:** MySQL XAMPP sempat mati di tengah audit sehingga server dan build gagal; setelah dinyalakan ulang semua tes diulang dari awal.
+
+**Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 161/161 (17 tes khusus satu perangkat sengaja dilewati). Audit responsif, console, dan tautan bersih.
+

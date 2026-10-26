@@ -37,7 +37,7 @@ async function Content({ params }: { params: PageProps<"/admin/voucher/[id]">["p
         {state.label}
       </StatusBadge>
 
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <VoucherForm
           defaults={{
             id: v.id,

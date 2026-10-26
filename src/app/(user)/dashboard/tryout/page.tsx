@@ -29,7 +29,7 @@ async function Content() {
           }
         />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+        <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
           <table className="w-full min-w-2xl text-left">
             <caption className="sr-only">Daftar tryout</caption>
             <thead className="bg-secondary text-sm">

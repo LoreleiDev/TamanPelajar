@@ -33,7 +33,7 @@ export function ChartFigure({
           <div aria-hidden="true">{children}</div>
           <details className="text-sm">
             <summary className="cursor-pointer text-muted-foreground hover:text-primary">Lihat tabel data</summary>
-            <div className="mt-2 overflow-x-auto outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+            <div className="relative mt-2 overflow-x-auto outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full text-left tabular-nums">
                 <caption className="sr-only">{title}</caption>
                 <thead>

@@ -106,7 +106,7 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
       </PageHeader>
       <div className="page-container py-10 md:py-12">
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
         <div className="flex min-w-0 flex-col gap-8">
           {o.status === "MENUNGGU" && <Instructions o={o} />}
 
@@ -151,7 +151,7 @@ async function Content({ params }: { params: PageProps<"/transaksi/[number]">["p
             <h2 id="produk-judul" className="text-heading">
               Produk
             </h2>
-            <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+            <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full text-left">
                 <caption className="sr-only">Produk dalam pesanan</caption>
                 <thead className="bg-secondary text-sm">

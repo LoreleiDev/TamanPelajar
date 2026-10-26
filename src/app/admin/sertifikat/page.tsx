@@ -51,7 +51,7 @@ async function Content() {
                 {c.issued.length > 0 && (
                   <details>
                     <summary className="cursor-pointer text-sm font-semibold text-primary">Lihat penerima</summary>
-                    <div className="mt-2 overflow-x-auto rounded-lg border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+                    <div className="relative mt-2 overflow-x-auto rounded-lg border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
                       <table className="w-full min-w-120 text-left text-sm">
                         <caption className="sr-only">Penerima sertifikat {c.title}</caption>
                         <thead className="bg-secondary">

@@ -95,7 +95,7 @@ export function QuestionPicker({
           <DialogDescription>{note}</DialogDescription>
         </DialogHeader>
         <form
-          className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_10rem_8rem_auto] sm:items-end"
+          className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_10rem_8rem_auto] sm:items-end"
           onSubmit={(e) => {
             e.preventDefault();
             search();

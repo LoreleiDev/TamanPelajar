@@ -58,7 +58,7 @@ async function Content({ params }: { params: PageProps<"/admin/transaksi/[number
         {statusLabel[o.status]}
       </StatusBadge>
 
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex min-w-0 flex-col gap-8">
           <DashboardSection title="Ringkasan">
             <dl className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] gap-x-4 gap-y-2 text-[0.9375rem]">
@@ -72,7 +72,7 @@ async function Content({ params }: { params: PageProps<"/admin/transaksi/[number
           </DashboardSection>
 
           <DashboardSection title="Produk">
-            <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+            <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full min-w-120 text-left">
                 <caption className="sr-only">Produk dalam pesanan</caption>
                 <thead className="bg-secondary text-sm">

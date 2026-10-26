@@ -83,7 +83,7 @@ export function ReviewViewer({ review, initialNumber }: { review: Review; initia
   }));
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
       <article className="flex min-w-0 flex-col gap-6" aria-labelledby="pembahasan-soal">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 id="pembahasan-soal" tabIndex={-1} className="text-2xl font-bold tabular-nums focus:outline-none">

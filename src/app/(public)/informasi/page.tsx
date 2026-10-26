@@ -59,7 +59,7 @@ async function Articles({ searchParams }: { searchParams: PageProps<"/informasi"
       {articles.length === 0 ? (
         <EmptyState title="Belum ada tulisan di kategori ini" description="Coba kategori lain atau lihat semua informasi." />
       ) : (
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           {/* Tulisan terbaru besar di kiri, sisanya daftar ringkas di kanan. */}
           {(() => {
             const [first, ...rest] = articles;
@@ -108,7 +108,7 @@ async function Articles({ searchParams }: { searchParams: PageProps<"/informasi"
 
 function ArticlesSkeleton() {
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" aria-busy="true" aria-label="Memuat informasi">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" aria-busy="true" aria-label="Memuat informasi">
       <Skeleton className="aspect-video rounded-xl" />
       <div className="flex flex-col gap-4">
         <Skeleton className="h-20" />

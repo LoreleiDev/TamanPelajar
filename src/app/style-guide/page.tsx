@@ -193,7 +193,7 @@ export default async function StyleGuidePage() {
       </Section>
 
       <Section title="Tabel">
-        <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+        <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
           <table className="w-full min-w-[32rem] text-left text-sm">
             <caption className="sr-only">Contoh tabel nilai tryout</caption>
             <thead className="bg-secondary text-foreground">

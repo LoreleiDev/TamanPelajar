@@ -39,7 +39,7 @@ export function CertificateSettingsForm({ defaults, template }: { defaults: Cert
   return (
     <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
       <FormAlert message={error} />
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
         <Field label="Judul di sertifikat" htmlFor={id("title")} error={errors.title?.message}>
           <Input autoComplete="off" {...f("title")} {...form.register("title")} />
         </Field>

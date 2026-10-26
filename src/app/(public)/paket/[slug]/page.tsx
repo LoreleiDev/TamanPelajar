@@ -160,7 +160,7 @@ export default async function PaketPage({ params }: PageProps<"/paket/[slug]">) 
 
           <Block id="isi-paket" title="Isi paket">
             {product.courses.length > 0 && (
-              <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+              <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
                 <table className="w-full min-w-[30rem] text-left">
                   <caption className="px-4 pt-4 pb-2 text-left font-bold">Kelas online dan video</caption>
                   <thead className="bg-secondary text-sm">
@@ -185,7 +185,7 @@ export default async function PaketPage({ params }: PageProps<"/paket/[slug]">) 
               </div>
             )}
             {product.exams.length > 0 && (
-              <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+              <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
                 <table className="w-full min-w-[30rem] text-left">
                   <caption className="px-4 pt-4 pb-2 text-left font-bold">Tryout CBT</caption>
                   <thead className="bg-secondary text-sm">

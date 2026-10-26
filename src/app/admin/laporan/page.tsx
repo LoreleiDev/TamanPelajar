@@ -51,12 +51,12 @@ async function Content({ searchParams }: { searchParams: PageProps<"/admin/lapor
         ]}
       />
 
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <DashboardSection title="Penjualan per paket">
           {r.products.length === 0 ? (
             <p className="text-muted-foreground">Tidak ada penjualan di rentang ini.</p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+            <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
               <table className="w-full min-w-120 text-left">
                 <caption className="sr-only">Penjualan per paket</caption>
                 <thead className="bg-secondary text-sm">
