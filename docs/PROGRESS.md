@@ -379,3 +379,36 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 161/161 (17 tes khusus satu perangkat sengaja dilewati). Audit responsif, console, dan tautan bersih.
 
+### `perf/P-performa` (batch D)
+- [x] Pengukuran Web Vitals di build produksi (desktop dan mobile dengan CPU 4× lebih lambat) untuk 13 halaman tamu, siswa, dan admin: LCP semua halaman < 1,5 detik, CLS ≈ 0
+- [x] SweetAlert2 dimuat saat dibutuhkan (dimuat lebih dulu saat tombol pemicu disorot/difokus): JS awal setiap halaman turun ±75 KB
+- [x] Recharts dimuat terpisah lewat `components/charts/lazy.tsx` dengan tinggi yang dipesan: LCP dashboard desktop 448 → 264 ms, dashboard admin 352 → 216 ms
+- [x] CLS halaman materi di mobile 0,466 → 0: skeleton memuat kini setinggi layar sehingga footer tidak terdorong
+- [x] e2e lebih stabil: `reset-db` mengembalikan materi uji kelas ke keadaan seed
+
+**Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 161/161 (17 tes khusus satu perangkat sengaja dilewati). Pemeriksa desain 0 FAIL.
+
+### Kriteria keberhasilan (T.1–T.19)
+
+| Butir | Status | Bukti utama |
+|---|---|---|
+| T.1 Daftar dan masuk | Selesai | `e2e/autentikasi.spec.ts` |
+| T.2 Melihat dan membeli paket | Selesai | `e2e/katalog.spec.ts`, `e2e/detail-paket.spec.ts`, `e2e/checkout.spec.ts` |
+| T.3 Paket muncul di dashboard | Selesai | `e2e/checkout.spec.ts`, `e2e/dashboard.spec.ts` |
+| T.4 Membuka kelas dan menonton video | Selesai | `e2e/kelas.spec.ts`, `e2e/video.spec.ts` |
+| T.5 Progres tersimpan | Selesai | `e2e/kelas.spec.ts` |
+| T.6–T.11 Tryout: mulai, timer dan autosave, pindah soal, kumpulkan, skor, hasil dan pembahasan | Selesai | `e2e/tryout.spec.ts`, tes unit penilaian |
+| T.12 Admin menginput materi dan soal | Selesai | `e2e/admin.spec.ts`, `e2e/admin-konten.spec.ts` |
+| T.13 Admin mengelola pengguna, produk, kelas, soal, tryout, transaksi | Selesai | `e2e/admin.spec.ts`, `e2e/admin-konten.spec.ts` |
+| T.14 Desktop dan mobile | Selesai | Semua e2e di dua perangkat; audit 65 halaman × 4 lebar |
+| T.15 Tanpa error console | Selesai | Audit console 65 halaman × 4 lebar |
+| T.16 Tanpa tautan/tombol mati | Selesai | Crawl 265 tautan internal |
+| T.17 Tamu membuka halaman publik; popup masuk | Selesai | `e2e/beranda.spec.ts`, `e2e/layout.spec.ts`, `e2e/kelas.spec.ts` |
+| T.18 Bab 1–2 gratis, bab lanjutan setelah berlangganan | Selesai | `e2e/kelas.spec.ts`, `e2e/checkout.spec.ts` |
+| T.19 Arsitektur, database, sitemap, komponen lebih dulu | Selesai | `docs/ARSITEKTUR.md` |
+
+**Catatan akhir:**
+- Pembayaran Midtrans sungguhan dan upload file ke Cloudinary memakai akun luar; e2e memakai mode simulasi dan hanya menguji validasi upload
+- Email masih mode log (`MAIL_MODE="log"`); pengiriman sungguhan belum disambungkan
+- Angka TTFB diukur di server lokal; di hosting akan bergantung pada lokasi database terkelola
+

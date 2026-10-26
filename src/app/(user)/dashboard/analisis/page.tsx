@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { ChartFigure } from "@/components/charts/chart-figure";
-import { CompareChart, TopicMasteryChart } from "@/components/charts/charts";
+import { CompareChart, TopicMasteryChart } from "@/components/charts/lazy";
 import { DashboardHeading, DashboardSection, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";

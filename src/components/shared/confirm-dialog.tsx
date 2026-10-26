@@ -3,7 +3,7 @@
 import { Slot } from "radix-ui";
 import type { ReactNode } from "react";
 
-import { confirmAlert } from "@/lib/alert";
+import { confirmAlert, preloadAlert } from "@/lib/alert";
 
 /**
  * Konfirmasi sebelum aksi berisiko (P.2.6) lewat SweetAlert bertema brand (lib/alert.ts).
@@ -27,6 +27,8 @@ export function ConfirmDialog({
   return (
     <Slot.Root
       aria-haspopup="dialog"
+      onPointerEnter={preloadAlert}
+      onFocus={preloadAlert}
       onClick={() => void confirmAlert({ title, text: description, confirmLabel, destructive, onConfirm })}
     >
       {trigger}

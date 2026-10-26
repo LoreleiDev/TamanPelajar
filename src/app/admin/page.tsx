@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { ChartFigure } from "@/components/charts/chart-figure";
-import { MonthlyChart } from "@/components/charts/charts";
+import { MonthlyChart } from "@/components/charts/lazy";
 import { DashboardHeading, DashboardSection, DashboardSkeleton, StatRow } from "@/components/shared/dashboard-parts";
 import { GrowthProgress } from "@/components/shared/growth-progress";
 import { adminPage } from "@/features/admin/guard";

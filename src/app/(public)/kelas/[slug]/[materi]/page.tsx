@@ -230,7 +230,8 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
 
 function RoomSkeleton() {
   return (
-    <div className="grid gap-8 lg:grid-cols-[20rem_minmax(0,1fr)]" aria-busy="true" aria-label="Memuat materi">
+    // Setinggi layar agar footer tidak tampil lalu terdorong saat materi tiba (CLS).
+    <div className="grid min-h-svh gap-8 lg:grid-cols-[20rem_minmax(0,1fr)]" aria-busy="true" aria-label="Memuat materi">
       <Skeleton className="hidden h-[32rem] rounded-xl lg:block" />
       <div className="flex flex-col gap-4">
         <Skeleton className="h-8 w-2/3" />

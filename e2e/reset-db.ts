@@ -43,6 +43,11 @@ async function resetDb() {
       where: { email: { endsWith: "@tamanpelajar.test" } },
       data: { failedLogins: 0, lockedUntil: null },
     });
+    // Materi uji kelas (e2e/kelas.spec.ts) kembali ke keadaan seed: belum selesai, tanpa catatan.
+    // Posisi video seed dekat akhir, jadi membuka halaman di luar tes bisa menandainya selesai.
+    const studi = { user: { email: "user1@tamanpelajar.test" }, lesson: { slug: "studi-kasus-keberagaman" } };
+    await prisma.lessonProgress.updateMany({ where: studi, data: { completedAt: null } });
+    await prisma.lessonNote.deleteMany({ where: studi });
 
     const passwordHash = await bcrypt.hash("Demo12345!", 10);
     const products = await prisma.product.findMany({ where: { exams: { some: {} }, deletedAt: null }, select: { id: true } });

@@ -4,7 +4,7 @@ import { Slot } from "radix-ui";
 import type { ReactNode } from "react";
 
 import { keluar } from "@/features/auth/actions";
-import { confirmAlert } from "@/lib/alert";
+import { confirmAlert, preloadAlert } from "@/lib/alert";
 
 /**
  * Membungkus tombol "Keluar": minta konfirmasi lewat SweetAlert, lalu jalankan signOut di
@@ -13,6 +13,8 @@ import { confirmAlert } from "@/lib/alert";
 export function LogoutButton({ children }: { children: ReactNode }) {
   return (
     <Slot.Root
+      onPointerEnter={preloadAlert}
+      onFocus={preloadAlert}
       onClick={async () => {
         // Tidak memanggil preventDefault agar menu dropdown menutup seperti biasa saat item dipilih.
         const ok = await confirmAlert({

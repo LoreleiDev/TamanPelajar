@@ -1,6 +1,6 @@
 "use client";
 
-import Swal, { type SweetAlertIcon } from "sweetalert2";
+import type { SweetAlertIcon } from "sweetalert2";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,12 @@ import { cn } from "@/lib/utils";
 // pemberitahuan penting. Tombol memakai kelas yang sama dengan komponen Button agar tidak
 // ada varian baru; tampilan popup diatur di globals.css (.swal2-*).
 
-const themed = Swal.mixin({ buttonsStyling: false, reverseButtons: true, focusCancel: false });
+// SweetAlert2 (±80 KB) baru dimuat saat popup pertama dibuka, tidak ikut bundle awal halaman.
+let loading: Promise<typeof import("sweetalert2").default> | null = null;
+const loadSwal = () => (loading ??= import("sweetalert2").then((m) => m.default));
+/** Muat SweetAlert lebih dulu (mis. saat tombol pemicu disorot) agar popup tidak tertunda. */
+export const preloadAlert = () => void loadSwal();
+const themed = async () => (await loadSwal()).mixin({ buttonsStyling: false, reverseButtons: true, focusCancel: false });
 
 // customClass tidak digabung dalam oleh mixin, jadi selalu dibuat lengkap per popup.
 const classes = (destructive: boolean) => ({
@@ -54,8 +59,8 @@ export async function confirmAlert({
   icon,
   onConfirm,
 }: ConfirmOptions): Promise<boolean> {
-  await waitForMenusClosed();
-  const result = await themed.fire({
+  const [Swal] = await Promise.all([loadSwal(), waitForMenusClosed()]);
+  const result = await (await themed()).fire({
     title,
     text,
     icon: icon ?? (destructive ? "warning" : "question"),
@@ -77,7 +82,7 @@ export async function confirmAlert({
 
 /** Pemberitahuan satu tombol untuk hasil penting (bukan pengganti toast biasa). */
 export async function noticeAlert(title: string, text: string, icon: SweetAlertIcon = "success") {
-  await themed.fire({
+  await (await themed()).fire({
     title,
     text,
     icon,

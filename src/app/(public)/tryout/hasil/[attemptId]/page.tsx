@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { ChartFigure } from "@/components/charts/chart-figure";
-import { TopicCompareChart, TopicRadarChart } from "@/components/charts/charts";
+import { TopicCompareChart, TopicRadarChart } from "@/components/charts/lazy";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/page-header";
