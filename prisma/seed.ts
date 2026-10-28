@@ -763,6 +763,21 @@ async function main() {
     ],
   });
 
+  // Daftar mata pelajaran (revisi RMED) dari yang dipakai kelas, video, dan soal.
+  const subjectNames = new Set(
+    (
+      await Promise.all([
+        prisma.course.findMany({ select: { subject: true } }),
+        prisma.video.findMany({ select: { subject: true } }),
+        prisma.question.findMany({ select: { subject: true } }),
+      ])
+    )
+      .flat()
+      .map((r) => r.subject),
+  );
+  await prisma.subject.createMany({ data: [...subjectNames].sort().map((name, order) => ({ name, order })), skipDuplicates: true });
+  console.log(`  ${subjectNames.size} mata pelajaran`);
+
   console.log("Selesai.");
 }
 

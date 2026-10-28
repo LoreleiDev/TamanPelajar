@@ -67,10 +67,10 @@ export async function getQuestionMeta() {
   await adminOnly();
   const [categories, subjects, topics] = await Promise.all([
     prisma.courseCategory.findMany({ orderBy: { order: "asc" }, select: { id: true, slug: true, name: true, shortName: true } }),
-    prisma.question.findMany({ where: { deletedAt: null }, distinct: ["subject"], orderBy: { subject: "asc" }, select: { subject: true } }),
+    prisma.subject.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }], select: { name: true } }),
     prisma.question.findMany({ where: { deletedAt: null }, distinct: ["topic"], orderBy: { topic: "asc" }, select: { topic: true } }),
   ]);
-  return { categories, subjects: subjects.map((s) => s.subject), topics: topics.map((t) => t.topic) };
+  return { categories, subjects: subjects.map((s) => s.name), topics: topics.map((t) => t.topic) };
 }
 
 const fullSelect = {

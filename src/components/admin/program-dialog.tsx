@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { useAutoSlug } from "@/components/admin/use-auto-slug";
 import { useAdminSubmit } from "@/components/admin/use-admin-submit";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { describedBy, Field, FormAlert } from "@/features/auth/components/form-parts";
-import { shouldAutoSlug, slugify } from "@/features/admin/form-rules";
 import { hapusProgram, simpanProgram } from "@/features/admin/program-actions";
 import { programSchema, type ProgramInput } from "@/features/admin/program-schema";
 
@@ -22,6 +22,8 @@ export function ProgramDialog({ trigger, defaults }: { trigger: ReactNode; defau
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const form = useForm({ resolver: zodResolver(programSchema), defaultValues: defaults });
+  // Slug mengikuti judul/nama saat membuat data baru (revisi RMED).
+  const autoSlug = useAutoSlug(form, "name", !defaults.id);
   const { errors } = form.formState;
   const f = (name: keyof ProgramInput) => ({ id: `p-${name}`, "aria-invalid": Boolean(errors[name]), "aria-describedby": describedBy(`p-${name}`, errors[name]?.message) });
   const { pending, error, onSubmit } = useAdminSubmit(form, (v: ProgramInput) => simpanProgram(v), () => {
@@ -45,7 +47,7 @@ export function ProgramDialog({ trigger, defaults }: { trigger: ReactNode; defau
             <Input
               autoComplete="off"
               {...f("name")}
-              {...form.register("name", { onBlur: (e) => shouldAutoSlug(form.getValues("slug"), e) && form.setValue("slug", slugify(e.target.value)) })}
+              {...form.register("name")}
             />
           </Field>
           <div className="grid grid-cols-2 gap-4">
@@ -57,7 +59,7 @@ export function ProgramDialog({ trigger, defaults }: { trigger: ReactNode; defau
             </Field>
           </div>
           <Field label="Slug URL" htmlFor="p-slug" error={errors.slug?.message} hint="Dipakai di filter katalog dan impor soal.">
-            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} />
+            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} onInput={autoSlug.onInput} />
           </Field>
           <Field label="Sasaran peserta" htmlFor="p-audience" error={errors.audience?.message} hint="Mis. Siswa kelas 12 dan alumni">
             <Input autoComplete="off" {...f("audience")} {...form.register("audience")} />

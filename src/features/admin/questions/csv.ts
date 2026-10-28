@@ -95,7 +95,11 @@ export interface ImportRowError {
  * Kunci: huruf opsi ("B"), beberapa huruf untuk PG jamak ("A,C"), teks untuk isian
  * (beberapa jawaban dipisah |), atau angka untuk numerik.
  */
-export function rowsToQuestions(rows: string[][], categoryIdBySlug: Map<string, string>) {
+/**
+ * `subjectByName` (nama huruf kecil → ejaan resmi): bila diberikan, mata pelajaran harus ada di
+ * daftar admin; tanpa itu (mis. tes unit) kolom diterima apa adanya.
+ */
+export function rowsToQuestions(rows: string[][], categoryIdBySlug: Map<string, string>, subjectByName?: Map<string, string>) {
   const errors: ImportRowError[] = [];
   const valid: { row: number; input: QuestionInput }[] = [];
   if (rows.length === 0) return { valid, errors: [{ row: 1, message: "File kosong" }] };
@@ -115,6 +119,10 @@ export function rowsToQuestions(rows: string[][], categoryIdBySlug: Map<string, 
     if (!difficulty) return errors.push({ row: rowNo, message: "Kesulitan harus mudah, sedang, atau sulit" });
     const status = STATUS[col(r, "status").toLowerCase()];
     if (!status) return errors.push({ row: rowNo, message: "Status harus draf, terbit, atau arsip" });
+    const subject = subjectByName ? subjectByName.get(col(r, "mata_pelajaran").toLowerCase()) : col(r, "mata_pelajaran");
+    if (subject === undefined) {
+      return errors.push({ row: rowNo, message: `Mata pelajaran "${col(r, "mata_pelajaran")}" belum terdaftar; tambahkan dulu di menu Mata Pelajaran` });
+    }
 
     const key = col(r, "kunci");
     const isChoice = type === "PG_TUNGGAL" || type === "PG_JAMAK" || type === "BENAR_SALAH";
@@ -131,7 +139,7 @@ export function rowsToQuestions(rows: string[][], categoryIdBySlug: Map<string, 
 
     const input: QuestionInput = {
       categoryId,
-      subject: col(r, "mata_pelajaran"),
+      subject,
       topic: col(r, "topik"),
       difficulty,
       type,

@@ -2,20 +2,24 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { DeleteButton } from "@/components/admin/delete-button";
 import { FormSection } from "@/components/admin/form-fields";
+import { SubjectSelect } from "@/components/admin/subject-select";
+import { useAutoSlug } from "@/components/admin/use-auto-slug";
 import { useAdminSubmit } from "@/components/admin/use-admin-submit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { describedBy, Field, FormAlert } from "@/features/auth/components/form-parts";
 import { NativeSelect } from "@/features/auth/components/native-select";
-import { shouldAutoSlug, slugify } from "@/features/admin/form-rules";
 import { hapusVideo, simpanVideo } from "@/features/admin/video-actions";
+import { detectVideoDuration } from "@/features/admin/video-duration";
 import { detectProvider, videoSchema, type VideoInput } from "@/features/admin/video-schema";
+import { formatClock } from "@/lib/format";
 
 const providerLabel = { YOUTUBE: "YouTube", VIMEO: "Vimeo", EKSTERNAL: "Berkas video eksternal" } as const;
 
@@ -23,17 +27,47 @@ const providerLabel = { YOUTUBE: "YouTube", VIMEO: "Vimeo", EKSTERNAL: "Berkas v
 export function VideoForm({
   defaults,
   categories,
+  subjects,
   usedInLessons,
 }: {
   defaults: VideoInput;
   categories: { id: string; name: string }[];
+  subjects: string[];
   usedInLessons: number;
 }) {
   const router = useRouter();
   const form = useForm({ resolver: zodResolver(videoSchema), defaultValues: defaults });
+  // Slug mengikuti judul/nama saat membuat data baru (revisi RMED).
+  const autoSlug = useAutoSlug(form, "title", !defaults.id);
   const { errors } = form.formState;
   const url = useWatch({ control: form.control, name: "url" });
   const provider = detectProvider(url ?? "");
+  const [durationState, setDurationState] = useState<"idle" | "loading" | "found" | "failed">("idle");
+
+  // Durasi otomatis (revisi RMED): dibaca dari penyedia video setiap kali URL valid berubah.
+  // Hanya untuk URL baru; durasi video yang sudah tersimpan tidak ditimpa saat form dibuka.
+  useEffect(() => {
+    const value = (url ?? "").trim();
+    if (!detectProvider(value) || value === defaults.url) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setDurationState("loading");
+      const sec = await detectVideoDuration(value);
+      if (cancelled) return;
+      if (sec) form.setValue("duration", formatClock(sec), { shouldValidate: form.formState.isSubmitted, shouldDirty: true });
+      setDurationState(sec ? "found" : "failed");
+    }, 600);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [url, defaults.url, form]);
+  const durationHint = {
+    idle: "Terisi otomatis dari URL video. Mis. 12:30",
+    loading: "Membaca durasi dari video…",
+    found: "Terisi otomatis dari video. Ubah bila perlu.",
+    failed: "Durasi tidak terbaca otomatis; isi manual, mis. 12:30.",
+  }[durationState];
   const f = (name: keyof VideoInput) => ({ id: `v-${name}`, "aria-invalid": Boolean(errors[name]), "aria-describedby": describedBy(`v-${name}`, errors[name]?.message) });
   const { pending, error, onSubmit } = useAdminSubmit(form, (v: VideoInput) => simpanVideo(v), (data) => {
     toast.success(defaults.id ? "Video disimpan." : "Video ditambahkan.");
@@ -46,10 +80,10 @@ export function VideoForm({
       <FormAlert message={error} />
       <FormSection title="Video">
         <Field label="Judul" htmlFor="v-title" error={errors.title?.message}>
-          <Input autoComplete="off" {...f("title")} {...form.register("title", { onBlur: (e) => shouldAutoSlug(form.getValues("slug"), e) && form.setValue("slug", slugify(e.target.value)) })} />
+          <Input autoComplete="off" {...f("title")} {...form.register("title")} />
         </Field>
         <Field label="Slug URL" htmlFor="v-slug" error={errors.slug?.message} hint="Alamat: /video/slug-ini">
-          <Input autoComplete="off" {...f("slug")} {...form.register("slug")} />
+          <Input autoComplete="off" {...f("slug")} {...form.register("slug")} onInput={autoSlug.onInput} />
         </Field>
         <Field
           label="URL video"
@@ -60,7 +94,7 @@ export function VideoForm({
           <Input type="url" inputMode="url" {...f("url")} {...form.register("url")} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Durasi" htmlFor="v-duration" error={errors.duration?.message} hint="Mis. 12:30">
+          <Field label="Durasi" htmlFor="v-duration" error={errors.duration?.message} hint={durationHint}>
             <Input inputMode="numeric" {...f("duration")} {...form.register("duration")} />
           </Field>
           <Field label="Program" htmlFor="v-categoryId" error={errors.categoryId?.message}>
@@ -82,7 +116,7 @@ export function VideoForm({
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Mata pelajaran" htmlFor="v-subject" error={errors.subject?.message}>
-            <Input autoComplete="off" {...f("subject")} {...form.register("subject")} />
+            <SubjectSelect subjects={subjects} current={defaults.subject} {...f("subject")} {...form.register("subject")} />
           </Field>
           <Field label="Status" htmlFor="v-status" error={errors.status?.message} hint="Hanya video terbit yang tampil di pustaka.">
             <NativeSelect {...f("status")} {...form.register("status")}>

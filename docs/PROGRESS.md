@@ -423,3 +423,11 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 161/161.
 
+### `feat/M5-mapel-slug-durasi` (batch 2)
+- [x] **M.5.1, L.2.1, L.2.4** Menu admin Mata Pelajaran: tambah, ubah urutan, ganti nama (ikut memperbarui kelas, video, dan soal yang memakainya), hapus bila tidak dipakai. Form kelas, video, dan bank soal memilih dari daftar ini; server menolak mata pelajaran yang belum terdaftar, termasuk saat impor CSV/XLSX. Migration mengisi daftar dari data lama
+- [x] Slug otomatis mengikuti judul/nama saat membuat program, kelas, video, paket, tryout, dan artikel; berhenti mengikuti bila admin mengubah slug sendiri; form ubah tidak mengubah slug yang sudah terbit
+- [x] Durasi video otomatis dari URL: YouTube (IFrame Player API), Vimeo (oEmbed), berkas MP4/WebM (metadata). Tetap bisa diubah manual; durasi materi video mengikuti video. Durasi tryout tetap diisi manual
+- [x] Tes unit impor soal dengan mata pelajaran; e2e kelola mata pelajaran, slug otomatis video
+
+**Pengujian:** lint, typecheck, build lulus; unit 79/79; e2e 163/163. Durasi otomatis dicek manual di browser: YouTube 10:35 terbaca, Vimeo publik terbaca lewat oEmbed.
+

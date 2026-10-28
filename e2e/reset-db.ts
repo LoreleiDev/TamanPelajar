@@ -34,6 +34,7 @@ async function resetDb() {
     await prisma.courseCategory.deleteMany({ where: { slug: { startsWith: "program-uji-admin-" } } });
     await prisma.article.deleteMany({ where: { slug: { startsWith: "artikel-uji-admin-" } } });
     await prisma.testimonial.deleteMany({ where: { name: { startsWith: "Uji Admin" } } });
+    await prisma.subject.deleteMany({ where: { name: { startsWith: "Mapel Uji" } } });
     await prisma.setting.upsert({
       where: { key: "kontak" },
       create: { key: "kontak", value: { email: "halo@tamanpelajar.com", jamLayanan: "Senin–Jumat, 09.00–17.00 WIB" } },

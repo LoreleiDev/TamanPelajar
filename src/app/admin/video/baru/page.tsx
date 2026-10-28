@@ -5,16 +5,18 @@ import { VideoForm } from "@/components/admin/video-form";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { Breadcrumb } from "@/components/shared/page-header";
 import { getExamCategories } from "@/features/admin/exams/queries";
+import { listSubjectNames } from "@/features/admin/subjects";
 import { adminPage } from "@/features/admin/guard";
 
 export const metadata: Metadata = { title: "Tambah video", robots: { index: false } };
 
 async function Content() {
   await adminPage("/admin/video/baru");
-  const categories = await getExamCategories();
+  const [categories, subjects] = await Promise.all([getExamCategories(), listSubjectNames()]);
   return (
     <VideoForm
       categories={categories}
+      subjects={subjects}
       usedInLessons={0}
       defaults={{
         title: "",

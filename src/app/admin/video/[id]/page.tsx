@@ -7,6 +7,7 @@ import { VideoForm } from "@/components/admin/video-form";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { Breadcrumb } from "@/components/shared/page-header";
 import { getExamCategories } from "@/features/admin/exams/queries";
+import { listSubjectNames } from "@/features/admin/subjects";
 import { adminPage } from "@/features/admin/guard";
 import { getAdminVideo } from "@/features/admin/videos";
 import { formatClock } from "@/lib/format";
@@ -16,7 +17,7 @@ export const metadata: Metadata = { title: "Ubah video", robots: { index: false 
 async function Content({ params }: { params: PageProps<"/admin/video/[id]">["params"] }) {
   const { id } = await params;
   await adminPage(`/admin/video/${id}`);
-  const [v, categories] = await Promise.all([getAdminVideo(id), getExamCategories()]);
+  const [v, categories, subjects] = await Promise.all([getAdminVideo(id), getExamCategories(), listSubjectNames()]);
   if (!v) notFound();
   return (
     <>
@@ -45,6 +46,7 @@ async function Content({ params }: { params: PageProps<"/admin/video/[id]">["par
       )}
       <VideoForm
         categories={categories}
+        subjects={subjects}
         usedInLessons={v.lessons.length}
         defaults={{
           id: v.id,

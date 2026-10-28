@@ -40,10 +40,11 @@ test.describe("panel admin: konten (L, M.4)", () => {
   test("tambah video dari URL (L.2.4)", async ({ page }, info) => {
     await masukAdmin(page, "/admin/video/baru");
     await page.getByLabel("Judul").fill(`Video Uji Admin ${info.project.name}`);
-    await page.getByLabel("Slug URL").fill(`video-uji-admin-${info.project.name}`);
+    // Slug terisi otomatis dari judul (revisi RMED).
+    await expect(page.getByLabel("Slug URL")).toHaveValue(`video-uji-admin-${info.project.name}`);
     await page.getByLabel("URL video").fill("https://contoh.id/halaman");
     await page.getByLabel("Durasi").fill("12:30");
-    await page.getByRole("textbox", { name: "Mata pelajaran" }).fill("Penalaran Umum");
+    await page.getByRole("combobox", { name: "Mata pelajaran" }).selectOption("Penalaran Umum");
     await page.getByLabel("Deskripsi").fill("Video uji untuk memastikan form video bekerja.");
     await page.getByRole("button", { name: "Tambah video" }).click();
     await expect(page.getByText(/Pakai URL YouTube, Vimeo/)).toBeVisible();
@@ -61,7 +62,7 @@ test.describe("panel admin: konten (L, M.4)", () => {
     await masukAdmin(page, "/admin/kelas/baru");
     await page.getByLabel("Judul kelas").fill(`Kelas Uji Admin ${info.project.name}`);
     await page.getByLabel("Slug URL").fill(slug);
-    await page.getByRole("textbox", { name: "Mata pelajaran" }).fill("Penalaran Umum");
+    await page.getByRole("combobox", { name: "Mata pelajaran" }).selectOption("Penalaran Umum");
     await page.getByLabel("Ringkasan").fill("Kelas sementara untuk pengujian panel admin.");
     await page.getByLabel("Deskripsi").fill("Kelas ini dibuat dan dihapus oleh tes otomatis.");
     await page.getByRole("button", { name: "Buat kelas" }).click();
@@ -226,5 +227,31 @@ test.describe("panel admin: situs dan laporan (C.2.8, L.2.8, M.1, M.2)", () => {
     expect(await pengguna.text()).toContain("admin@tamanpelajar.test");
     await page.goto("/admin/sertifikat");
     await expect(page.getByRole("heading", { level: 1, name: "Sertifikat" })).toBeVisible();
+  });
+
+  test("kelola mata pelajaran dan pakai di form video (revisi RMED)", async ({ page }, info) => {
+    const name = `Mapel Uji ${info.project.name}`;
+    await masukAdmin(page, "/admin/mata-pelajaran");
+    await page.getByRole("button", { name: "Tambah mata pelajaran" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Nama mata pelajaran").fill(name);
+    await dialog.getByRole("button", { name: "Simpan mata pelajaran" }).click();
+    const row = page.getByRole("row").filter({ hasText: name });
+    await expect(row).toBeVisible();
+
+    // Nama yang sama ditolak.
+    await page.getByRole("button", { name: "Tambah mata pelajaran" }).click();
+    await page.getByRole("dialog").getByLabel("Nama mata pelajaran").fill(name);
+    await page.getByRole("dialog").getByRole("button", { name: "Simpan mata pelajaran" }).click();
+    await expect(page.getByRole("dialog").getByText("Nama ini sudah dipakai")).toBeVisible();
+    await page.keyboard.press("Escape");
+
+    await page.goto("/admin/video/baru");
+    await expect(page.getByRole("combobox", { name: "Mata pelajaran" }).getByRole("option", { name })).toHaveCount(1);
+
+    await page.goto("/admin/mata-pelajaran");
+    await row.getByRole("button", { name: /^Hapus/ }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus mata pelajaran" }).click();
+    await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(0);
   });
 });

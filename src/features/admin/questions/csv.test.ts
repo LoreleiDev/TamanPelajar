@@ -27,6 +27,17 @@ describe("CSV bank soal", () => {
     expect(parseCsv(toCsv(rows))).toEqual(rows);
   });
 
+  it("mata pelajaran harus terdaftar dan memakai ejaan dari daftar admin", () => {
+    const csv = [
+      header,
+      "utbk-snbt,penalaran umum,Logika,mudah,pg_tunggal,Soal satu?,A1,B1,,,,A,,Karena A.,1,terbit",
+      "utbk-snbt,Kimia,Stoikiometri,mudah,pg_tunggal,Soal dua?,A2,B2,,,,A,,Karena A.,1,terbit",
+    ].join("\n");
+    const { valid, errors } = rowsToQuestions(parseCsv(csv), cats, new Map([["penalaran umum", "Penalaran Umum"]]));
+    expect(valid.map((v) => v.input.subject)).toEqual(["Penalaran Umum"]);
+    expect(errors).toEqual([{ row: 3, message: expect.stringMatching(/Mata pelajaran "Kimia" belum terdaftar/) }]);
+  });
+
   it("mengubah baris valid menjadi soal dan melaporkan baris salah", () => {
     const csv = [
       header,

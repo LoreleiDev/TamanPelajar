@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hapusKelas } from "@/features/admin/courses/actions";
 import { getAdminCourse, getCourseBatches, getCourseParticipants } from "@/features/admin/courses/queries";
 import { getExamCategories } from "@/features/admin/exams/queries";
+import { listSubjectNames } from "@/features/admin/subjects";
 import { adminPage } from "@/features/admin/guard";
 import { publishLabel, publishTone } from "@/features/admin/labels";
 import { formatStudyTime, formatTanggal, formatTanggalJam } from "@/lib/format";
@@ -80,7 +81,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/admin/kel
   const { id } = await params;
   const { tab } = await searchParams;
   await adminPage(`/admin/kelas/${id}`);
-  const [c, categories] = await Promise.all([getAdminCourse(id), getExamCategories()]);
+  const [c, categories, subjects] = await Promise.all([getAdminCourse(id), getExamCategories(), listSubjectNames()]);
   if (!c) notFound();
   const lessonCount = c.sections.reduce((n, s) => n + s.lessons.length, 0);
 
@@ -127,6 +128,7 @@ async function Content({ params, searchParams }: { params: PageProps<"/admin/kel
         <TabsContent value="pengaturan" className="pt-4">
           <CourseForm
             categories={categories}
+            subjects={subjects}
             defaults={{
               id: c.id,
               title: c.title,

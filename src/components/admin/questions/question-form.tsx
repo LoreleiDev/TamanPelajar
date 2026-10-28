@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { FormSection } from "@/components/admin/form-fields";
 import { MediaUploader, type MediaValue } from "@/components/admin/media-uploader";
+import { SubjectSelect } from "@/components/admin/subject-select";
 import { useAdminSubmit } from "@/components/admin/use-admin-submit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,7 +99,7 @@ export function QuestionForm({
             </NativeSelect>
           </Field>
           <Field label="Mata pelajaran" htmlFor="q-subject" error={errors.subject?.message}>
-            <Input list="daftar-mapel" autoComplete="off" {...f("subject")} {...form.register("subject")} />
+            <SubjectSelect subjects={subjects} current={defaults.subject} {...f("subject")} {...form.register("subject")} />
           </Field>
           <Field label="Topik" htmlFor="q-topic" error={errors.topic?.message} hint="Topik dipakai analisis kemampuan siswa.">
             <Input list="daftar-topik" autoComplete="off" {...f("topic")} {...form.register("topic")} />
@@ -125,11 +126,6 @@ export function QuestionForm({
             </Field>
           </div>
         </div>
-        <datalist id="daftar-mapel">
-          {subjects.map((s) => (
-            <option key={s} value={s} />
-          ))}
-        </datalist>
         <datalist id="daftar-topik">
           {topics.map((t) => (
             <option key={t} value={t} />

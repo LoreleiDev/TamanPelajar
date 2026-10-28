@@ -7,6 +7,7 @@ import { fail, invalidInput, ok, type ActionResult } from "@/lib/action-result";
 import { prisma } from "@/lib/prisma";
 
 import { adminAction, audit } from "./guard";
+import { resolveSubject } from "./subjects";
 import { videoSchema } from "./video-schema";
 
 const refresh = (id?: string) => {
@@ -20,7 +21,10 @@ export async function simpanVideo(input: unknown): Promise<ActionResult<{ id: st
   return adminAction(async (admin) => {
     const parsed = videoSchema.safeParse(input);
     if (!parsed.success) return invalidInput(parsed.error);
-    const { id, duration: _d, ...data } = parsed.data;
+    const { id, duration: _d, ...fields } = parsed.data;
+    const subject = await resolveSubject(fields.subject);
+    if (!subject) return fail("Mata pelajaran belum terdaftar.", { subject: "Pilih mata pelajaran dari daftar" });
+    const data = { ...fields, subject };
     const clash = await prisma.video.findUnique({ where: { slug: data.slug }, select: { id: true } });
     if (clash && clash.id !== id) return fail("Slug sudah dipakai video lain.", { slug: "Slug ini sudah dipakai" });
     const row = { ...data, transcript: data.transcript || null };

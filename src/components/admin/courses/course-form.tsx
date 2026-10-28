@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { CheckField, FormSection } from "@/components/admin/form-fields";
+import { SubjectSelect } from "@/components/admin/subject-select";
+import { useAutoSlug } from "@/components/admin/use-auto-slug";
 import { useAdminSubmit } from "@/components/admin/use-admin-submit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +16,13 @@ import { describedBy, Field, FormAlert } from "@/features/auth/components/form-p
 import { NativeSelect } from "@/features/auth/components/native-select";
 import { simpanKelas } from "@/features/admin/courses/actions";
 import { courseSchema, type CourseInput } from "@/features/admin/courses/schemas";
-import { shouldAutoSlug, slugify } from "@/features/admin/form-rules";
 
 /** Pengaturan kelas (L.2.1). */
-export function CourseForm({ defaults, categories }: { defaults: CourseInput; categories: { id: string; name: string }[] }) {
+export function CourseForm({ defaults, categories, subjects }: { defaults: CourseInput; categories: { id: string; name: string }[]; subjects: string[] }) {
   const router = useRouter();
   const form = useForm({ resolver: zodResolver(courseSchema), defaultValues: defaults });
+  // Slug mengikuti judul/nama saat membuat data baru (revisi RMED).
+  const autoSlug = useAutoSlug(form, "title", !defaults.id);
   const { errors } = form.formState;
   const f = (name: keyof CourseInput) => ({ id: `c-${name}`, "aria-invalid": Boolean(errors[name]), "aria-describedby": describedBy(`c-${name}`, errors[name]?.message) });
   const { pending, error, onSubmit } = useAdminSubmit(form, (v: CourseInput) => simpanKelas(v), (data) => {
@@ -33,11 +36,11 @@ export function CourseForm({ defaults, categories }: { defaults: CourseInput; ca
       <FormAlert message={error} />
       <FormSection title="Identitas">
         <Field label="Judul kelas" htmlFor="c-title" error={errors.title?.message}>
-          <Input autoComplete="off" {...f("title")} {...form.register("title", { onBlur: (e) => shouldAutoSlug(form.getValues("slug"), e) && form.setValue("slug", slugify(e.target.value)) })} />
+          <Input autoComplete="off" {...f("title")} {...form.register("title")} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Slug URL" htmlFor="c-slug" error={errors.slug?.message} hint="Alamat: /kelas/slug-ini">
-            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} />
+            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} onInput={autoSlug.onInput} />
           </Field>
           <Field label="Program" htmlFor="c-categoryId" error={errors.categoryId?.message}>
             <NativeSelect {...f("categoryId")} {...form.register("categoryId")}>
@@ -49,7 +52,7 @@ export function CourseForm({ defaults, categories }: { defaults: CourseInput; ca
             </NativeSelect>
           </Field>
           <Field label="Mata pelajaran" htmlFor="c-subject" error={errors.subject?.message}>
-            <Input autoComplete="off" {...f("subject")} {...form.register("subject")} />
+            <SubjectSelect subjects={subjects} current={defaults.subject} {...f("subject")} {...form.register("subject")} />
           </Field>
           <Field label="Tingkat" htmlFor="c-level" error={errors.level?.message}>
             <NativeSelect {...f("level")} {...form.register("level")}>

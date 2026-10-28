@@ -9,13 +9,13 @@ import { toast } from "sonner";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { FormSection } from "@/components/admin/form-fields";
 import { MediaUploader, type MediaValue } from "@/components/admin/media-uploader";
+import { useAutoSlug } from "@/components/admin/use-auto-slug";
 import { useAdminSubmit } from "@/components/admin/use-admin-submit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { describedBy, Field, FormAlert } from "@/features/auth/components/form-parts";
 import { NativeSelect } from "@/features/auth/components/native-select";
-import { shouldAutoSlug, slugify } from "@/features/admin/form-rules";
 import { hapusArtikel, simpanArtikel } from "@/features/article/actions";
 import { ARTICLE_CATEGORIES, articleCategoryLabel, articleSchema, type ArticleInput } from "@/features/article/schemas";
 
@@ -24,6 +24,8 @@ export function ArticleForm({ defaults, cover }: { defaults: ArticleInput; cover
   const router = useRouter();
   const [media, setMedia] = useState<MediaValue | null>(cover);
   const form = useForm({ resolver: zodResolver(articleSchema), defaultValues: defaults });
+  // Slug mengikuti judul/nama saat membuat data baru (revisi RMED).
+  const autoSlug = useAutoSlug(form, "title", !defaults.id);
   const { errors } = form.formState;
   const f = (name: keyof ArticleInput) => ({ id: `a-${name}`, "aria-invalid": Boolean(errors[name]), "aria-describedby": describedBy(`a-${name}`, errors[name]?.message) });
   const { pending, error, onSubmit } = useAdminSubmit(form, (v: ArticleInput) => simpanArtikel(v), (data) => {
@@ -37,11 +39,11 @@ export function ArticleForm({ defaults, cover }: { defaults: ArticleInput; cover
       <FormAlert message={error} />
       <FormSection title="Artikel">
         <Field label="Judul" htmlFor="a-title" error={errors.title?.message}>
-          <Input autoComplete="off" {...f("title")} {...form.register("title", { onBlur: (e) => shouldAutoSlug(form.getValues("slug"), e) && form.setValue("slug", slugify(e.target.value)) })} />
+          <Input autoComplete="off" {...f("title")} {...form.register("title")} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Slug URL" htmlFor="a-slug" error={errors.slug?.message} hint="Alamat: /informasi/slug-ini">
-            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} />
+            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} onInput={autoSlug.onInput} />
           </Field>
           <Field label="Kategori" htmlFor="a-category" error={errors.category?.message}>
             <NativeSelect {...f("category")} {...form.register("category")}>

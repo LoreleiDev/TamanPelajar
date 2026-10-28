@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { CheckField, FormSection } from "@/components/admin/form-fields";
 import { MediaUploader, type MediaValue } from "@/components/admin/media-uploader";
+import { useAutoSlug } from "@/components/admin/use-auto-slug";
 import { useAdminSubmit } from "@/components/admin/use-admin-submit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +17,14 @@ import { describedBy, Field, FormAlert } from "@/features/auth/components/form-p
 import { NativeSelect } from "@/features/auth/components/native-select";
 import { simpanTryout } from "@/features/admin/exams/actions";
 import { examSchema, type ExamInput, type ExamOutput } from "@/features/admin/exams/schemas";
-import { shouldAutoSlug, slugify } from "@/features/admin/form-rules";
 
 /** Pengaturan tryout (M.6.1–M.6.6). */
 export function ExamForm({ defaults, categories, image }: { defaults: ExamInput; categories: { id: string; name: string }[]; image: MediaValue | null }) {
   const router = useRouter();
   const [media, setMedia] = useState<MediaValue | null>(image);
   const form = useForm<ExamInput, unknown, ExamOutput>({ resolver: zodResolver(examSchema), defaultValues: defaults });
+  // Slug mengikuti judul/nama saat membuat data baru (revisi RMED).
+  const autoSlug = useAutoSlug(form, "title", !defaults.id);
   const { errors } = form.formState;
   const showDiscussion = useWatch({ control: form.control, name: "showDiscussion" });
   const f = (name: keyof ExamInput) => ({ id: `e-${name}`, "aria-invalid": Boolean(errors[name]), "aria-describedby": describedBy(`e-${name}`, errors[name]?.message) });
@@ -40,16 +42,12 @@ export function ExamForm({ defaults, categories, image }: { defaults: ExamInput;
           <Input
             autoComplete="off"
             {...f("title")}
-            {...form.register("title", {
-              onBlur: (e) => {
-                if (shouldAutoSlug(form.getValues("slug"), e)) form.setValue("slug", slugify(e.target.value));
-              },
-            })}
+            {...form.register("title")}
           />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Slug URL" htmlFor="e-slug" error={errors.slug?.message} hint="Alamat: /tryout/slug-ini">
-            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} />
+            <Input autoComplete="off" {...f("slug")} {...form.register("slug")} onInput={autoSlug.onInput} />
           </Field>
           <Field label="Kategori" htmlFor="e-categoryId" error={errors.categoryId?.message}>
             <NativeSelect {...f("categoryId")} {...form.register("categoryId")}>

@@ -7,6 +7,7 @@ import { fail, invalidInput, ok, type ActionResult } from "@/lib/action-result";
 import { prisma } from "@/lib/prisma";
 
 import { adminAction, audit, type Admin } from "../guard";
+import { resolveSubject } from "../subjects";
 import { parseCsv, rowsToQuestions, type ImportRowError } from "./csv";
 import { bulkStatusSchema, idsSchema, normalizeOptions, questionSchema, type QuestionOutput } from "./schemas";
 
@@ -49,7 +50,9 @@ export async function simpanSoal(input: unknown): Promise<ActionResult<{ id: str
   return adminAction(async (admin) => {
     const parsed = questionSchema.safeParse(input);
     if (!parsed.success) return invalidInput(parsed.error);
-    const q = parsed.data;
+    const subject = await resolveSubject(parsed.data.subject);
+    if (!subject) return fail("Mata pelajaran belum terdaftar.", { subject: "Pilih mata pelajaran dari daftar" });
+    const q = { ...parsed.data, subject };
     if (!(await prisma.courseCategory.findUnique({ where: { id: q.categoryId }, select: { id: true } }))) {
       return fail("Kategori tidak ditemukan.", { categoryId: "Pilih kategori yang ada" });
     }
@@ -205,8 +208,15 @@ export async function imporSoal(formData: FormData): Promise<ActionResult<Import
     }
     if (rows.length - 1 > MAX_IMPORT_ROWS) return fail(`Maksimal ${MAX_IMPORT_ROWS} soal per impor. Pecah file menjadi beberapa bagian.`);
 
-    const categories = await prisma.courseCategory.findMany({ select: { id: true, slug: true } });
-    const { valid, errors } = rowsToQuestions(rows, new Map(categories.map((c) => [c.slug, c.id])));
+    const [categories, subjects] = await Promise.all([
+      prisma.courseCategory.findMany({ select: { id: true, slug: true } }),
+      prisma.subject.findMany({ select: { name: true } }),
+    ]);
+    const { valid, errors } = rowsToQuestions(
+      rows,
+      new Map(categories.map((c) => [c.slug, c.id])),
+      new Map(subjects.map((s) => [s.name.toLowerCase(), s.name])),
+    );
     if (mode === "periksa" || valid.length === 0) return ok({ mode, valid: valid.length, imported: 0, errors });
 
     const parsed = valid.map((v) => questionSchema.parse(v.input));

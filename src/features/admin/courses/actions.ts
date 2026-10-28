@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 import { slugify } from "../form-rules";
 import { adminAction, audit } from "../guard";
+import { resolveSubject } from "../subjects";
 import { searchQuestionsForQuiz } from "./search";
 import {
   courseSchema,
@@ -55,7 +56,10 @@ export async function simpanKelas(input: unknown): Promise<ActionResult<{ id: st
   return adminAction(async (admin) => {
     const parsed = courseSchema.safeParse(input);
     if (!parsed.success) return invalidInput(parsed.error);
-    const { id, certificate, ...data } = parsed.data;
+    const { id, certificate, ...fields } = parsed.data;
+    const subject = await resolveSubject(fields.subject);
+    if (!subject) return fail("Mata pelajaran belum terdaftar.", { subject: "Pilih mata pelajaran dari daftar" });
+    const data = { ...fields, subject };
     const clash = await prisma.course.findUnique({ where: { slug: data.slug }, select: { id: true } });
     if (clash && clash.id !== id) return fail("Slug sudah dipakai kelas lain.", { slug: "Slug ini sudah dipakai" });
 

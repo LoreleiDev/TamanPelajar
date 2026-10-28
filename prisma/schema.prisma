@@ -290,6 +290,18 @@ model CourseCategory {
   @@index([order])
 }
 
+/// Mata pelajaran yang dikelola admin (revisi RMED). Kelas, video, dan soal menyimpan namanya
+/// di kolom `subject`; mengganti nama di sini ikut memperbarui kolom itu.
+model Subject {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
 model Course {
   id               String        @id @default(cuid())
   slug             String        @unique

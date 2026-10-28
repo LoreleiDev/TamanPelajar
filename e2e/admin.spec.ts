@@ -157,7 +157,7 @@ test.describe("panel admin (M)", () => {
     await masukAdmin(page, "/admin/bank-soal");
     await page.getByRole("link", { name: "Tambah soal" }).click();
     await expect(page).toHaveURL(/\/admin\/bank-soal\/baru$/);
-    await page.getByRole("combobox", { name: "Mata pelajaran" }).fill("Pengetahuan Umum");
+    await page.getByRole("combobox", { name: "Mata pelajaran" }).selectOption("Pengetahuan Umum");
     await page.getByRole("combobox", { name: "Topik" }).fill("Geografi");
     await page.getByLabel("Isi pertanyaan").fill(body);
     await page.getByLabel("Opsi A", { exact: true }).fill("Bandung");
