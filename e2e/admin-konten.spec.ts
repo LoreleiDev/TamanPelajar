@@ -254,4 +254,29 @@ test.describe("panel admin: situs dan laporan (C.2.8, L.2.8, M.1, M.2)", () => {
     await page.getByRole("dialog").getByRole("button", { name: "Hapus mata pelajaran" }).click();
     await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(0);
   });
+
+  test("hapus massal program; yang masih dipakai dilewati (revisi RMED)", async ({ page }, info) => {
+    await masukAdmin(page, "/admin/program");
+    const names = ["A", "B"].map((x) => `Program Massal ${x} ${info.project.name}`);
+    for (const [i, name] of names.entries()) {
+      await page.getByRole("button", { name: "Tambah program" }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByLabel("Nama program").fill(name);
+      await dialog.getByLabel("Slug URL").fill(`program-uji-admin-massal-${i}-${info.project.name}`);
+      await dialog.getByLabel("Nama singkat").fill("UJI");
+      await dialog.getByLabel("Sasaran peserta").fill("Tim penguji otomatis");
+      await dialog.getByLabel("Deskripsi").fill("Program sementara untuk menguji hapus massal.");
+      await dialog.getByRole("button", { name: "Simpan program" }).click();
+      await expect(page.getByRole("row").filter({ hasText: name })).toBeVisible();
+    }
+    for (const name of [...names, "UTBK/SNBT"]) await page.getByRole("checkbox", { name: `Pilih ${name}` }).check();
+    const bar = page.getByRole("region", { name: "Aksi untuk baris terpilih" });
+    await expect(bar).toContainText("3 dipilih");
+    await bar.getByRole("button", { name: "Hapus 3 terpilih" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus 3 program" }).click();
+    await expect(page.getByText("2 program dihapus.")).toBeVisible();
+    await expect(page.getByText("1 program tidak dihapus")).toBeVisible();
+    for (const name of names) await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(0);
+    await expect(page.getByRole("row").filter({ hasText: "UTBK/SNBT" })).toBeVisible();
+  });
 });

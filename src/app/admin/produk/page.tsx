@@ -4,11 +4,13 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { z } from "zod";
 
+import { BulkSelection, RowCheckbox, SelectAllCheckbox } from "@/components/admin/bulk-selection";
 import { FilterBar } from "@/components/admin/filter-bar";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
+import { hapusProdukMassal } from "@/features/admin/bulk-actions";
 import { adminPage } from "@/features/admin/guard";
 import { publishLabel, publishTone } from "@/features/admin/labels";
 import { listAdminProducts } from "@/features/admin/products/queries";
@@ -38,48 +40,56 @@ async function Content({ searchParams }: { searchParams: PageProps<"/admin/produ
       {rows.length === 0 ? (
         <EmptyState title="Belum ada paket" description="Buat paket berisi kelas, tryout, atau video, lalu terbitkan agar bisa dibeli." />
       ) : (
-        <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
-          <table className="w-full min-w-176 text-left">
-            <caption className="sr-only">Daftar paket</caption>
-            <thead className="bg-secondary text-sm">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-semibold">Paket</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">Harga</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Isi</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">Terjual</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">Aktif</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="tabular-nums">
-              {rows.map((p) => (
-                <tr key={p.id} className="border-t border-border align-top">
-                  <th scope="row" className="px-4 py-3 font-normal">
-                    <Link href={`/admin/produk/${p.id}`} className="font-semibold text-primary hover:underline">
-                      {p.name}
-                    </Link>
-                    <span className="block text-sm text-muted-foreground">
-                      {p.category.shortName} · {programTypeLabel[p.programType]} · {p.activeDays} hari
-                    </span>
+        <BulkSelection ids={rows.map((r) => r.id)} noun="paket" action={hapusProdukMassal}>
+          <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+            <table className="w-full min-w-176 text-left">
+              <caption className="sr-only">Daftar paket</caption>
+              <thead className="bg-secondary text-sm">
+                <tr>
+                  <th scope="col" className="w-10 px-4 py-3">
+                    <SelectAllCheckbox label="Pilih semua paket" />
                   </th>
-                  <td className="px-4 py-3 text-right">
-                    {formatRupiah(p.promoPrice ?? p.price)}
-                    {p.promoPrice !== null && <span className="block text-sm text-muted-foreground line-through">{formatRupiah(p.price)}</span>}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {p._count.courses} kelas, {p._count.exams} tryout
-                    {p._count.videos > 0 && `, ${p._count.videos} video`}
-                  </td>
-                  <td className="px-4 py-3 text-right">{p.salesCount}</td>
-                  <td className="px-4 py-3 text-right">{p._count.enrollments}</td>
-                  <td className="px-4 py-3">
-                    <StatusBadge tone={publishTone[p.status]}>{publishLabel[p.status]}</StatusBadge>
-                  </td>
+                  <th scope="col" className="px-4 py-3 font-semibold">Paket</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">Harga</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Isi</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">Terjual</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">Aktif</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="tabular-nums">
+                {rows.map((p) => (
+                  <tr key={p.id} className="border-t border-border align-top">
+                    <td className="px-4 py-3">
+                      <RowCheckbox id={p.id} label={p.name} />
+                    </td>
+                    <th scope="row" className="px-4 py-3 font-normal">
+                      <Link href={`/admin/produk/${p.id}`} className="font-semibold text-primary hover:underline">
+                        {p.name}
+                      </Link>
+                      <span className="block text-sm text-muted-foreground">
+                        {p.category.shortName} · {programTypeLabel[p.programType]} · {p.activeDays} hari
+                      </span>
+                    </th>
+                    <td className="px-4 py-3 text-right">
+                      {formatRupiah(p.promoPrice ?? p.price)}
+                      {p.promoPrice !== null && <span className="block text-sm text-muted-foreground line-through">{formatRupiah(p.price)}</span>}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {p._count.courses} kelas, {p._count.exams} tryout
+                      {p._count.videos > 0 && `, ${p._count.videos} video`}
+                    </td>
+                    <td className="px-4 py-3 text-right">{p.salesCount}</td>
+                    <td className="px-4 py-3 text-right">{p._count.enrollments}</td>
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={publishTone[p.status]}>{publishLabel[p.status]}</StatusBadge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </BulkSelection>
       )}
     </>
   );

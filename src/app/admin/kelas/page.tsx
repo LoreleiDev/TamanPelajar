@@ -4,12 +4,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { z } from "zod";
 
+import { BulkSelection, RowCheckbox, SelectAllCheckbox } from "@/components/admin/bulk-selection";
 import { FilterBar } from "@/components/admin/filter-bar";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { listAdminCourses } from "@/features/admin/courses/queries";
+import { hapusKelasMassal } from "@/features/admin/bulk-actions";
 import { adminPage } from "@/features/admin/guard";
 import { publishLabel, publishTone } from "@/features/admin/labels";
 import { formatStudyTime } from "@/lib/format";
@@ -37,45 +39,53 @@ async function Content({ searchParams }: { searchParams: PageProps<"/admin/kelas
       {rows.length === 0 ? (
         <EmptyState title="Belum ada kelas" description="Buat kelas, lalu susun bab dan materinya." />
       ) : (
-        <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
-          <table className="w-full min-w-176 text-left">
-            <caption className="sr-only">Daftar kelas</caption>
-            <thead className="bg-secondary text-sm">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-semibold">Kelas</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">Bab</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">Materi</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Durasi</th>
-                <th scope="col" className="px-4 py-3 text-right font-semibold">Di paket</th>
-                <th scope="col" className="px-4 py-3 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="tabular-nums">
-              {rows.map((c) => (
-                <tr key={c.id} className="border-t border-border align-top">
-                  <th scope="row" className="px-4 py-3 font-normal">
-                    <Link href={`/admin/kelas/${c.id}`} className="font-semibold text-primary hover:underline">
-                      {c.title}
-                    </Link>
-                    <span className="block text-sm text-muted-foreground">
-                      {c.category} · {c.subject}
-                    </span>
+        <BulkSelection ids={rows.map((r) => r.id)} noun="kelas" action={hapusKelasMassal}>
+          <div className="relative overflow-x-auto rounded-xl border border-border outline-none focus-visible:ring-3 focus-visible:ring-ring/50" tabIndex={0} role="region" aria-label="Tabel, geser ke samping bila perlu">
+            <table className="w-full min-w-176 text-left">
+              <caption className="sr-only">Daftar kelas</caption>
+              <thead className="bg-secondary text-sm">
+                <tr>
+                  <th scope="col" className="w-10 px-4 py-3">
+                    <SelectAllCheckbox label="Pilih semua kelas" />
                   </th>
-                  <td className="px-4 py-3 text-right">
-                    {c.sectionCount}
-                    <span className="block text-sm text-muted-foreground">{c.freeSections} gratis</span>
-                  </td>
-                  <td className="px-4 py-3 text-right">{c.lessonCount}</td>
-                  <td className="px-4 py-3">{formatStudyTime(c.estimatedMinutes * 60)}</td>
-                  <td className="px-4 py-3 text-right">{c.products}</td>
-                  <td className="px-4 py-3">
-                    <StatusBadge tone={publishTone[c.status]}>{publishLabel[c.status]}</StatusBadge>
-                  </td>
+                  <th scope="col" className="px-4 py-3 font-semibold">Kelas</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">Bab</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">Materi</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Durasi</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">Di paket</th>
+                  <th scope="col" className="px-4 py-3 font-semibold">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="tabular-nums">
+                {rows.map((c) => (
+                  <tr key={c.id} className="border-t border-border align-top">
+                    <td className="px-4 py-3">
+                      <RowCheckbox id={c.id} label={c.title} />
+                    </td>
+                    <th scope="row" className="px-4 py-3 font-normal">
+                      <Link href={`/admin/kelas/${c.id}`} className="font-semibold text-primary hover:underline">
+                        {c.title}
+                      </Link>
+                      <span className="block text-sm text-muted-foreground">
+                        {c.category} · {c.subject}
+                      </span>
+                    </th>
+                    <td className="px-4 py-3 text-right">
+                      {c.sectionCount}
+                      <span className="block text-sm text-muted-foreground">{c.freeSections} gratis</span>
+                    </td>
+                    <td className="px-4 py-3 text-right">{c.lessonCount}</td>
+                    <td className="px-4 py-3">{formatStudyTime(c.estimatedMinutes * 60)}</td>
+                    <td className="px-4 py-3 text-right">{c.products}</td>
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={publishTone[c.status]}>{publishLabel[c.status]}</StatusBadge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </BulkSelection>
       )}
     </>
   );

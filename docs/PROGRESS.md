@@ -431,3 +431,9 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 79/79; e2e 163/163. Durasi otomatis dicek manual di browser: YouTube 10:35 terbaca, Vimeo publik terbaca lewat oEmbed.
 
+### `feat/M1-hapus-massal` (batch 3)
+- [x] **M.1, C.2.3–C.2.4** Hapus massal di menu Program, Kelas, Video, Paket Produk, dan Tryout: kotak centang per baris, pilih semua, bilah aksi dengan konfirmasi. Aturannya sama dengan hapus satuan; yang tidak boleh dihapus (program masih berisi, video dipakai materi, tryout sedang dikerjakan) dilewati dan alasannya ditampilkan. Setiap penghapusan tercatat di audit log
+- [x] e2e hapus massal program, termasuk program yang dilewati
+
+**Pengujian:** lint, typecheck, build lulus; unit 79/79; e2e 165/165.
+
