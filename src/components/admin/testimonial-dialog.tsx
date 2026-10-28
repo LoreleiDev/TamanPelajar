@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { describedBy, Field, FormAlert } from "@/features/auth/components/form-parts";
-import { simpanTestimoni } from "@/features/admin/site-actions";
+import { simpanTestimoni, terbitkanTestimoni } from "@/features/admin/site-actions";
 import { testimonialSchema, type TestimonialInput } from "@/features/admin/testimonial-schema";
 
 /** Tambah/ubah testimoni (M.1 Testimoni). */
@@ -68,5 +68,27 @@ export function TestimonialDialog({ trigger, defaults }: { trigger: ReactNode; d
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Terbitkan testimoni siswa yang menunggu tinjauan (revisi RMED). */
+export function PublishTestimonialButton({ id }: { id: string }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  return (
+    <Button
+      size="sm"
+      disabled={pending}
+      onClick={() =>
+        start(async () => {
+          const r = await terbitkanTestimoni({ id });
+          if (!r.ok) return void toast.error(r.error);
+          toast.success("Testimoni diterbitkan di beranda.");
+          router.refresh();
+        })
+      }
+    >
+      {pending ? "Menerbitkan…" : "Terbitkan"}
+    </Button>
   );
 }

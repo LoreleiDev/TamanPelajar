@@ -35,9 +35,10 @@ test.describe("beranda (D.1)", () => {
 
   test("testimoni bisa digeser", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("1 dari 3")).toBeVisible();
+    // Jumlah bisa bertambah oleh testimoni siswa yang diterbitkan tes lain.
+    await expect(page.getByText(/^1 dari \d+$/)).toBeVisible();
     await page.getByRole("button", { name: "Cerita berikutnya" }).click();
-    await expect(page.getByText("2 dari 3")).toBeVisible();
+    await expect(page.getByText(/^2 dari \d+$/)).toBeVisible();
     await expect(page.getByText("Bagus Pratama")).toBeVisible();
   });
 });

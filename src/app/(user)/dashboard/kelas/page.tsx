@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { SaveCourseButton } from "@/components/course/save-course-button";
+import { StudentTestimonialDialog } from "@/components/course/student-testimonial-dialog";
 import { DashboardHeading, DashboardSkeleton } from "@/components/shared/dashboard-parts";
 import { EmptyState } from "@/components/shared/empty-state";
 import { GrowthProgress } from "@/components/shared/growth-progress";
@@ -17,7 +19,9 @@ async function Content() {
   const [courses, programs] = await Promise.all([getCourseProgress(user.id), getPrograms(user.id)]);
   return (
     <>
-      <DashboardHeading title="Kelas saya">Kelas dari paket yang kamu beli dan kelas yang pernah kamu buka.</DashboardHeading>
+      <DashboardHeading title="Kelas saya">
+        Kelas dari paket yang kamu beli, kelas yang kamu tambahkan dengan tombol &ldquo;Tambah kelas&rdquo;, dan kelas yang pernah kamu buka.
+      </DashboardHeading>
       {programs.length > 0 && (
         <section aria-labelledby="program-judul" className="flex flex-col gap-3">
           <h2 id="program-judul" className="text-lg font-bold">
@@ -56,7 +60,7 @@ async function Content() {
                   {c.title}
                 </Link>
                 <span className={c.enrolled ? "text-sm font-semibold text-primary" : "text-sm text-muted-foreground"}>
-                  {c.enrolled ? "Akses penuh" : "Bab gratis"}
+                  {c.enrolled ? "Akses penuh" : c.saved ? "Ditambahkan, bab gratis" : "Bab gratis"}
                 </span>
               </div>
               <GrowthProgress value={c.percent} label={`${c.completed} dari ${c.total} materi`} />
@@ -74,6 +78,27 @@ async function Content() {
                   </Button>
                 )}
               </div>
+              {(c.percent === 100 || (c.saved && !c.enrolled)) && (
+                <div className="flex flex-wrap items-center gap-3 rounded-lg bg-secondary px-3 py-2 text-sm">
+                  {c.percent === 100 &&
+                    (c.testimonial === "belum" ? (
+                      <StudentTestimonialDialog
+                        courseId={c.id}
+                        courseTitle={c.title}
+                        trigger={
+                          <Button size="sm" variant="outline">
+                            Tulis testimoni
+                          </Button>
+                        }
+                      />
+                    ) : (
+                      <span className="text-muted-foreground">
+                        {c.testimonial === "menunggu" ? "Testimonimu menunggu tinjauan admin." : "Testimonimu tampil di beranda."}
+                      </span>
+                    ))}
+                  {c.saved && !c.enrolled && <SaveCourseButton courseId={c.id} courseTitle={c.title} />}
+                </div>
+              )}
             </li>
           ))}
         </ul>

@@ -5,7 +5,11 @@ import { adminOnly } from "./guard";
 
 export async function listAdminTestimonials() {
   await adminOnly();
-  return prisma.testimonial.findMany({ orderBy: [{ order: "asc" }, { createdAt: "asc" }] });
+  // Testimoni siswa yang menunggu tinjauan tampil paling atas.
+  return prisma.testimonial.findMany({
+    orderBy: [{ isPending: "desc" }, { order: "asc" }, { createdAt: "asc" }],
+    include: { user: { select: { id: true, email: true } } },
+  });
 }
 
 export async function listAdminBanners() {

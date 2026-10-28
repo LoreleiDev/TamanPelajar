@@ -9,6 +9,17 @@ async function masuk(page: Page, email: string) {
 }
 
 test.describe("kelas online (G, T.4, T.5, T.17, T.18)", () => {
+  // Popup testimoni kelas 100% diuji di kelas-saya.spec.ts; di sini dianggap sudah ditunda agar
+  // tidak menutupi halaman bila progres akun demo mencapai 100% karena tes lain.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      const getItem = Storage.prototype.getItem;
+      Storage.prototype.getItem = function (key: string) {
+        return key.startsWith("tp:testimoni-ditunda:") ? "1" : getItem.call(this, key);
+      };
+    });
+  });
+
   test("tamu melihat kurikulum, dan membuka materi memunculkan dialog masuk (T.17)", async ({ page }) => {
     await page.goto("/kelas/penalaran-umum", { waitUntil: "networkidle" });
     await expect(page.getByRole("heading", { level: 1, name: "Penalaran Umum" })).toBeVisible();

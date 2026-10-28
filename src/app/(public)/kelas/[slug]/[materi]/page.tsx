@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { StudentTestimonialDialog } from "@/components/course/student-testimonial-dialog";
 import { CurriculumNav } from "@/components/course/curriculum-nav";
 import { Breadcrumb } from "@/components/shared/page-header";
 import { DiscussionThread } from "@/components/course/discussion-thread";
@@ -17,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CertificateTrackSummary } from "@/features/certificate/components/certificate-track";
 import { syncCertificateTrack } from "@/features/certificate/service";
-import { getCourseOutline, getLearnerState, getLessonContent } from "@/features/course/queries";
+import { getCourseOutline, getLearnerState, getLessonContent, hasCourseTestimonial } from "@/features/course/queries";
 import { formatStudyTime, formatTanggal } from "@/lib/format";
 import { requireUserPage } from "@/lib/rbac";
 
@@ -38,7 +39,10 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
   const lesson = state.lessons[index];
   const prev = state.lessons[index - 1];
   const next = state.lessons[index + 1];
-  const content = lesson.access === "terbuka" ? await getLessonContent(lesson.id, user.id) : null;
+  const [content, reviewed] = await Promise.all([
+    lesson.access === "terbuka" ? getLessonContent(lesson.id, user.id) : null,
+    user.role === "USER" && state.percent === 100 ? hasCourseTestimonial(user.id, outline.id) : true,
+  ]);
 
   const byId = new Map(state.lessons.map((l) => [l.id, l]));
   const navSections = outline.sections.map((s) => ({
@@ -74,6 +78,8 @@ async function LessonRoom({ params }: { params: PageProps<"/kelas/[slug]/[materi
       </section>
       {/* Sertifikat berbasis batch; tidak tampil bila kelas belum punya batch. */}
       {track && <CertificateTrackSummary track={track} />}
+      {/* Kelas 100% selesai: minta testimoni sekali (revisi RMED). */}
+      {!reviewed && <StudentTestimonialDialog autoOpen courseId={outline.id} courseTitle={outline.title} />}
       {/* Riwayat belajar (G.4.9) */}
       {state.recent.length > 0 && (
         <section aria-labelledby="riwayat-judul" className="flex flex-col gap-2">

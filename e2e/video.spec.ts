@@ -47,9 +47,10 @@ test.describe("video belajar (H)", () => {
 
   test("filter status tonton hanya untuk pengguna yang masuk", async ({ page }) => {
     await masuk(page, "user1@tamanpelajar.test");
-    await page.getByLabel("Status").selectOption("sudah");
+    // Dibatasi ke <main>: saat streaming, salinan konten sempat berada di wadah tersembunyi.
+    await page.getByRole("main").getByRole("form", { name: "Filter video" }).getByLabel("Status").selectOption("sudah");
     await expect(page).toHaveURL(/status=sudah/);
-    const cards = page.getByRole("article");
+    const cards = page.getByRole("main").getByRole("article");
     await expect(cards.first()).toBeVisible();
     await expect(cards.filter({ hasNotText: "Sudah ditonton" })).toHaveCount(0);
   });

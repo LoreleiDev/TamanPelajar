@@ -2,6 +2,7 @@ import { BookOpen } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { SaveCourseButton } from "@/components/course/save-course-button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { listCourses } from "@/features/course/queries";
@@ -34,11 +35,8 @@ export default async function KelasPage() {
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {courses.map((c) => (
-            <li key={c.slug}>
-              <Link
-                href={`/kelas/${c.slug}`}
-                className="group flex h-full flex-col gap-3 rounded-xl border border-border p-5 transition-colors duration-150 hover:border-primary/40 hover:bg-accent/40"
-              >
+            <li key={c.slug} className="flex h-full flex-col rounded-xl border border-border transition-colors duration-150 hover:border-primary/40">
+              <Link href={`/kelas/${c.slug}`} className="group flex flex-1 flex-col gap-3 rounded-t-xl p-5 transition-colors duration-150 hover:bg-accent/40">
                 <p className="text-sm">
                   <span className="font-semibold text-primary">{c.category.name}</span>
                   <span className="text-muted-foreground">, tingkat {levelLabels[c.level].toLowerCase()}</span>
@@ -71,6 +69,10 @@ export default async function KelasPage() {
                   </div>
                 </dl>
               </Link>
+              {/* Di luar tautan kartu: tombol tidak boleh berada di dalam elemen <a>. */}
+              <div className="rounded-b-xl bg-secondary px-5 py-3">
+                <SaveCourseButton courseId={c.id} courseTitle={c.title} />
+              </div>
             </li>
           ))}
         </ul>

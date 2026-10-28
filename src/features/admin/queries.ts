@@ -10,13 +10,14 @@ import { fillMonths, lastMonths, percent } from "./stats";
 
 export async function getAdminBadges() {
   await adminOnly();
-  const [transaksi, penilaian, diskusi, tugas] = await Promise.all([
+  const [transaksi, penilaian, diskusi, tugas, testimoni] = await Promise.all([
     prisma.order.count({ where: { status: "MENUNGGU", expiresAt: { gt: new Date() }, deletedAt: null } }),
     countPendingEssays(),
     countUnansweredDiscussions(),
     countPendingPracticals(),
+    prisma.testimonial.count({ where: { isPending: true } }),
   ]);
-  return { transaksi, penilaian, diskusi, tugas };
+  return { transaksi, penilaian, diskusi, tugas, testimoni };
 }
 
 const num = (v: unknown) => Number(v ?? 0);

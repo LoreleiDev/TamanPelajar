@@ -20,6 +20,8 @@ async function resetDb() {
     await prisma.rateLimit.deleteMany();
     // Order tidak ikut terhapus bersama User (relasi tanpa cascade), jadi hapus lebih dulu.
     await prisma.order.deleteMany({ where: { user: { email: { startsWith: "e2e-" } } } });
+    // Testimoni siswa uji tidak ikut terhapus bersama User (relasi SetNull), jadi hapus lebih dulu.
+    await prisma.testimonial.deleteMany({ where: { OR: [{ user: { email: { startsWith: "e2e-" } } }, { name: { startsWith: "Peserta Sertifikat" } }] } });
     await prisma.user.deleteMany({ where: { email: { startsWith: "e2e-" } } });
     await prisma.verificationToken.deleteMany({ where: { identifier: { startsWith: "e2e-" } } });
     await prisma.voucher.deleteMany({ where: { code: { startsWith: "E2E-" } } });
@@ -134,6 +136,16 @@ async function resetDb() {
       await prisma.lessonProgress.createMany({ data: puLessons.map((l) => ({ userId: sertif.id, lessonId: l.id, completedAt: now })) });
       await prisma.quizAttempt.createMany({
         data: puLessons.flatMap((l) => (l.quizId ? [{ quizId: l.quizId, userId: sertif.id, score: 90, passed: true, answers: {}, submittedAt: now }] : [])),
+      });
+      // Siswa tanpa paket untuk tombol "Tambah kelas" (revisi RMED).
+      await prisma.user.create({
+        data: {
+          email: `e2e-kelas-${project}@tamanpelajar.test`,
+          name: `Penyimpan Kelas ${project === "desktop" ? "Desktop" : "Mobile"}`,
+          passwordHash,
+          emailVerified: now,
+          profile: { create: { phone: "081255550000", educationLevel: "SMA", examTarget: "UTBK/SNBT", completedAt: now } },
+        },
       });
       // Pertanyaan diskusi untuk dijawab admin (L.2.8), di materi bab gratis.
       const freeLesson = await prisma.lesson.findFirst({ where: { section: { isFree: true, course: { slug: "penalaran-umum" } } }, orderBy: { order: "asc" }, select: { id: true } });

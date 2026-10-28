@@ -437,3 +437,10 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 79/79; e2e 165/165.
 
+### `feat/G-tambah-kelas-testimoni` (batch 4)
+- [x] **F.1, G** Tombol "Tambah kelas" di daftar dan detail kelas: kelas masuk ke Kelas Saya (bab 1–2 tetap gratis, bab lanjutan tetap butuh paket); tombol berubah menjadi "Sudah di Kelas Saya" dan bisa mengeluarkan lagi; kelas dari paket bertanda "Terdaftar lewat paket". Tamu diminta masuk dulu
+- [x] **D.1.7** Testimoni siswa: popup sekali saat satu kelas selesai 100% ("Nanti saja" disimpan di browser) dan tombol "Tulis testimoni" di Kelas Saya. Testimoni masuk sebagai "Menunggu tinjauan" dan baru tampil di beranda setelah admin menekan Terbitkan (masuk urutan paling akhir); penanda jumlah di menu Testimoni
+- [x] e2e: tamu diminta masuk, tambah/keluarkan kelas, tanda kelas dari paket, popup testimoni sampai diterbitkan admin; tes kelas dan carousel beranda dibuat tidak bergantung pada testimoni/progres dari tes lain
+
+**Pengujian:** lint, typecheck, build lulus; unit 79/79; e2e 173/173 (17 tes khusus satu perangkat sengaja dilewati). Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px halaman baru tanpa scroll horizontal dan error console.
+

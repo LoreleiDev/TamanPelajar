@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 
 // Menu panel administrator (M.1), dikelompokkan agar 16+ menu tetap mudah dipindai.
 // Menu ditambahkan ke sini bersamaan dengan halamannya, jadi tidak ada tautan mati.
-export type AdminBadges = Partial<Record<"penilaian" | "diskusi" | "transaksi" | "tugas", number>>;
+export type AdminBadges = Partial<Record<"penilaian" | "diskusi" | "transaksi" | "tugas" | "testimoni", number>>;
 
 interface Item {
   href: string;
@@ -81,7 +81,7 @@ const groups: { title: string; items: Item[] }[] = [
     items: [
       { href: "/admin/informasi", label: "Informasi", icon: Newspaper },
       { href: "/admin/banner", label: "Banner", icon: GalleryHorizontal },
-      { href: "/admin/testimoni", label: "Testimoni", icon: MessageSquareQuote },
+      { href: "/admin/testimoni", label: "Testimoni", icon: MessageSquareQuote, badge: "testimoni" },
       { href: "/admin/pengaturan", label: "Pengaturan", icon: Settings },
     ],
   },

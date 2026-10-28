@@ -203,6 +203,8 @@ model User {
   articles            Article[]
   certificates        UserCertificate[]
   batchParticipations BatchParticipant[]
+  savedCourses        SavedCourse[]
+  testimonials        Testimonial[]
   reviewedSubmissions PracticalSubmission[] @relation("SubmissionReviewer")
   auditLogs           AuditLog[]
   mediaUploaded       Media[]
@@ -325,6 +327,8 @@ model Course {
   products         ProductCourse[]
   certificate      Certificate?
   batches          CourseBatch[]
+  savedBy          SavedCourse[]
+  testimonials     Testimonial[]
   learningSessions LearningSession[]
 
   @@index([categoryId])
@@ -1194,10 +1198,36 @@ model Testimonial {
   body        String   @db.Text
   isPublished Boolean  @default(true)
   order       Int      @default(0)
+  /// Diisi bila testimoni dikirim siswa setelah menyelesaikan kelas (revisi RMED).
+  userId      String?
+  courseId    String?
+  /// true selama testimoni siswa belum ditinjau admin.
+  isPending   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, courseId])
   @@index([isPublished, order])
+  @@index([isPending])
+  @@index([courseId])
+}
+
+/// Kelas yang ditambahkan siswa ke Kelas Saya dengan tombol "Tambah kelas" (revisi RMED).
+model SavedCourse {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
 }
 
 // ─── N.7 Sertifikat dan sistem ───────────────────────────────────────────────

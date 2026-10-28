@@ -9,6 +9,7 @@ import { GrowthProgress } from "@/components/shared/growth-progress";
 import { JsonLd } from "@/components/shared/json-ld";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SaveCourseButton } from "@/components/course/save-course-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { getCourseOutline, getLearnerState, listCourseSlugs, type CourseOutline } from "@/features/course/queries";
 import { formatStudyTime, formatTanggal } from "@/lib/format";
@@ -119,7 +120,9 @@ export default async function KelasDetailPage({ params }: PageProps<"/kelas/[slu
             {levelLabels[outline.level]}
           </span>
         }
-      />
+      >
+        <SaveCourseButton courseId={outline.id} courseTitle={outline.title} size="default" className="self-start" />
+      </PageHeader>
 
       <div className="page-container flex flex-col gap-10 py-10 md:py-12">
 

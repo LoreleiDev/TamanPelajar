@@ -44,20 +44,29 @@ export interface CourseProgress {
   lastAccessAt: Date | null;
   nextLesson: { slug: string; title: string } | null;
   enrolled: boolean;
+  /** Ditambahkan sendiri lewat tombol "Tambah kelas" (revisi RMED). */
+  saved: boolean;
+  id: string;
+  /** Status testimoni siswa untuk kelas ini: belum ada, menunggu tinjauan, atau terbit. */
+  testimonial: "belum" | "menunggu" | "terbit";
 }
 
 /** Kelas yang dibeli atau pernah dibuka, dengan progres dan materi berikutnya (F.2.3, F.2.5, F.2.10). */
 export async function getCourseProgress(userId: string): Promise<CourseProgress[]> {
   const now = new Date();
-  const [enrolled, touched] = await Promise.all([
+  const [enrolled, touched, saved, testimonials] = await Promise.all([
     prisma.productCourse.findMany({
       where: { product: { enrollments: { some: { userId, status: "AKTIF", expiresAt: { gt: now } } } } },
       select: { courseId: true },
     }),
     prisma.lessonProgress.findMany({ where: { userId }, select: { lesson: { select: { section: { select: { courseId: true } } } } } }),
+    prisma.savedCourse.findMany({ where: { userId }, select: { courseId: true } }),
+    prisma.testimonial.findMany({ where: { userId, courseId: { not: null } }, select: { courseId: true, isPublished: true } }),
   ]);
   const enrolledIds = new Set(enrolled.map((e) => e.courseId));
-  const ids = [...new Set([...enrolledIds, ...touched.map((t) => t.lesson.section.courseId)])];
+  const savedIds = new Set(saved.map((s) => s.courseId));
+  const reviewOf = new Map(testimonials.map((t) => [t.courseId!, t.isPublished ? ("terbit" as const) : ("menunggu" as const)]));
+  const ids = [...new Set([...enrolledIds, ...savedIds, ...touched.map((t) => t.lesson.section.courseId)])];
   if (ids.length === 0) return [];
 
   const courses = await prisma.course.findMany({
@@ -97,6 +106,9 @@ export async function getCourseProgress(userId: string): Promise<CourseProgress[
         lastAccessAt: last ?? null,
         nextLesson: next ? { slug: next.slug, title: next.title } : null,
         enrolled: enrolledIds.has(c.id),
+        saved: savedIds.has(c.id),
+        id: c.id,
+        testimonial: reviewOf.get(c.id) ?? ("belum" as const),
       };
     })
     .sort((a, b) => (b.lastAccessAt?.getTime() ?? 0) - (a.lastAccessAt?.getTime() ?? 0));

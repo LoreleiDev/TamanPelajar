@@ -11,6 +11,7 @@ import { sanitizeRichText } from "@/lib/sanitize";
 const publishedCourse = { status: "TERBIT", deletedAt: null } as const;
 
 export interface CourseListItem {
+  id: string;
   slug: string;
   title: string;
   summary: string;
@@ -32,6 +33,7 @@ export async function listCourses(): Promise<CourseListItem[]> {
     where: publishedCourse,
     orderBy: [{ category: { order: "asc" } }, { title: "asc" }],
     select: {
+      id: true,
       slug: true,
       title: true,
       summary: true,
@@ -42,6 +44,7 @@ export async function listCourses(): Promise<CourseListItem[]> {
     },
   });
   return rows.map((c) => ({
+    id: c.id,
     slug: c.slug,
     title: c.title,
     summary: c.summary,
@@ -331,4 +334,9 @@ export async function getLessonContent(lessonId: string, userId: string): Promis
       replies: d.replies.map((r) => ({ id: r.id, body: r.body, createdAt: r.createdAt, author: author(r.user) })),
     })),
   };
+}
+
+/** Siswa sudah pernah mengirim testimoni untuk kelas ini (revisi RMED)? */
+export async function hasCourseTestimonial(userId: string, courseId: string) {
+  return Boolean(await prisma.testimonial.findUnique({ where: { userId_courseId: { userId, courseId } }, select: { id: true } }));
 }

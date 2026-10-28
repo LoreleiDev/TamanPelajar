@@ -21,8 +21,30 @@ export async function simpanTestimoni(input: unknown): Promise<ActionResult<null
     const parsed = testimonialSchema.safeParse(input);
     if (!parsed.success) return invalidInput(parsed.error);
     const { id, ...data } = parsed.data;
-    const row = id ? await prisma.testimonial.update({ where: { id }, data, select: { id: true } }) : await prisma.testimonial.create({ data, select: { id: true } });
+    // Menyimpan dari form admin berarti testimoni sudah ditinjau.
+    const row = id
+      ? await prisma.testimonial.update({ where: { id }, data: { ...data, isPending: false }, select: { id: true } })
+      : await prisma.testimonial.create({ data, select: { id: true } });
     await audit(prisma, admin, id ? "testimoni.ubah" : "testimoni.buat", "Testimonial", row.id, { after: data });
+    revalidatePath("/admin/testimoni");
+    updateTag("katalog");
+    return ok(null);
+  });
+}
+
+/** Terbitkan testimoni siswa yang menunggu tinjauan (revisi RMED). */
+export async function terbitkanTestimoni(input: unknown): Promise<ActionResult<null>> {
+  return adminAction(async (admin) => {
+    const parsed = idSchema.safeParse(input);
+    if (!parsed.success) return invalidInput(parsed.error);
+    // Testimoni yang baru diterbitkan masuk ke urutan paling akhir di beranda.
+    const last = await prisma.testimonial.aggregate({ where: { isPublished: true }, _max: { order: true } });
+    const before = await prisma.testimonial.update({
+      where: { id: parsed.data.id },
+      data: { isPublished: true, isPending: false, order: (last._max.order ?? 0) + 1 },
+      select: { name: true, program: true },
+    });
+    await audit(prisma, admin, "testimoni.terbitkan", "Testimonial", parsed.data.id, { after: before });
     revalidatePath("/admin/testimoni");
     updateTag("katalog");
     return ok(null);
