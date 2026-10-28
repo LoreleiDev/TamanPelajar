@@ -31,7 +31,8 @@ test.describe("panel admin (M)", () => {
   test("dashboard admin menampilkan statistik dan grafik (M.2)", async ({ page }) => {
     await masukAdmin(page);
     await expect(page.getByRole("heading", { name: "Dashboard admin", level: 1 })).toBeVisible();
-    await expect(page.getByText("Total siswa")).toBeVisible();
+    // Dibatasi ke <main>: saat streaming, salinan konten sempat berada di wadah tersembunyi.
+    await expect(page.getByRole("main").getByText("Total siswa")).toBeVisible();
     await expect(page.getByRole("figure", { name: "Pendapatan bulanan" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Program terlaris" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Tingkat penyelesaian kelas" })).toBeVisible();

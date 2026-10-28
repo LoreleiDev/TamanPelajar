@@ -84,7 +84,16 @@ async function allSummaries(): Promise<ProductSummary[]> {
   return rows.map(toSummary);
 }
 
-export async function listCategories(): Promise<(Category & { productCount: number })[]> {
+/**
+ * Program (kategori) untuk halaman publik. Bawaan hanya program yang punya paket terbit, agar
+ * program kosong tidak tampil di beranda dan filter katalog; `all` dipakai untuk URL langsung.
+ */
+export async function listCategories(options: { all?: boolean } = {}): Promise<(Category & { productCount: number })[]> {
+  const rows = await listAllCategories();
+  return options.all ? rows : rows.filter((c) => c.productCount > 0);
+}
+
+async function listAllCategories(): Promise<(Category & { productCount: number })[]> {
   "use cache";
   cached();
   const rows = await prisma.courseCategory.findMany({
@@ -104,7 +113,7 @@ export async function listCategories(): Promise<(Category & { productCount: numb
 }
 
 export async function getCategory(slug: string): Promise<Category | null> {
-  return (await listCategories()).find((c) => c.slug === slug) ?? null;
+  return (await listCategories({ all: true })).find((c) => c.slug === slug) ?? null;
 }
 
 /** Paket rekomendasi beranda (D.1.4): terlaris lebih dulu. */

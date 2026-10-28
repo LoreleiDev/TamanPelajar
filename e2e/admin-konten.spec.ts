@@ -28,6 +28,10 @@ test.describe("panel admin: konten (L, M.4)", () => {
     await dialog.getByRole("button", { name: "Simpan program" }).click();
     const row = page.getByRole("row").filter({ hasText: name });
     await expect(row).toBeVisible();
+    // Program tanpa paket terbit tidak tampil di beranda dan filter katalog.
+    await page.goto("/");
+    await expect(page.getByRole("region", { name: "Pilih program sesuai ujianmu" }).getByText(name)).toHaveCount(0);
+    await page.goto("/admin/program");
     await row.getByRole("button", { name: "Hapus" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Hapus program" }).click();
     await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(0);

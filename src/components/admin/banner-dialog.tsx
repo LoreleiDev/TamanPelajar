@@ -47,12 +47,29 @@ export function BannerDialog({ trigger, defaults, image }: { trigger: ReactNode;
           <Field label="Judul" htmlFor="b-title" error={errors.title?.message} hint="Dipakai sebagai teks alternatif gambar.">
             <Input autoComplete="off" {...f("title")} {...form.register("title")} />
           </Field>
+          {/* Panduan ukuran: banner tampil berasio 3:1 di beranda (banner-strip.tsx). */}
+          <div className="flex items-center gap-4 rounded-lg bg-secondary p-3 text-sm">
+            <div aria-hidden="true" className="grid aspect-[3/1] w-24 shrink-0 place-items-center rounded-md border-2 border-dashed border-primary text-[0.6875rem] font-bold text-primary tabular-nums">
+              3 : 1
+            </div>
+            <p>
+              <span className="font-semibold">Ukuran ideal 1200 × 400 piksel</span> (lebar × tinggi, rasio 3:1). Gambar dengan ukuran
+              lain dipotong otomatis dari tengah, jadi letakkan teks penting di tengah gambar.
+            </p>
+          </div>
+          {media?.url && (
+            <figure className="flex flex-col gap-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element -- pratinjau URL Cloudinary dinamis */}
+              <img src={media.url} alt="" className="aspect-[3/1] w-full rounded-xl object-cover" />
+              <figcaption className="text-sm text-muted-foreground">Pratinjau seperti tampil di beranda.</figcaption>
+            </figure>
+          )}
           <MediaUploader
             label="Gambar banner"
             folder="banner"
             kind="image"
             value={media}
-            hint="Rasio 3:1 disarankan, mis. 1200×400 px."
+            hint="Ukuran ideal 1200 × 400 px (rasio 3:1)."
             onChange={(v) => {
               setMedia(v);
               form.setValue("imageId", v?.id ?? "", { shouldDirty: true, shouldValidate: form.formState.isSubmitted });

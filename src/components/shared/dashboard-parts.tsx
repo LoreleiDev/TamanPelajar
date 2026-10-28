@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { SproutLoader } from "@/components/shared/ornaments";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** Judul halaman dashboard: padat, tanpa dekorasi. */
@@ -48,6 +49,7 @@ export function StatRow({ items }: { items: { label: string; value: ReactNode; h
 export function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6" aria-busy="true" aria-label="Memuat">
+      <SproutLoader />
       <Skeleton className="h-8 w-1/3" />
       <Skeleton className="h-24 rounded-xl" />
       <div className="grid gap-6 md:grid-cols-2">

@@ -15,7 +15,8 @@ export function ProgramLineup({ categories }: { categories: (Category & { produc
           Pilih program sesuai ujianmu
         </h2>
         <p className="text-lead max-w-[52ch]">
-          Tujuh program dengan kisi-kisi masing-masing. Klik satu program untuk melihat paketnya.
+          {new Intl.NumberFormat("id-ID").format(categories.length)} program dengan kisi-kisi masing-masing. Klik satu program untuk
+          melihat paketnya.
         </p>
       </div>
       <ul className="flex flex-col">

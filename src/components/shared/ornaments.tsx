@@ -73,3 +73,26 @@ export function DotPattern({ className, rows = 4, cols = 6 }: { className?: stri
     </svg>
   );
 }
+
+/** Loader tunas yang tumbuh berulang; dipakai di skeleton halaman. Diam bila reduced motion. */
+export function SproutLoader({ label = "Memuat…", className }: { label?: string; className?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground", className)}>
+      <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false" className="size-6 shrink-0">
+        <path
+          d="M24 46V27"
+          stroke="var(--brand-bark)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          fill="none"
+          className="origin-bottom [transform-box:fill-box] motion-safe:animate-[tumbuh-batang_1.6s_ease-out_infinite]"
+        />
+        <g className="origin-[24px_28px] motion-safe:animate-[tumbuh-daun_1.6s_ease-out_infinite]">
+          <path d="M23 28C13 29 5 22 3 10c12-1 20 6 20 18Z" fill="var(--brand-primary)" />
+          <path d="M25 24C26 12 34 4 46 4c0 13-9 21-21 20Z" fill="var(--brand-olive)" />
+        </g>
+      </svg>
+      {label}
+    </span>
+  );
+}

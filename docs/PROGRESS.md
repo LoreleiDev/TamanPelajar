@@ -412,3 +412,14 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 - Email masih mode log (`MAIL_MODE="log"`); pengiriman sungguhan belum disambungkan
 - Angka TTFB diukur di server lokal; di hosting akan bergantung pada lokasi database terkelola
 
+## Revisi RMED setelah Tahap 6 (28 Oktober 2026)
+
+### `fix/revisi-login-program-loading` (batch 1)
+- [x] **E.1.2** Setelah masuk, halaman tujuan (mis. panel admin) dimuat dengan navigasi penuh sehingga header, sesi di client, dan cache router lama tidak tertinggal (sebelumnya kadang perlu refresh)
+- [x] **D.1.3, D.2.2** Program tanpa paket terbit tidak tampil di beranda dan filter katalog; jumlah program di beranda dihitung otomatis
+- [x] **C.2.8** Form banner: panduan ukuran 1200 × 400 px (rasio 3:1) dengan bingkai contoh dan pratinjau seperti di beranda
+- [x] **P.2.2** Animasi loading: bar hijau tipis dengan tunas di ujungnya saat pindah halaman, dan loader tunas tumbuh di skeleton dashboard/admin (diam bila `prefers-reduced-motion`)
+- [x] e2e lebih stabil: `reset-db` memulihkan pesanan menunggu pembayaran dan notifikasi belum dibaca milik akun demo
+
+**Pengujian:** lint, typecheck, build lulus; unit 78/78; e2e 161/161.
+

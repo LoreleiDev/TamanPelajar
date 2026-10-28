@@ -43,6 +43,21 @@ async function resetDb() {
       where: { email: { endsWith: "@tamanpelajar.test" } },
       data: { failedLogins: 0, lockedUntil: null },
     });
+    // Data seed yang bergeser oleh waktu atau oleh pemakaian manual dikembalikan:
+    // pesanan user4 yang menunggu pembayaran (kedaluwarsa 1 hari setelah seed) dan
+    // notifikasi user1 yang belum dibaca (e2e/dashboard.spec.ts, e2e/autentikasi.spec.ts).
+    const pending = await prisma.order.findFirst({
+      where: { user: { email: "user4@tamanpelajar.test" }, status: { in: ["MENUNGGU", "KEDALUWARSA"] }, items: { some: { product: { slug: "persiapan-utbk-snbt" } } } },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    if (pending) {
+      await prisma.order.update({ where: { id: pending.id }, data: { status: "MENUNGGU", expiresAt: new Date(Date.now() + 86_400_000) } });
+      await prisma.payment.updateMany({ where: { orderId: pending.id }, data: { status: "MENUNGGU" } });
+    }
+    const latestNote = await prisma.notification.findFirst({ where: { user: { email: "user1@tamanpelajar.test" } }, orderBy: { createdAt: "desc" }, select: { id: true } });
+    if (latestNote) await prisma.notification.update({ where: { id: latestNote.id }, data: { readAt: null } });
+
     // Materi uji kelas (e2e/kelas.spec.ts) kembali ke keadaan seed: belum selesai, tanpa catatan.
     // Posisi video seed dekat akhir, jadi membuka halaman di luar tes bisa menandainya selesai.
     const studi = { user: { email: "user1@tamanpelajar.test" }, lesson: { slug: "studi-kasus-keberagaman" } };

@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
@@ -15,7 +14,6 @@ import { describedBy, Field, FormAlert, PasswordInput, useHydrated } from "./for
 
 /** Form masuk (E.1.2, E.3.1–E.3.2, E.3.4). */
 export function MasukForm({ callbackUrl, initialError }: { callbackUrl: string; initialError?: string }) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const hydrated = useHydrated();
   const [error, setError] = useState<{ message: string; code?: string } | undefined>(
@@ -35,8 +33,9 @@ export function MasukForm({ callbackUrl, initialError }: { callbackUrl: string; 
         }
         return;
       }
-      router.replace(result.data.redirectTo);
-      router.refresh();
+      // Navigasi penuh, bukan router.replace: header, sesi di client, dan cache router lama ikut
+      // dimuat ulang sehingga halaman tujuan (mis. panel admin) langsung tampil sebagai akun baru.
+      window.location.assign(result.data.redirectTo);
     }),
   );
 

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Suspense } from "react";
+
+import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { LoginRequiredProvider } from "@/components/shared/require-login";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -34,6 +37,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className={`${jakarta.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        {/* useSearchParams butuh Suspense (cacheComponents). */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <LoginRequiredProvider>{children}</LoginRequiredProvider>
         <Toaster position="top-center" />
       </body>
