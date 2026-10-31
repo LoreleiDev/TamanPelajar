@@ -26,12 +26,12 @@ export const footerNav = {
   bantuan: [
     { href: "/bantuan", label: "Pusat bantuan" },
     { href: "/kontak", label: "Hubungi kami" },
-    { href: "/kebijakan-privasi", label: "Kebijakan privasi" },
-    { href: "/syarat-ketentuan", label: "Syarat dan ketentuan" },
-  ],
-  tentang: [
     { href: "/tentang", label: "Tentang Taman Pelajar" },
     { href: "/informasi", label: "Informasi dan artikel" },
+  ],
+  legal: [
+    { href: "/kebijakan-privasi", label: "Kebijakan privasi" },
+    { href: "/syarat-ketentuan", label: "Syarat dan ketentuan" },
   ],
 };
 

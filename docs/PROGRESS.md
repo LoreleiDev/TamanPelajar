@@ -449,3 +449,8 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** atas permintaan RMED tidak ada tes penuh. Lint, typecheck, dan pemeriksa desain bersih; screenshot 1440 dan 375 px tanpa scroll horizontal.
 
+### `fix/footer-rapi` (revisi RMED, 31 Oktober 2026)
+- [x] **D.1.9** Footer ditata ulang: wordmark besar dihapus, logo di kolom brand, tepi atas melengkung dari halaman putih, garis tunas samar di pojok, strip bawah berisi hak cipta dan tautan legal; tautan Tentang dan Informasi pindah ke kolom Bantuan
+
+**Pengujian:** lint, typecheck, pemeriksa desain bersih; e2e layout, aksesibilitas, dan beranda (desktop) lulus 19 tes terhadap server dev; screenshot 1440, 768, 375 px tanpa scroll horizontal. Suite e2e penuh tidak dijalankan.
+
