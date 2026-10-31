@@ -37,9 +37,12 @@ export function SproutDivider({ className }: { className?: string }) {
  */
 export function OrganicCorners({
   tone = "on-light",
+  wave: showWave = true,
   className,
 }: {
   tone?: "on-light" | "on-green";
+  /** false bila sudut bawah dipakai konten (mis. hero putih). */
+  wave?: boolean;
   className?: string;
 }) {
   const leaf = tone === "on-green" ? "rgb(255 255 255 / 0.10)" : "var(--brand-primary)";
@@ -50,9 +53,11 @@ export function OrganicCorners({
         <path d="M200 0H40c10 60 60 112 160 128Z" fill={leaf} />
         <path d="M200 0h-70c8 34 34 58 70 66Z" fill={leaf} opacity="0.6" />
       </svg>
-      <svg viewBox="0 0 240 120" className="absolute -bottom-px -left-px w-[min(44vw,380px)]">
-        <path d="M0 120V40c40-18 70 26 120 22s72-44 120-30v88Z" fill={wave} />
-      </svg>
+      {showWave && (
+        <svg viewBox="0 0 240 120" className="absolute -bottom-px -left-px w-[min(44vw,380px)]">
+          <path d="M0 120V40c40-18 70 26 120 22s72-44 120-30v88Z" fill={wave} />
+        </svg>
+      )}
     </div>
   );
 }

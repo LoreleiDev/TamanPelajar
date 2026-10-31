@@ -444,3 +444,8 @@ Tiga batch, masing-masing di-squash ke `main` setelah lint, typecheck, unit, bui
 
 **Pengujian:** lint, typecheck, build lulus; unit 79/79; e2e 173/173 (17 tes khusus satu perangkat sengaja dilewati). Pemeriksa desain 0 FAIL. Review visual 1440 dan 375 px halaman baru tanpa scroll horizontal dan error console.
 
+### `fix/landing-putih` (revisi RMED, 31 Oktober 2026)
+- [x] **D.1.1, D.1.5** Beranda dominan putih dengan teks hijau: hero tanpa gradient (lengkung hijau di satu sudut, ilustrasi tunas hijau-cokelat), daftar keunggulan berlatar putih/abu muda. Keputusan ini menggantikan "latar gradient hijau" di D.1.1 dan bagian Desain; halaman masuk/daftar dan footer tetap hijau
+
+**Pengujian:** atas permintaan RMED tidak ada tes penuh. Lint, typecheck, dan pemeriksa desain bersih; screenshot 1440 dan 375 px tanpa scroll horizontal.
+

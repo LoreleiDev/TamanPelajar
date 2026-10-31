@@ -11,7 +11,7 @@ const items = [
 
 export function QuickMenu() {
   return (
-    <nav aria-label="Menu belajar cepat" className="page-container -mt-6 relative z-10 lg:-mt-7">
+    <nav aria-label="Menu belajar cepat" className="page-container relative z-10">
       <ul className="flex flex-wrap gap-2 sm:gap-3">
         {items.map(({ href, label, icon: Icon }) => (
           <li key={href}>

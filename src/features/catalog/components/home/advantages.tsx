@@ -50,18 +50,18 @@ export function Advantages() {
           </Button>
         </div>
       </div>
-      <ul className="flex flex-col text-white">
+      <ul className="flex flex-col text-primary">
         {rows.map((r, i) => (
           <li
             key={r.title}
             className={cn(
               "grid flex-1 gap-3 px-4 py-7 md:grid-cols-[5fr_4fr_3fr] md:gap-6 md:px-8",
-              i % 2 === 0 ? "bg-primary" : "bg-primary-hover",
+              i % 2 === 0 ? "bg-background" : "bg-secondary",
             )}
           >
             <h3 className="text-[1.5rem] leading-tight font-bold lg:text-[1.75rem]">{r.title}</h3>
-            <p className="text-white/90">{r.body}</p>
-            <p className="text-sm text-white/90 md:text-[0.9375rem]">
+            <p>{r.body}</p>
+            <p className="text-sm md:text-[0.9375rem]">
               <span className="sr-only">Termasuk: </span>
               <span className="md:hidden">{r.terms.join(", ")}</span>
               <span className="hidden md:flex md:flex-col md:gap-1">
